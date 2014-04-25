@@ -31,8 +31,8 @@
 							'lower-line': $index !== 0,
 							 'selected':isSelected(blog._id)
 							 }">
-						<div class="four cell fixed" data-ng-click="displayBlog(blog)">
-							<img ng-src="[[blogThumbnail(blog)]]" />
+						<div class="four cell absolute" data-ng-click="displayBlog(blog)">
+							<img ng-src="[[blogThumbnail(blog)]]" style="height: 100%" />
 						</div>
 						<div class="eight cell absolute right-magnet text-container">
 							<div class="row">

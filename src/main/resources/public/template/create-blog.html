@@ -2,7 +2,7 @@
 	<div class="row text-container">
 		<div class="two cell clip fixed-block height-two">
 			<div class="absolute" loading-panel="upload-blog-thumbnail">
-				<img ng-src="[[blogThumbnail(create.blog)]]" />
+				<image-select ng-model="create.blog.thumbnail" default="/blog/public/img/blog.png"></image-select>
 			</div>
 
 		</div>
@@ -11,13 +11,7 @@
 			<div class="row">
 				<hr class="row" />
 			</div>
-			<form id="upload-form" method="post" enctype="multipart/form-data">
-				<!-- styling file inputs is currently impossible, so we hide them and display a replacement. -->
-				<div class="hidden-content">
-					<input type="file" name="file"  id="avatar" file-input-change="updateBlogImage(create.blog)" data-ng-model="photo.file"/>
-				</div>
-				<button class="file-button file-selector" data-linked="avatar" translate key="blog.changeimage"></button>
-			</form>
+			<media-select ng-model="create.blog.thumbnail" label="blog.changeimage" file-format="'img'"></media-select>
 		</div>
 
 
