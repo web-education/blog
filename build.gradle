@@ -11,6 +11,7 @@ test {
 }
 
 repositories{
+    mavenLocal()
 		maven {
 			credentials {
 				username 'admin'

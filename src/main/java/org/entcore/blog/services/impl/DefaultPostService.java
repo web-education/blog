@@ -162,8 +162,10 @@ public class DefaultPostService implements PostService {
 			groups.add(QueryBuilder.start("groupId").is(gpId)
 					.put("manager").is(true).get());
 		}
-		return QueryBuilder.start("_id").is(blogId).put("shared").elemMatch(
-				new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
+		return QueryBuilder.start("_id").is(blogId).or(
+				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+				QueryBuilder.start("shared").elemMatch(
+				new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()).get()
 		);
 	}
 

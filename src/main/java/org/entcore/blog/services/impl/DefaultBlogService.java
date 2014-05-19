@@ -133,9 +133,11 @@ public class DefaultBlogService implements BlogService{
 		for (String gpId: user.getProfilGroupsIds()) {
 			groups.add(QueryBuilder.start("groupId").is(gpId).get());
 		}
-		QueryBuilder query = QueryBuilder.start("shared").elemMatch(
+		QueryBuilder query = new QueryBuilder().or(
+				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+				QueryBuilder.start("shared").elemMatch(
 				new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
-		);
+		).get());
 		JsonObject sort = new JsonObject().putNumber("modified", -1);
 		mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null,
 				new Handler<Message<JsonObject>>() {

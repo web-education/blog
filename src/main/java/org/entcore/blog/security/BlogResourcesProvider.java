@@ -99,8 +99,10 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			groups.add(QueryBuilder.start("groupId").is(gpId)
 					.put("manager").is(true).get());
 		}
-		return QueryBuilder.start("_id").is(id).put("shared").elemMatch(
-			new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
+		return QueryBuilder.start("_id").is(id).or(
+				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+				QueryBuilder.start("shared").elemMatch(
+			new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()).get()
 		);
 	}
 
@@ -154,6 +156,12 @@ public class BlogResourcesProvider implements ResourcesProvider {
 					}
 					if (res.getObject("blog") != null  &&
 							res.getObject("blog").getArray("shared") != null) {
+						String blogAuthorId =  res.getObject("blog")
+								.getObject("author", new JsonObject()).getString("userId");
+						if (blogAuthorId != null && blogAuthorId.equals(user.getUserId())) {
+							handler.handle(true);
+							return;
+						}
 						for (Object o: res.getObject("blog").getArray("shared")) {
 							if (!(o instanceof JsonObject)) continue;
 							JsonObject json = (JsonObject) o;
