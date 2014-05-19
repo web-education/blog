@@ -22,7 +22,7 @@ var views = {
 	},
 	"lastPosts":{},
 	"displayBlog":{}
-}
+};
 
 function resolveMyRights(me){
 	me.myRights = {
@@ -68,7 +68,7 @@ function Blog($scope, date, _, ui, lang, notify){
 				edit: true
 			},
 			manager: true
-		}
+		};
 		var ownerRights = _.where(blog.shared, { userId: $scope.me.userId, manager: true });
 
 		if(ownerRights.length > 0){
@@ -83,9 +83,9 @@ function Blog($scope, date, _, ui, lang, notify){
 		});
 
 		function setRight(path){
-			return _.find(currentSharedRights, function(right){
+			return (_.find(currentSharedRights, function(right){
 					return right[path];
-				}) !== undefined;
+				}) !== undefined) || blog.author.userId === model.me.userId;
 		}
 
 		blog.myRights.comment.post = setRight('org-entcore-blog-controllers-PostController|comment');
