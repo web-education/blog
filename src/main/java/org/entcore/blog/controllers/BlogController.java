@@ -171,7 +171,8 @@ public class BlogController extends Controller {
 			@Override
 			public void handle(UserInfos user) {
 				if (user != null) {
-					shareService.shareInfos(user.getUserId(), blogId, defaultResponseHandler(request));
+					shareService.shareInfos(user.getUserId(), blogId,
+							I18n.acceptLanguage(request), defaultResponseHandler(request));
 				} else {
 					unauthorized(request);
 				}
