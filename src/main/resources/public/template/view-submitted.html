@@ -5,12 +5,12 @@
 			<span class="warning-text-badge" ng-if="post.state === 'SUBMITTED'" translate key="submitted"></span>
 			[[post.title]]
 		</h2>
-		<h5 class="subtitle row">
+		<strong class="twelve cell subtitle">
 			[[translate('blog.by')]] <a href="/userbook/annuaire#[[post.author.userId]]">[[post.author.username]]</a> [[translate('blog.on.date')]] [[formatDate(post.created.$date)]]
 			<span data-ng-if="isCurrentView('lastPosts')">
 				[[translate('blog.on.blog')]] <a data-ng-click="displayBlog(currentBlog)">[[currentBlog.title]]</a>
 			</span>
-		</h5>
+		</strong>
 
 	</div>
 	<div class="seven cell">
