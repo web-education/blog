@@ -19,7 +19,8 @@ public class Blog extends Server {
 	public void start() {
 		super.start();
 
-		final MongoDb mongo = new MongoDb(Server.getEventBus(vertx),
+		final MongoDb mongo = MongoDb.getInstance();
+		mongo.init(Server.getEventBus(vertx),
 				container.config().getString("mongo-address", "wse.mongodb.persistor"));
 
 		BlogController blogController = new BlogController(vertx, container, rm, securedActions, mongo);
