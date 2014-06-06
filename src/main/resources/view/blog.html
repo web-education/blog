@@ -25,7 +25,7 @@
 	</div>
 	<div class="row">
 		<div class="four cell">
-			<nav class="vertical">
+			<nav class="vertical stamps">
 				<div data-ng-repeat="blog in blogs">
 					<article class="height-four twelve clip small-text cell" data-ng-class="{
 							'lower-line': $index !== 0,
@@ -50,19 +50,8 @@
 				<a data-ng-click="showCreateBlog()" ng-if="me.myRights.blog.post" class="cell vertical-spacing-twice">{{#i18n}}blog.create.blog{{/i18n}}</a>
 			</nav>
 	</div>
-	<div class="eight cell horizontal-spacing">
-			<h3 data-ng-if="isCurrentView('createBlog')">{{#i18n}}blog.create.title{{/i18n}}</h3>
-		    <h1 class="text" ng-if="(isCurrentView('listPosts') || isCurrentView('editBlog')) && blogs.length !== 0">[[currentBlog.title]]</h1>
-			<em class="medium-importance" ng-if="(isCurrentView('listPosts') || isCurrentView('editBlog')) && blogs.length !== 0"><span translate key="blog.by"></span> <a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a></em>
-			<div class="row">
-				<hr />
-			</div>
-			<article class="row">
-				<section data-ng-include="currentView.path" class="row"></section>
-			</article>
-		</div>
-		<div class="clear"></div>
-		</div>
+	<div class="eight cell horizontal-spacing" ng-include="template.containers.main">
+	</div>
 	</portal>
 	<section class="lightbox-backdrop"></section>
 	<section class="lightbox-window six cell">

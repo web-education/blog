@@ -1,29 +1,3 @@
-var views = {
-	"createBlog":{
-		"path":"/blog/public/template/create-blog.html"
-	},
-	"listPosts": {
-		path: "/blog/public/template/list-posts.html"
-	},
-	"editBlog":{
-		"path":"/blog/public/template/edit-blog.html"
-	},
-	"createPost":{
-		"path":"/blog/public/template/create-post.html"
-	},
-	"editPost":{
-		"path":"/blog/public/template/edit-post.html"
-	},
-	'viewPost': {
-		path: '/blog/public/template/view-post.html'
-	},
-	'viewSubmitted': {
-		path: '/blog/public/template/view-submitted.html'
-	},
-	"lastPosts":{},
-	"displayBlog":{}
-};
-
 function resolveMyRights(me){
 	me.myRights = {
 		blog: {
@@ -32,7 +6,7 @@ function resolveMyRights(me){
 	}
 }
 
-function Blog($scope, date, _, ui, lang, notify){
+function Blog($scope, date, _, ui, lang, notify, template){
 	$scope.translate = lang.translate;
 
 	$scope.blogs = [];
@@ -41,9 +15,10 @@ function Blog($scope, date, _, ui, lang, notify){
 
 	$scope.me = {};
 
-	$scope.currentView = '';
 	$scope.commentFormPath = '';
 	$scope.notify = notify;
+
+	$scope.template = template;
 
 	$scope.displayOptions = {
 		showAll: false,
@@ -145,7 +120,7 @@ function Blog($scope, date, _, ui, lang, notify){
 	})
 
 	$scope.defaultView = function(){
-		$scope.currentView = views.listPosts;
+		template.open('main', 'list-posts');
 		refreshBlogList();
 	};
 
@@ -154,7 +129,7 @@ function Blog($scope, date, _, ui, lang, notify){
 	}
 
 	$scope.currentBlogView  = function(){
-		$scope.currentView = '';
+		template.close('main');
 		$scope.displayBlog($scope.currentBlog);
 	};
 
@@ -219,7 +194,7 @@ function Blog($scope, date, _, ui, lang, notify){
 		$scope.currentBlog = blog;
 		http().get('/blog/post/list/all/' + blog._id).done(function(data){
 			$scope.currentBlog.posts = data;
-			$scope.currentView= views.listPosts;
+			template.open('main', 'list-posts');
 			initMaxResults();
 			$scope.$apply();
 		});
@@ -250,14 +225,13 @@ function Blog($scope, date, _, ui, lang, notify){
 	}
 
 	$scope.isSelected = function(id){
-		return id === $scope.currentBlog._id && $scope.currentView !== views.lastPosts;
+		return id === $scope.currentBlog._id;
 	}
 	$scope.isVisible = function(){
-		return $scope.currentBlog && ($scope.currentView !== views.createBlog
-			&& $scope.currentView !== views.editBlog) && $scope.currentBlog.myRights.post.post;
+		return $scope.currentBlog && (!template.contains('main', 'create-blog') && !template.contains('main', 'edit-blog')) && $scope.currentBlog.myRights.post.post;
 	}
 	$scope.isCurrentView = function(name){
-		return ($scope.currentView == views[name]);
+		return template.contains('main', name);
 	};
 
 	$scope.switchComments = function(post){
@@ -266,20 +240,21 @@ function Blog($scope, date, _, ui, lang, notify){
 
 	$scope.showCreatePost = function(){
 		resetScope();
-		$scope.currentView = views.createPost;
+		template.open('main', 'create-post');
+	};
 
-	}
 	$scope.showCreateBlog= function(){
 		$scope.currentBlog = '';
 		resetScope();
-		$scope.currentView = views.createBlog;
-	}
+		template.open('main', 'create-blog');
+	};
+
 	$scope.showEditBlog = function(blog){
 		http().get('/blog/' + blog._id)
 			.done(function(data){
 				blogRights(data);
 				$scope.currentBlog = data;
-				$scope.currentView= views.editBlog;
+				template.open('main', 'edit-blog');
 				$scope.$apply();
 
 			});
@@ -287,12 +262,12 @@ function Blog($scope, date, _, ui, lang, notify){
 
 	$scope.postTemplate = function(post){
 		if(post === $scope.editPost){
-			return views.editPost;
+			return '/blog/public/template/edit-post.html';
 		}
 		if(post.state === 'SUBMITTED' || post.state === 'DRAFT'){
-			return views.viewSubmitted;
+			return '/blog/public/template/view-submitted.html';
 		}
-		return views.viewPost;
+		return '/blog/public/template/view-post.html';;
 	}
 
 	$scope.showEditPost = function(post){
@@ -338,7 +313,7 @@ function Blog($scope, date, _, ui, lang, notify){
 	}
 
 	$scope.isEditing = function(){
-		return $scope.editPost || ($scope.create.post && $scope.currentView === views.createPost);
+		return $scope.editPost || ($scope.create.post && !template.contains('main', 'edit-post'));
 	}
 
 	$scope.saveDraft = function(){
@@ -486,7 +461,7 @@ function Blog($scope, date, _, ui, lang, notify){
 		http().delete('/blog/' + $scope.currentBlog._id).done(function(){
 			refreshBlogList(function(){
 				$scope.currentBlog = '';
-				$scope.currentView = '';
+				$scope.close('main');
 			})
 		})
 	}

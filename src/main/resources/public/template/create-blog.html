@@ -1,24 +1,37 @@
-<form class="row ">
-	<div class="row reduce-block-eight">
-		<div class="two cell clip fixed-block height-two">
-			<div class="absolute" loading-panel="upload-blog-thumbnail">
-				<image-select ng-model="create.blog.thumbnail" default="/blog/public/img/blog.png"></image-select>
+<h2><i18n>blog.create.title</i18n></h2>
+<div class="row">
+	<hr />
+</div>
+<article class="row">
+	<section class="row">
+		<form class="row ">
+			<div class="row reduce-block-eight">
+				<div class="two cell clip fixed-block height-two">
+					<div class="absolute" loading-panel="upload-blog-thumbnail">
+						<image-select ng-model="create.blog.thumbnail" default="/blog/public/img/blog.png"></image-select>
+					</div>
+
+				</div>
+				<div class="nine cell reduce-block-eight">
+					<input type="text" data-ng-model="create.blog.title" required translate-attr="placeholder" placeholder="blog.title.placeholder" class="twelve cell" />
+					<div class="row">
+						<hr class="row" />
+					</div>
+					<media-select ng-model="create.blog.thumbnail" label="blog.changeimage" file-format="'img'"></media-select>
+				</div>
+
+
 			</div>
-
-		</div>
-		<div class="nine cell reduce-block-eight">
-			<input type="text" data-ng-model="create.blog.title" required translate-attr="placeholder" placeholder="blog.title.placeholder" class="twelve cell" />
-			<div class="row">
-				<hr class="row" />
+			<div class="row reduce-block-eight">
+				<input type="submit" data-ng-click="createBlog()" translate-attr="value" class="button right-magnet" value="blog.save">
+				<input type="button" class="button right-magnet cancel" translate-attr="value" ng-click="defaultView()" value="cancel">
+				<div class="clear"></div>
 			</div>
-			<media-select ng-model="create.blog.thumbnail" label="blog.changeimage" file-format="'img'"></media-select>
-		</div>
+		</form>
 
+	</section>
+</article>
+</div>
+<div class="clear"></div>
+</div>
 
-	</div>
-	<div class="row reduce-block-eight">
-		<input type="submit" data-ng-click="createBlog()" translate-attr="value" class="button right-magnet" value="blog.save">
-		<input type="button" class="button right-magnet cancel" translate-attr="value" ng-click="defaultView()" value="cancel">
-		<div class="clear"></div>
-	</div>
-</form>
