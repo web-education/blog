@@ -1,60 +1,63 @@
 <h1 class="text">[[currentBlog.title]]</h1>
-<em class="medium-importance">
+<em class="medium-importance" ng-if="currentBlog.author">
 	<i18n>blog.by</i18n>
-<a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a></em>
+	<a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a>
+</em>
 
 <hr class="row" />
 <div class="clear"></div>
 
-<div class="row line filters" ng-if="blogs.length !== 0">
-	<ul>
-		<li><em class="medium-importance" translate content="posts.filter"></em></li>
-		<li>
-			<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showAll" ng-change="uncheckAll()" />
-				<i18n>filters.all</i18n>
-			</label>
-		</li>
-		<li>
-			<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showPosts" ng-change="uncheckAllBox()" />
-				<i18n>filters.published</i18n>
-			</label>
-		</li>
-		<li>
-			<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showDrafts" ng-change="uncheckAllBox()" />
-				<span translate key="filters.drafts"></span>
-			</label>
-		</li>
-		<li>
-			<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showSubmitted" ng-change="uncheckAllBox()" />
-				<span translate key="filters.submitted"></span>
-			</label>
-		</li>
-	</ul>
-</div>
-
 <article class="reduce-block-eight row" ng-if="blogs.length === 0">
 	<span translate key="noblog"></span>
 </article>
-<div ng-if="displayOptions.showAll || displayOptions.showDrafts">
-	<section data-ng-repeat="post in currentBlog.drafts | limitTo:nbResults('drafts')" class="reduce-block-eight"
-			ng-class="{row: true, line: true, 'greyed-out': post.state !== 'PUBLISHED' }">
-		<div ng-include="postTemplate(post)"></div>
-	</section>
-</div>
-<div ng-if="displayOptions.showAll || displayOptions.showSubmitted">
-	<section data-ng-repeat="post in currentBlog.submitted | limitTo:nbResults('submitted')"
-			 class="reduce-block-eight"
-			ng-class="{row: true, line: true, 'greyed-out': post.state !== 'PUBLISHED' }">
-		<div ng-include="postTemplate(post)"></div>
-	</section>
-</div>
-<div ng-if="displayOptions.showAll || displayOptions.showPosts">
-	<section data-ng-repeat="post in currentBlog.posts | limitTo:nbResults('posts')"
-			class="row reduce-block-eight line">
-		<div ng-include="postTemplate(post)"></div>
-	</section>
-</div>
-<h3 ng-if="seeMore()" class="reduce-block-eight">
-	<a ng-click="addResults()" class="right-magnet">[[translate('seemore')]]</a>
-	<div class="clear"></div>
-</h3>
+
+<article>
+	<div class="row line filters" ng-if="blogs.length !== 0">
+		<ul>
+			<li><em class="medium-importance" translate content="posts.filter"></em></li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showAll" ng-change="uncheckAll()" />
+					<i18n>filters.all</i18n>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showPosts" ng-change="uncheckAllBox()" />
+					<i18n>filters.published</i18n>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showDrafts" ng-change="uncheckAllBox()" />
+					<span translate key="filters.drafts"></span>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showSubmitted" ng-change="uncheckAllBox()" />
+					<span translate key="filters.submitted"></span>
+				</label>
+			</li>
+		</ul>
+	</div>
+	<div ng-if="displayOptions.showAll || displayOptions.showDrafts">
+		<section data-ng-repeat="post in currentBlog.drafts | limitTo:nbResults('drafts')" class="reduce-block-eight"
+				 ng-class="{row: true, line: true, 'greyed-out': post.state !== 'PUBLISHED' }">
+			<div ng-include="postTemplate(post)"></div>
+		</section>
+	</div>
+	<div ng-if="displayOptions.showAll || displayOptions.showSubmitted">
+		<section data-ng-repeat="post in currentBlog.submitted | limitTo:nbResults('submitted')"
+				 class="reduce-block-eight"
+				 ng-class="{row: true, line: true, 'greyed-out': post.state !== 'PUBLISHED' }">
+			<div ng-include="postTemplate(post)"></div>
+		</section>
+	</div>
+	<div ng-if="displayOptions.showAll || displayOptions.showPosts">
+		<section data-ng-repeat="post in currentBlog.posts | limitTo:nbResults('posts')"
+				 class="row reduce-block-eight line">
+			<div ng-include="postTemplate(post)"></div>
+		</section>
+	</div>
+	<h3 ng-if="seeMore()" class="reduce-block-eight">
+		<a ng-click="addResults()" class="right-magnet">[[translate('seemore')]]</a>
+		<div class="clear"></div>
+	</h3>
+</article>
