@@ -16,7 +16,7 @@
 		<div class="eight cell">
 			<nav class="contextual-buttons row" ng-if="currentBlog._id">
 				<div class="row">
-					<button data-ng-click="showCreatePost()" data-ng-disabled="isEditing()" data-ng-if="isVisible()">
+					<button data-ng-click="showCreatePost()" ng-if="isVisible() && !isEditing()">
 						<i class="add"></i>{{#i18n}}blog.create.post{{/i18n}}
 					</button>
 				</div>

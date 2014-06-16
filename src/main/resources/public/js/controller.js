@@ -313,8 +313,8 @@ function Blog($scope, date, _, ui, lang, notify, template){
 	}
 
 	$scope.isEditing = function(){
-		return $scope.editPost || ($scope.create.post && !template.contains('main', 'edit-post'));
-	}
+		return $scope.editPost;
+	};
 
 	$scope.saveDraft = function(){
 		$scope.create.post.state = 'DRAFT';

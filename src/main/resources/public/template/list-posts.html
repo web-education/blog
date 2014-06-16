@@ -1,27 +1,22 @@
-<h3 data-ng-if="isCurrentView('createBlog')">{{#i18n}}blog.create.title{{/i18n}}</h3>
-<h1 class="text" ng-if="(isCurrentView('listPosts') || isCurrentView('editBlog')) && blogs.length !== 0">[[currentBlog.title]]</h1>
-<em class="medium-importance" ng-if="(isCurrentView('listPosts') || isCurrentView('editBlog')) && blogs.length !== 0"><span translate key="blog.by"></span> <a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a></em>
-<div class="row">
-	<hr />
-</div>
-<article class="row">
-	<section class="row"></section>
-</article>
-</div>
+<h1 class="text">[[currentBlog.title]]</h1>
+<em class="medium-importance">
+	<i18n>blog.by</i18n>
+<a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a></em>
+
+<hr class="row" />
 <div class="clear"></div>
-</div>
 
 <div class="row line filters" ng-if="blogs.length !== 0">
 	<ul>
-		<li><em class="medium-importance" translate key="posts.filter"></em></li>
+		<li><em class="medium-importance" translate content="posts.filter"></em></li>
 		<li>
 			<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showAll" ng-change="uncheckAll()" />
-				<span translate key="filters.all"></span>
+				<i18n>filters.all</i18n>
 			</label>
 		</li>
 		<li>
 			<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showPosts" ng-change="uncheckAllBox()" />
-				<span translate key="filters.published"></span>
+				<i18n>filters.published</i18n>
 			</label>
 		</li>
 		<li>
