@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DefaultBlogService implements BlogService{
 
-	private static final String BLOG_COLLECTION = "blogs";
+	protected static final String BLOG_COLLECTION = "blogs";
 
 	private final MongoDb mongo;
 

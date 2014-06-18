@@ -22,7 +22,7 @@ import java.util.UUID;
 public class DefaultPostService implements PostService {
 
 	private final MongoDb mongo;
-	private static final String POST_COLLECTION = "posts";
+	protected static final String POST_COLLECTION = "posts";
 	private static final JsonObject defaultKeys = new JsonObject()
 			.putNumber("author", 1)
 			.putNumber("title", 1)

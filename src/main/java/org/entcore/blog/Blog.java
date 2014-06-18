@@ -6,8 +6,10 @@ import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.security.BlogResourcesProvider;
 import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.http.Binding;
+import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.common.http.filter.ActionFilter;
 import fr.wseduc.webutils.request.filter.SecurityHandler;
+import org.entcore.common.user.RepositoryHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,9 @@ public class Blog extends Server {
 		final MongoDb mongo = MongoDb.getInstance();
 		mongo.init(Server.getEventBus(vertx),
 				container.config().getString("mongo-address", "wse.mongodb.persistor"));
+
+		vertx.eventBus().registerHandler("user.repository",
+				new RepositoryHandler(new BlogRepositoryEvents()));
 
 		BlogController blogController = new BlogController(vertx, container, rm, securedActions, mongo);
 
