@@ -1,0 +1,27 @@
+<article>
+	<div class="row line filters" ng-if="blogs.length !== 0">
+		<ul>
+			<li><em class="medium-importance" translate content="posts.filter"></em></li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showAll" ng-change="uncheckAll()" />
+					<i18n>filters.all</i18n>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showPosts" ng-change="uncheckAllBox()" />
+					<i18n>filters.published</i18n>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showDrafts" ng-change="uncheckAllBox()" />
+					<span translate content="filters.drafts"></span>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox"><input type="checkbox" ng-model="displayOptions.showSubmitted" ng-change="uncheckAllBox()" />
+					<span translate content="filters.submitted"></span>
+				</label>
+			</li>
+		</ul>
+	</div>
+</article>

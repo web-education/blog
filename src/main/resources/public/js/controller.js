@@ -19,6 +19,8 @@ function Blog($scope, date, _, ui, lang, notify, template){
 	$scope.notify = notify;
 
 	$scope.template = template;
+	template.open('blogsList', 'blogs-list');
+	template.open('filters', 'filters');
 
 	$scope.displayOptions = {
 		showAll: false,
@@ -117,7 +119,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 		resolveMyRights($scope.me);
 		refreshBlogList();
 		$scope.$apply();
-	})
+	});
 
 	$scope.defaultView = function(){
 		template.open('main', 'list-posts');
@@ -126,7 +128,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 
 	$scope.showEverything = function(post){
 		post.showEverything = true;
-	}
+	};
 
 	$scope.currentBlogView  = function(){
 		template.close('main');
@@ -351,14 +353,14 @@ function Blog($scope, date, _, ui, lang, notify, template){
 
 	$scope.blogThumbnail = function(blog){
 		if(blog.thumbnail !== ''){
-			return blog.thumbnail;
+			return blog.thumbnail + '?thumbnail=120x120';
 		}
-		return '/blog/public/img/blog.png';
-	}
+		return '/img/illustrations/blog.png';
+	};
 
 	$scope.photo = { file: undefined }
 	$scope.updateBlogImage = function(blog){
-		blog.thumbnail = '/workspace/document/' + $scope.photo.file._id + '?thumbnail=100x100';
+		blog.thumbnail = '/workspace/document/' + $scope.photo.file._id + '?thumbnail=120x120';
 	};
 
 	$scope.updatePost = function(){
@@ -418,7 +420,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 
 	$scope.openSharingView = function(){
 		$scope.sharedResources = [$scope.currentBlog];
-		$scope.lightboxPath = '/blog/public/template/share.html'
+		$scope.lightboxPath = '/blog/public/template/share.html';
 		ui.showLightbox();
 
 	};
@@ -438,7 +440,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 			post.comments = undefined;
 			$scope.$apply();
 		});
-	}
+	};
 
 	$scope.saveBlogChanges = function(){
 		http().put('/blog/' + $scope.currentBlog._id, $scope.currentBlog).done(function(){
@@ -446,7 +448,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 				$scope.displayBlog($scope.currentBlog);
 			});
 		})
-	}
+	};
 
 	$scope.createBlog = function(){
 		http().post('/blog', $scope.create.blog)
@@ -461,8 +463,8 @@ function Blog($scope, date, _, ui, lang, notify, template){
 		http().delete('/blog/' + $scope.currentBlog._id).done(function(){
 			refreshBlogList(function(){
 				$scope.currentBlog = '';
-				$scope.close('main');
-			})
+				$scope.defaultView();
+			});
 		})
 	}
 }
