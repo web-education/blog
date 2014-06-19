@@ -1,7 +1,5 @@
 <nav class="vertical stamps">
-	<a data-ng-click="showCreateBlog()" ng-if="me.myRights.blog.post" class="cell classic-link vertical-spacing">
-		<i18n>blog.create.blog</i18n>
-	</a>
+
 	<div data-ng-repeat="blog in blogs">
 		<article class="height-four twelve clip small-text cell" data-ng-class="{
 							'lower-line': $index !== 0,
@@ -23,6 +21,8 @@
 				</div>
 			</div>
 		</article>
-
+		<a data-ng-click="showCreateBlog()" ng-if="me.myRights.blog.post" class="cell classic-link vertical-spacing">
+			<i18n>blog.create.blog</i18n>
+		</a>
 	</div>
 </nav>
