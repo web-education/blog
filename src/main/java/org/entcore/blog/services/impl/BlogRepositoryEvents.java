@@ -17,6 +17,12 @@ public class BlogRepositoryEvents implements RepositoryEvents {
 	private final MongoDb mongo = MongoDb.getInstance();
 
 	@Override
+	public void exportResources(String externalId, String userId, JsonArray groups, String exportPath,
+			String locale) {
+
+	}
+
+	@Override
 	public void deleteGroups(JsonArray groups) {
 		for (Object o : groups) {
 			if (!(o instanceof JsonObject)) continue;
