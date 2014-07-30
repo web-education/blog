@@ -15,6 +15,11 @@ public class BlogRepositoryEvents implements RepositoryEvents {
 
 	private static final Logger log = LoggerFactory.getLogger(BlogRepositoryEvents.class);
 	private final MongoDb mongo = MongoDb.getInstance();
+	private final boolean shareOldGroupsToUsers;
+
+	public BlogRepositoryEvents(boolean shareOldGroupsToUsers) {
+		this.shareOldGroupsToUsers = shareOldGroupsToUsers;
+	}
 
 	@Override
 	public void exportResources(String externalId, String userId, JsonArray groups, String exportPath,
@@ -24,38 +29,40 @@ public class BlogRepositoryEvents implements RepositoryEvents {
 
 	@Override
 	public void deleteGroups(JsonArray groups) {
-		for (Object o : groups) {
-			if (!(o instanceof JsonObject)) continue;
-			final JsonObject j = (JsonObject) o;
-			final JsonObject query = MongoQueryBuilder.build(
-					QueryBuilder.start("shared.groupId").is(j.getString("group")));
-			JsonArray userShare = new JsonArray();
-			for (Object u : j.getArray("users")) {
-				JsonObject share = new JsonObject()
-						.putString("userId", u.toString())
-						.putBoolean("org-entcore-blog-controllers-PostController|comments", true)
-						.putBoolean("org-entcore-blog-controllers-PostController|get", true)
-						.putBoolean("org-entcore-blog-controllers-BlogController|get", true)
-						.putBoolean("org-entcore-blog-controllers-PostController|list", true);
-				userShare.addObject(share);
-			}
-			JsonObject update = new JsonObject()
-					.putObject("$addToSet",
-							new JsonObject().putObject("shared",
-									new JsonObject().putArray("$each", userShare)));
-			mongo.update(DefaultBlogService.BLOG_COLLECTION, query, update, false, true,
-					new Handler<Message<JsonObject>>() {
-				@Override
-				public void handle(Message<JsonObject> event) {
-					if (!"ok".equals(event.body().getString("status"))) {
-						log.error("Error updating blogs with group " +
-								j.getString("group") + " : " + event.body().encode());
-					} else {
-						log.info("Blogs with group " + j.getString("group") +
-								" updated : " + event.body().getInteger("number"));
-					}
+		if (shareOldGroupsToUsers) {
+			for (Object o : groups) {
+				if (!(o instanceof JsonObject)) continue;
+				final JsonObject j = (JsonObject) o;
+				final JsonObject query = MongoQueryBuilder.build(
+						QueryBuilder.start("shared.groupId").is(j.getString("group")));
+				JsonArray userShare = new JsonArray();
+				for (Object u : j.getArray("users")) {
+					JsonObject share = new JsonObject()
+							.putString("userId", u.toString())
+							.putBoolean("org-entcore-blog-controllers-PostController|comments", true)
+							.putBoolean("org-entcore-blog-controllers-PostController|get", true)
+							.putBoolean("org-entcore-blog-controllers-BlogController|get", true)
+							.putBoolean("org-entcore-blog-controllers-PostController|list", true);
+					userShare.addObject(share);
 				}
-			});
+				JsonObject update = new JsonObject()
+						.putObject("$addToSet",
+								new JsonObject().putObject("shared",
+										new JsonObject().putArray("$each", userShare)));
+				mongo.update(DefaultBlogService.BLOG_COLLECTION, query, update, false, true,
+						new Handler<Message<JsonObject>>() {
+					@Override
+					public void handle(Message<JsonObject> event) {
+						if (!"ok".equals(event.body().getString("status"))) {
+							log.error("Error updating blogs with group " +
+									j.getString("group") + " : " + event.body().encode());
+						} else {
+							log.info("Blogs with group " + j.getString("group") +
+									" updated : " + event.body().getInteger("number"));
+						}
+				   }
+				});
+			}
 		}
 	}
 

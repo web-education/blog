@@ -26,7 +26,8 @@ public class Blog extends Server {
 				container.config().getString("mongo-address", "wse.mongodb.persistor"));
 
 		vertx.eventBus().registerHandler("user.repository",
-				new RepositoryHandler(new BlogRepositoryEvents()));
+				new RepositoryHandler(new BlogRepositoryEvents(
+						config.getBoolean("share-old-groups-to-users", false))));
 
 		BlogController blogController = new BlogController(vertx, container, rm, securedActions, mongo);
 
