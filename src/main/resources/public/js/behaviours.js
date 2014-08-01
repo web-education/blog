@@ -16,7 +16,7 @@ Behaviours.register('blog', {
 					},
 					icon: blog.thumbnail,
 					path: '/blog?blog=' + blog._id,
-					id: blog._id
+					_id: blog._id
 				};
 			});
 			callback(this.resources);
