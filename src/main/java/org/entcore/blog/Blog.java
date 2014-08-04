@@ -32,6 +32,7 @@ public class Blog extends Server {
 		BlogController blogController = new BlogController(vertx, container, rm, securedActions, mongo);
 
 		blogController.get("", "blog");
+		blogController.get("/print", "print");
 		blogController.post("", "create");
 		blogController.get("/share/json/:blogId", "shareJson");
 		blogController.put("/share/json/:blogId", "shareJsonSubmit");

@@ -51,6 +51,10 @@ public class BlogController extends Controller {
 		renderView(request);
 	}
 
+	public void print(HttpServerRequest request) {
+		renderView(request);
+	}
+
 	// TODO improve fields matcher and validater
 	@SecuredAction("blog.create")
 	public void create(final HttpServerRequest request) {

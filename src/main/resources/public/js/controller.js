@@ -13,7 +13,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 	$scope.currentBlog = undefined;
 	$scope.currentPost = {};
 
-	$scope.me = {};
+	$scope.me = model.me;
 
 	$scope.commentFormPath = '';
 	$scope.notify = notify;
@@ -86,40 +86,39 @@ function Blog($scope, date, _, ui, lang, notify, template){
 	}
 
 	function refreshBlogList(callback){
-		http().get('blog/list/all')
-			.done(function(data){
-				data.forEach(function(blog){
-					blogRights(blog);
-					blog.shortened = shortenedTitle(blog.title);
-				});
-				$scope.blogs = data;
-				if(typeof callback === 'function'){
-					callback(data);
-				}
-				var sp = window.location.href.split('blog=');
-				if(!$scope.currentBlog && $scope.blogs.length > 0){
-					if(sp.length > 1 && _.where($scope.blogs, { _id: sp[1] }).length > 0){
-						$scope.currentBlog = _.where($scope.blogs, { _id: sp[1] })[0];
-					}
-					else if(sp.length > 1 && !_.where($scope.blogs, { _id: sp[1] }).length){
-						$scope.currentBlog = $scope.blogs[0];
-						notify.error('notfound');
-					}
-					else{
-						$scope.currentBlog = $scope.blogs[0];
-					}
-				}
-				$scope.displayBlog($scope.currentBlog);
-				$scope.$apply();
+		http().get('/blog/list/all').done(function(data){
+			data.forEach(function(blog){
+				blogRights(blog);
+				blog.shortened = shortenedTitle(blog.title);
 			});
+			$scope.blogs = data;
+			if(typeof callback === 'function'){
+				callback(data);
+			}
+			var sp = window.location.href.split('blog=');
+			if(!$scope.currentBlog && $scope.blogs.length > 0){
+				if(sp.length > 1 && _.where($scope.blogs, { _id: sp[1] }).length > 0){
+					$scope.currentBlog = _.where($scope.blogs, { _id: sp[1] })[0];
+				}
+				else if(sp.length > 1 && !_.where($scope.blogs, { _id: sp[1] }).length){
+					$scope.currentBlog = $scope.blogs[0];
+					notify.error('notfound');
+				}
+				else{
+					$scope.currentBlog = $scope.blogs[0];
+				}
+			}
+			$scope.displayBlog($scope.currentBlog);
+			if(window.location.href.indexOf('print') !== -1){
+				setTimeout(function(){
+					window.print();
+				}, 1000);
+			}
+			$scope.$apply();
+		});
 	}
 
-	http().get('/auth/oauth2/userinfo').done(function(data){
-		$scope.me = data;
-		resolveMyRights($scope.me);
-		refreshBlogList();
-		$scope.$apply();
-	});
+	resolveMyRights($scope.me);
 
 	$scope.defaultView = function(){
 		template.open('main', 'list-posts');

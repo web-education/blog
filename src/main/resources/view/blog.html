@@ -19,6 +19,9 @@
 					<button data-ng-click="showCreatePost()" ng-if="isVisible() && !isEditing()">
 						<i class="add"></i><i18n>blog.create.post</i18n>
 					</button>
+					<a ng-href="/blog/print?blog=[[currentBlog._id]]" class="button">
+						<i18n>print</i18n>
+					</a>
 				</div>
 			</nav>
 		</div>

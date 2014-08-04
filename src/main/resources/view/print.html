@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html class="print">
+<head>
+	<title>Blog</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script src="{{#infra}}js/loader.js{{/infra}}" type="text/javascript" id="context"></script>
+	<script src="/blog/public/js/model.js" type="text/javascript"></script>
+	<script src="/blog/public/js/controller.js" type="text/javascript"></script>
+</head>
+<body ng-controller="Blog">
+	<portal-styles></portal-styles>
+
+	<div class="centered container row">
+		<section class="main">
+			<h1 class="text upper-title">[[currentBlog.title]]</h1>
+			<em class="medium-importance" ng-if="currentBlog.author">
+				<i18n>blog.by</i18n> [[currentBlog.author.username]]
+			</em>
+
+			<section data-ng-repeat="post in currentBlog.posts" class="row">
+				<article class="twelve cell vertical-spacing-twice">
+					<div class="row">
+						<div class="six cell">
+							<h2 class="upper-title">[[post.title]]</h2>
+							<strong class="subtitle">
+								[[translate('blog.by')]] [[post.author.username]] [[translate('blog.on.date')]] [[formatDate(post.created.$date)]]
+						<span data-ng-if="isCurrentView('lastPosts')">
+							[[translate('blog.on.blog')]] <a data-ng-click="displayBlog(currentBlog)">[[currentBlog.title]]</a>
+						</span>
+							</strong>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="twelve cell" bind-html="post.content"></div>
+					</div>
+
+				</article>
+			</section>
+		</section>
+
+	</div>
+
+</body>
+</html>
