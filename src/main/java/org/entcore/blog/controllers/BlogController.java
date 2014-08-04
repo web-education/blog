@@ -51,8 +51,9 @@ public class BlogController extends Controller {
 		renderView(request);
 	}
 
+	@SecuredAction("blog.print")
 	public void print(HttpServerRequest request) {
-		renderView(request);
+		renderView(request, null, "print.html", null);
 	}
 
 	// TODO improve fields matcher and validater
