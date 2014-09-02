@@ -20,6 +20,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 
 	$scope.template = template;
 	template.open('blogsList', 'blogs-list');
+	template.open('filters', 'filters');
 
 	$scope.displayOptions = {
 		showAll: false,
@@ -118,8 +119,6 @@ function Blog($scope, date, _, ui, lang, notify, template){
 	}
 
 	resolveMyRights($scope.me);
-	if($scope.me.myRights.blog.post)
-		template.open('filters', 'filters');
 
 	$scope.defaultView = function(){
 		template.open('main', 'list-posts');
