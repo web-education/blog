@@ -1,0 +1,35 @@
+<div class="row accordions">
+	<article class="accordion" ng-class="{ opened: !existingBlog }">
+		<h2 ng-click="existingBlog = false;"><i18n>Nouveau blog</i18n></h2>
+		<div class="toggle">
+			<div class="content">
+				<input type="text" i18n-placeholder="Nom du blog" ng-model="blog.name" />
+				<input type="button" i18n-value="Créer le blog" ng-click="createBlog()" />
+			</div>
+		</div>
+	</article>
+	<article class="accordion" ng-class="{ opened: existingBlog }">
+		<h2 ng-click="existingBlog = true;"><i18n>Choisir un blog existant</i18n></h2>
+		<div class="toggle">
+			<div class="content">
+				<input type="search" ng-model="searchText" />
+				<div class="row">
+					<article class="found-resources">
+						<div ng-if="searchText === ''" class="reduce-block-six">
+							<div class="row">
+								Recherchez le blog dans lequel vous postez les articles que vous souhaitez afficher.
+							</div>
+						</div>
+						<ul class="illustrated-list">
+							<li ng-repeat="blog in blogs | filter:searchText" ng-click="setSnipletSource(blog)">
+								<img skin-src="[[blog.icon]]" class="illustration" />
+								<a class="name">[[blog.title]]</a>
+								<em class="owner">[[blog.ownerName]]</em>
+							</li>
+						</ul>
+					</article>
+				</div>
+			</div>
+		</div>
+	</article>
+</div>

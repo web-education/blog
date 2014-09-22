@@ -21,5 +21,26 @@ Behaviours.register('blog', {
 			});
 			callback(this.resources);
 		}.bind(this));
+	},
+	sniplets: {
+		articles: {
+			init: function(){
+				http().get('/blog/post/list/all/' + this.source._id).done(function(data){
+
+				});
+			},
+			initSource: function(){
+				Behaviours.applicationsBehaviours.blog.loadResources(function(resources){
+					this.blogs = resources;
+					this.$apply('blogs');
+				}.bind(this));
+			},
+			createBlog: function(){
+
+			},
+			addArticle: function($scope){
+
+			}
+		}
 	}
 });
