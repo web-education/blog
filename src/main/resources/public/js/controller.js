@@ -1,19 +1,33 @@
-function resolveMyRights(me){
-	me.myRights = {
+function resolveMyRights(){
+	model.me.myRights = {
 		blog: {
-			post: _.where(me.authorizedActions, { name: "org.entcore.blog.controllers.BlogController|create" }).length > 0
+			post: _.where(model.me.authorizedActions, { name: "org.entcore.blog.controllers.BlogController|create" }).length > 0
 		}
 	}
 }
 
-function Blog($scope, date, _, ui, lang, notify, template){
+routes.define(function($routeProvider){
+	$routeProvider
+		.when('/view/:blogId', {
+			action: 'viewBlog'
+		})
+		.when('/new-article/:blogId', {
+			action: 'newArticle'
+		})
+		.when('/list-blogs', {
+			action: 'list'
+		})
+		.otherwise({
+			redirectTo: '/list-blogs'
+		})
+});
+
+function Blog($scope, date, _, ui, lang, notify, template, route){
 	$scope.translate = lang.translate;
 
 	$scope.blogs = [];
 	$scope.currentBlog = undefined;
 	$scope.currentPost = {};
-
-	$scope.me = model.me;
 
 	$scope.commentFormPath = '';
 	$scope.notify = notify;
@@ -21,6 +35,36 @@ function Blog($scope, date, _, ui, lang, notify, template){
 	$scope.template = template;
 	template.open('blogsList', 'blogs-list');
 	template.open('filters', 'filters');
+
+	route({
+		viewBlog: function(params){
+			refreshBlogList(function(){
+				if(_.where($scope.blogs, { _id: params.blogId }).length > 0){
+					$scope.currentBlog = _.where($scope.blogs, { _id: params.blogId })[0];
+				}
+				else{
+					notify.error('notfound');
+				}
+
+				$scope.defaultView();
+			});
+		},
+		newArticle: function(params){
+			refreshBlogList(function(){
+				if(_.where($scope.blogs, { _id: params.blogId }).length > 0){
+					$scope.currentBlog = _.where($scope.blogs, { _id: params.blogId })[0];
+				}
+				else{
+					notify.error('notfound');
+				}
+
+				template.open('main', 'create-post');
+			});
+		},
+		list: function(){
+			refreshBlogList();
+		}
+	});
 
 	$scope.displayOptions = {
 		showAll: false,
@@ -46,17 +90,17 @@ function Blog($scope, date, _, ui, lang, notify, template){
 			},
 			manager: true
 		};
-		var ownerRights = _.where(blog.shared, { userId: $scope.me.userId, manager: true });
+		var ownerRights = _.where(blog.shared, { userId: model.me.userId, manager: true });
 
 		if(ownerRights.length > 0){
 			return;
 		}
 		var currentSharedRights = _.filter(blog.shared, function(sharedRight){
-			if(!$scope.me.profilGroupsIds){
+			if(!model.me.profilGroupsIds){
 				return false;
 			}
-			return $scope.me.profilGroupsIds.indexOf(sharedRight.groupId) !== -1
-				|| sharedRight.userId === $scope.me.userId;
+			return model.me.profilGroupsIds.indexOf(sharedRight.groupId) !== -1
+				|| sharedRight.userId === model.me.userId;
 		});
 
 		function setRight(path){
@@ -95,20 +139,11 @@ function Blog($scope, date, _, ui, lang, notify, template){
 			if(typeof callback === 'function'){
 				callback(data);
 			}
-			var sp = window.location.href.split('blog=');
-			if(!$scope.currentBlog && $scope.blogs.length > 0){
-				if(sp.length > 1 && _.where($scope.blogs, { _id: sp[1] }).length > 0){
-					$scope.currentBlog = _.where($scope.blogs, { _id: sp[1] })[0];
-				}
-				else if(sp.length > 1 && !_.where($scope.blogs, { _id: sp[1] }).length){
-					$scope.currentBlog = $scope.blogs[0];
-					notify.error('notfound');
-				}
-				else{
-					$scope.currentBlog = $scope.blogs[0];
-				}
+
+			if(!$scope.currentBlog){
+				$scope.currentBlog = $scope.blogs[0];
 			}
-			$scope.displayBlog($scope.currentBlog);
+			$scope.openBlog($scope.currentBlog);
 			if(window.location.href.indexOf('print') !== -1){
 				setTimeout(function(){
 					window.print();
@@ -118,11 +153,10 @@ function Blog($scope, date, _, ui, lang, notify, template){
 		});
 	}
 
-	resolveMyRights($scope.me);
+	resolveMyRights(model.me);
 
 	$scope.defaultView = function(){
 		template.open('main', 'list-posts');
-		refreshBlogList();
 	};
 
 	$scope.showEverything = function(post){
@@ -163,8 +197,6 @@ function Blog($scope, date, _, ui, lang, notify, template){
 		return $scope.maxResults < slots;
 	};
 
-	$scope.defaultView();
-
 	$scope.publish = function(post){
 		if($scope.currentBlog.myRights.manager){
 			post.state = 'PUBLISHED';
@@ -187,7 +219,7 @@ function Blog($scope, date, _, ui, lang, notify, template){
 		http().put('/blog/post/submit/' + $scope.currentBlog._id + '/' + post._id);
 	};
 
-	$scope.displayBlog = function(blog){
+	$scope.openBlog = function(blog){
 		if(!blog){
 			return;
 		}
@@ -195,7 +227,6 @@ function Blog($scope, date, _, ui, lang, notify, template){
 		$scope.currentBlog = blog;
 		http().get('/blog/post/list/all/' + blog._id).done(function(data){
 			$scope.currentBlog.posts = data;
-			template.open('main', 'list-posts');
 			initMaxResults();
 			$scope.$apply();
 		});
@@ -211,6 +242,11 @@ function Blog($scope, date, _, ui, lang, notify, template){
 			initMaxResults();
 			$scope.$apply();
 		});
+	};
+
+	$scope.displayBlog = function(blog){
+		$scope.openBlog(blog);
+		template.open('main', 'list-posts');
 	};
 
 	$scope.nbComments = function(post){

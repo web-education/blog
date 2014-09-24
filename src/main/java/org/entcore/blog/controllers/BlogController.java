@@ -117,7 +117,7 @@ public class BlogController extends Controller {
 
 	private String getBlogUri(String blogId) {
 		return container.config().getString("host", "http://localhost:8018") +
-			pathPrefix + "?blog=" + blogId;
+			pathPrefix + "#/view/" + blogId;
 	}
 
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
