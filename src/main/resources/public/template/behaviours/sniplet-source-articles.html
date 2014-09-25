@@ -3,8 +3,12 @@
 		<h2 ng-click="existingBlog = false;"><i18n>Nouveau blog</i18n></h2>
 		<div class="toggle">
 			<div class="content">
-				<input type="text" i18n-placeholder="Nom du blog" ng-model="blog.name" />
-				<input type="button" i18n-value="Créer le blog" ng-click="createBlog()" />
+				<p class="info">
+					Vos actualités seront ajoutées dans un nouveau blog automatiquement créé.
+				</p>
+				<div class="row">
+					<input type="button" i18n-value="Créer le blog" ng-click="createBlog()" class="cell right-magnet" />
+				</div>
 			</div>
 		</div>
 	</article>

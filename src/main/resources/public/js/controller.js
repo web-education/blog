@@ -36,6 +36,8 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 	template.open('blogsList', 'blogs-list');
 	template.open('filters', 'filters');
 
+	$scope.me = model.me;
+
 	route({
 		viewBlog: function(params){
 			refreshBlogList(function(){
