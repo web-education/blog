@@ -46,7 +46,7 @@
 "submitted" : "Submeter",
 "filters.submitted" : "Submetido ([[currentBlog.submitted.length]])",
 "filters.published" : "Publicados",
-"filters.drafts" : "Desenhos",
+"filters.drafts" : "Desenhos ([[currentBlog.drafts.length]])",
 "filters.all" : "Todos",
 "share.me" : "Eu",
 "posts.filter" : "Ver os artigos",
@@ -60,4 +60,3 @@
 "draft.empty" : "O seu desenho ê vazio",
 "share.varyingrights" : "Cuidado, você vai modificar os direitos de compartilhamento desta pasta : todos os documentos e pastas desta pasta vai ficar alterados"
 }
-

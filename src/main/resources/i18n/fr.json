@@ -46,7 +46,7 @@
 	"notfound": "Le blog n'existe pas",
 	"filters.submitted": "Soumis ([[currentBlog.submitted.length]])",
 	"filters.published": "Publiés",
-	"filters.drafts": "Brouillons",
+	"filters.drafts": "Brouillons ([[currentBlog.drafts.length]])",
 	"filters.all": "Tous",
 	"share.varyingrights": "Attention, vous allez modifier des droits de partage sur ce dossier : tous les documents et répertoires de ce dossier seront affectés",
 	"share.me":"Moi",
