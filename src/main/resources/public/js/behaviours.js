@@ -41,6 +41,10 @@ Behaviours.register('blog', {
 						this.$apply('blogs');
 					}.bind(this));
 				},
+				copyRights: function(snipletResource, source){
+					var viewRights = ["org-entcore-blog-controllers-PostController|list","org-entcore-blog-controllers-PostController|get","org-entcore-blog-controllers-PostController|comments","org-entcore-blog-controllers-BlogController|get"];
+					Behaviours.copyRights(snipletResource, source, viewRights, 'blog');
+				},
 				createBlog: function(){
 					if(this.snipletResource){
 						this.blog.thumbnail = this.snipletResource.icon || '';
@@ -50,16 +54,7 @@ Behaviours.register('blog', {
 					}
 					http().post('/blog', this.blog).done(function(newBlog){
 						//sharing rights copy
-						if(this.snipletResource && this.snipletResource.shared){
-							this.snipletResource.shared.forEach(function(share){
-								var actions = _.reject(_.map(share, function(value, prop){ return prop }), function(item){ return item === 'userId' || item === 'groupId' });
-								var id = share.groupId
-								if(!id){
-									id = share.userId;
-								}
-								http().put('/blog/share/json/' + id, { actions: actions });
-							})
-						}
+						this.copyRights(this.snipletResource, newBlog);
 						//filler post publication
 						var post = {
 							state: 'SUBMITTED',
