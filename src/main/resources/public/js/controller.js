@@ -504,4 +504,12 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 			});
 		})
 	}
+
+	$scope.orderBlogsList = function(blog){
+		if(blog.myRights.blog.edit)
+			return 0
+		if(blog.myRights.post.post)
+			return 1
+		return 2
+	}
 }
