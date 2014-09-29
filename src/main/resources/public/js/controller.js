@@ -306,8 +306,22 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 		if(post.state === 'SUBMITTED' || post.state === 'DRAFT'){
 			return '/blog/public/template/view-submitted.html';
 		}
-		return '/blog/public/template/view-post.html';;
+		return '/blog/public/template/view-post.html';
 	}
+
+	$scope.postTemplateOne = function(post){
+		if(post === $scope.editPost){
+			template.open('blogPostView', 'edit-post');
+		}
+		else if(post.state === 'SUBMITTED' || post.state === 'DRAFT'){
+			template.open('blogPostView', 'view-submitted');
+		}
+		else {
+			template.open('blogPostView', 'view-post');
+		}
+		return template.containers.blogPostView;
+	}
+
 
 	$scope.showEditPost = function(post){
 		$scope.currentPost = post;
