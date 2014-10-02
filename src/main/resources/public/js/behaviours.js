@@ -1,4 +1,11 @@
 Behaviours.register('blog', {
+	rights: {
+		resource: {
+			update: {
+				right: 'org-entcore-blog-controllers-PostController|create'
+			}
+		}
+	},
 	loadResources: function(callback){
 		http().get('/blog/list/all').done(function(blogs){
 			this.resources = _.map(blogs, function(blog){
@@ -29,9 +36,14 @@ Behaviours.register('blog', {
 			controller: {
 				init: function(){
 					this.blog = {};
-					http().get('/blog/post/list/all/' + this.source._id).done(function(data){
-						this.posts = data;
-						this.$apply('posts');
+					http().get('/blog/' + this.source._id).done(function(blog){
+						this.blog = new Model(blog);
+						this.blog.owner = this.blog.author;
+						this.blog.behaviours('blog');
+						http().get('/blog/post/list/all/' + this.source._id).done(function(data){
+							this.posts = data;
+							this.$apply('posts');
+						}.bind(this));
 					}.bind(this));
 				},
 				initSource: function(){
