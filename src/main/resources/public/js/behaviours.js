@@ -22,7 +22,7 @@ Behaviours.register('blog', {
 						userId: blog.author.userId
 					},
 					icon: blog.thumbnail,
-					path: '/blog?blog=' + blog._id,
+					path: '/blog#/view/' + blog._id,
 					_id: blog._id
 				};
 			});
