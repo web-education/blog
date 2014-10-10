@@ -64,6 +64,7 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 			});
 		},
 		list: function(){
+			$scope.defaultView();
 			refreshBlogList();
 		}
 	});
