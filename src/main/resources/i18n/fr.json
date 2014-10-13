@@ -45,7 +45,7 @@
 	"draft": "(Brouillon)",
 	"submitted": "(Billet soumis)",
 	"e404": "Adresse introuvable",
-	"notfound": "Le blog n'existe pas",
+	"notfound": "Le blog n'existe pas ou vous n'y avez pas accès.",
 	"filters.submitted": "Soumis ([[currentBlog.submitted.length]])",
 	"filters.published": "Publiés",
 	"filters.drafts": "Brouillons ([[currentBlog.drafts.length]])",
