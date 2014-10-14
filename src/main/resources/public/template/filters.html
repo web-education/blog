@@ -1,23 +1,20 @@
 <filters ng-if="me.hasWorkflow('org.entcore.blog.controllers.BlogController|create')">
 	<li ng-class="{ selected: displayOptions.showPosts }">
 		<label>
-			<i class="published type"></i>
+			<i class="published type" tooltip="filters.published"></i>
 			<input type="checkbox" ng-model="displayOptions.showPosts" />
-			<p><i18n>filters.published</i18n></p>
 		</label>
 	</li>
 	<li ng-class="{ selected: displayOptions.showDrafts }">
 		<label>
-			<i class="draft type"></i>
+			<i class="draft type" tooltip="filters.drafts"></i>
 			<input type="checkbox" ng-model="displayOptions.showDrafts" />
-			<p><i18n>filters.drafts</i18n></p>
 		</label>
 	</li>
 	<li ng-class="{ selected: displayOptions.showSubmitted }">
 		<label>
-			<i class="submitted type"></i>
+			<i class="submitted type" tooltip="filters.submitted"></i>
 			<input type="checkbox" ng-model="displayOptions.showSubmitted" />
-			<p><i18n>filters.submitted</i18n></p>
 		</label>
 	</li>
 </filters>
