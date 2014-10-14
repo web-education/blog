@@ -1,4 +1,4 @@
-<filters ng-if="me.hasWorkflow('org.entcore.blog.controllers.BlogController|create')">
+<filters ng-if="currentBlog.myRights.post.edit">
 	<li ng-class="{ selected: displayOptions.showPosts }">
 		<label>
 			<i class="published type" tooltip="filters.published"></i>
