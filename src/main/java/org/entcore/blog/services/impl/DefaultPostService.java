@@ -69,6 +69,7 @@ public class DefaultPostService implements PostService {
 		post.putObject("modified", MongoDb.now());
 		JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
 		if (validationError(result, b)) return;
+		b.putString("state", StateType.DRAFT.name());
 		QueryBuilder query = QueryBuilder.start("_id").is(postId);
 		MongoUpdateBuilder modifier = new MongoUpdateBuilder();
 		for (String attr: b.getFieldNames()) {
