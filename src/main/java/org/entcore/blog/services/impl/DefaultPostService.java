@@ -119,7 +119,7 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void list(String blogId, StateType state, final UserInfos user,
+	public void list(String blogId, final StateType state, final UserInfos user,
 				final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId)
 				.put("state").is(state.name());
@@ -138,8 +138,8 @@ public class DefaultPostService implements PostService {
 				@Override
 				public void handle(Message<JsonObject> event) {
 					JsonObject res = event.body();
-					if (res != null && "ok".equals(res.getString("status")) &&
-						1 != res.getInteger("count")) {
+					if ((res != null && "ok".equals(res.getString("status")) &&
+						1 != res.getInteger("count")) || StateType.DRAFT.equals(state)) {
 						query.put("author.userId").is(user.getUserId());
 					}
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, defaultKeys,
