@@ -203,7 +203,10 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 	$scope.publish = function(post){
 		if($scope.currentBlog.myRights.manager){
 			post.state = 'PUBLISHED';
-			http().put('/blog/post/publish/' + $scope.currentBlog._id + '/' + post._id);
+			http().put('/blog/post/publish/' + $scope.currentBlog._id + '/' + post._id).done(function(){
+				$scope.openBlog($scope.currentBlog);
+				$scope.$apply();
+			});
 		}
 		else{
 			$scope.submit(post);
