@@ -221,8 +221,15 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 	};
 
 	$scope.submit = function(post){
-		post.state = 'SUBMITTED';
-		http().put('/blog/post/submit/' + $scope.currentBlog._id + '/' + post._id);
+		if($scope.currentBlog['publish-type'] === "IMMEDIATE"){
+			post.state = 'PUBLISHED';
+		} else {
+			post.state = 'SUBMITTED';
+		}
+		http().put('/blog/post/submit/' + $scope.currentBlog._id + '/' + post._id).done(function(){
+			$scope.openBlog($scope.currentBlog);
+			$scope.$apply();
+		});
 	};
 
 	$scope.openBlog = function(blog){
