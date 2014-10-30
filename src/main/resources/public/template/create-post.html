@@ -9,11 +9,10 @@
 						ng-model="create.post.content"
 						file-upload-path="'/workspace/document?application=blog-' + currentBlog.id + '&protected=true'"
 						notify="notify"></html-editor>
-				<input type="submit" class="right-magnet" translate-attr="value" value="blog.publish" />
+				<input type="submit" class="right-magnet" translate-attr="value" value="[[getPublishButtonI18n()]]" />
 				<input type="button" class="right-magnet" translate-attr="value" value="blog.save" ng-click="saveDraft()" />
 				<input type="button" class="right-magnet cancel" translate-attr="value" data-ng-click="currentBlogView()" value="cancel" />
 			</form>
 			<div class="clear"></div>
 	</section>
 </article>
-
