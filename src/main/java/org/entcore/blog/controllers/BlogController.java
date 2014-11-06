@@ -2,24 +2,30 @@ package org.entcore.blog.controllers;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.*;
 import static org.entcore.common.user.UserUtils.*;
-
 import fr.wseduc.mongodb.MongoDb;
+
+import org.entcore.blog.Blog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
+import org.entcore.common.events.EventStore;
+import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.request.ActionsUtils;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.share.impl.MongoDbShareService;
+
 import fr.wseduc.webutils.*;
 
 import java.util.*;
 
 import org.entcore.common.user.UserUtils;
 import org.entcore.common.user.UserInfos;
+
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VoidHandler;
@@ -34,6 +40,8 @@ public class BlogController extends Controller {
 	private final BlogService blog;
 	private final BlogTimelineService timelineService;
 	private final ShareService shareService;
+	private EventStore eventStore;
+	private enum BlogEvent { ACCESS }
 
 	public BlogController(Vertx vertx, Container container,
 		RouteMatcher rm, Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions,
@@ -44,11 +52,13 @@ public class BlogController extends Controller {
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		this.shareService = new MongoDbShareService(eb, mongo, "blogs", securedActions, groupedActions);
+		eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
 	}
 
 	@SecuredAction("blog.view")
 	public void blog(HttpServerRequest request) {
 		renderView(request);
+		eventStore.createAndStoreEvent(BlogEvent.ACCESS.name(), request);
 	}
 
 	@SecuredAction("blog.print")

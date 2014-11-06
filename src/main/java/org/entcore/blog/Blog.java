@@ -7,6 +7,7 @@ import org.entcore.blog.security.BlogResourcesProvider;
 import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.http.Binding;
 import org.entcore.blog.services.impl.BlogRepositoryEvents;
+import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.filter.ActionFilter;
 import fr.wseduc.webutils.request.filter.SecurityHandler;
 import org.entcore.common.user.RepositoryHandler;
@@ -20,6 +21,10 @@ public class Blog extends Server {
 	@Override
 	public void start() {
 		super.start();
+
+		EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
+		eventStoreFactory.setContainer(container);
+		eventStoreFactory.setVertx(vertx);
 
 		final MongoDb mongo = MongoDb.getInstance();
 		mongo.init(Server.getEventBus(vertx),
