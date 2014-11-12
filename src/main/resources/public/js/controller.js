@@ -539,6 +539,6 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 	}
 
 	$scope.getPublishButtonI18n = function(){
-		return ( $scope.currentBlog.myRights.manager || $scope.currentBlog['publish-type']) === 'IMMEDIATE' ? 'blog.publish' : 'blog.submitPost';
+		return ( $scope.currentBlog.myRights.manager || $scope.currentBlog['publish-type'] === 'IMMEDIATE') ? 'blog.publish' : 'blog.submitPost';
 	}
 }
