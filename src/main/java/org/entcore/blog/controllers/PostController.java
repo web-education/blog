@@ -158,7 +158,7 @@ public class PostController extends Controller {
 										public void handle(UserInfos user) {
 											timelineService.notifyPublishPost(request, blogId, postId, user,
 													container.config().getString("host", "http://localhost:8018") +
-															pathPrefix + "?blog=" + blogId);
+															pathPrefix + "#/view/" + blogId);
 										}
 									});
 								}
@@ -195,7 +195,7 @@ public class PostController extends Controller {
 						public void handle(UserInfos user) {
 							timelineService.notifyPublishPost(request, blogId, postId, user,
 									container.config().getString("host", "http://localhost:8018") +
-									pathPrefix + "?blog=" + blogId);
+									pathPrefix + "#/view/" + blogId);
 						}
 					});
 					renderJson(request, event.right().getValue());
