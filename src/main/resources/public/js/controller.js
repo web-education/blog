@@ -99,10 +99,10 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 			return;
 		}
 		var currentSharedRights = _.filter(blog.shared, function(sharedRight){
-			if(!model.me.profilGroupsIds){
+			if(!model.me.groupsIds){
 				return false;
 			}
-			return model.me.profilGroupsIds.indexOf(sharedRight.groupId) !== -1
+			return model.me.groupsIds.indexOf(sharedRight.groupId) !== -1
 				|| sharedRight.userId === model.me.userId;
 		});
 
