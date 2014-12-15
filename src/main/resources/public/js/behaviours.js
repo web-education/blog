@@ -91,6 +91,11 @@ Behaviours.register('blog', {
 				},
 				formatDate: function(date){
 					return moment(date).format('D/MM/YYYY');
+				},
+				getReferencedResources: function(source){
+					if(source._id){
+						return [source._id];
+					}
 				}
 			}
 		}
