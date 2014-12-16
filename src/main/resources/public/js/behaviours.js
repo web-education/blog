@@ -53,10 +53,6 @@ Behaviours.register('blog', {
 						this.$apply('blogs');
 					}.bind(this));
 				},
-				copyRights: function(snipletResource, source){
-					var viewRights = ["org-entcore-blog-controllers-PostController|list","org-entcore-blog-controllers-PostController|get","org-entcore-blog-controllers-PostController|comments","org-entcore-blog-controllers-BlogController|get"];
-					Behaviours.copyRights(snipletResource, source, viewRights, 'blog');
-				},
 				createBlog: function(){
 					if(this.snipletResource){
 						this.blog.thumbnail = this.snipletResource.icon || '';
@@ -66,7 +62,7 @@ Behaviours.register('blog', {
 					}
 					http().post('/blog', this.blog).done(function(newBlog){
 						//sharing rights copy
-						this.copyRights(this.snipletResource, newBlog);
+						this.snipletResource.synchronizeRights();
 						//filler post publication
 						var post = {
 							state: 'SUBMITTED',
