@@ -1,4 +1,84 @@
+console.log('blog behaviours file')
+
 Behaviours.register('blog', {
+	model: {
+		Post: function(){
+
+		},
+		Blog: function(data){
+			var that = this;
+			if(data._id){
+				http().get('/blog/' + data._id).done(function(blog) {
+					this.owner = blog.author;
+					this.updateData(blog);
+				}.bind(this));
+			}
+
+			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
+				sync: function(){
+					var data = [];
+					http().get('/blog/post/list/all/' + that._id).done(function(posts){
+						data = data.concat(posts);
+						http().get('/blog/post/list/all/' + that._id, { state: 'DRAFT'}).done(function(posts){
+							data = data.concat(posts);
+							http().get('/blog/post/list/all/' + that._id, { state: 'SUBMITTED'}).done(function(posts){
+								data = data.concat(posts);
+								data = _.map(data, function(item){
+									item.blogId = data._id;
+									return item;
+								});
+								this.load(data);
+							}.bind(this));
+						}.bind(this));
+					}.bind(this));
+				},
+				addDraft: function(post, callback){
+					http().post('/blog/post/' + data._id, post).done(function(result){
+						post._id = result._id;
+						this.posts.push(post);
+						if(typeof callback === 'function'){
+							callback();
+						}
+					}.bind(this));
+				},
+				behaviours: 'blog'
+			});
+		},
+		App: function(){
+			this.collection(Behaviours.applicationsBehaviours.blog.model.Blog, {
+				sync: function(cb){
+					http().get('/blog/list/all').done(function(blogs) {
+						this.load(blogs);
+						if(typeof cb === "function"){
+							cb();
+						}
+					}.bind(this));
+				},
+				behaviours: 'blog'
+			});
+		},
+		register: function(){
+			this.Blog.prototype.save = function(cb){
+				http().post('/blog', this).done(function(newBlog) {
+					this._id = newBlog._id;
+					if(typeof cb === 'function'){
+						cb();
+					}
+				}.bind(this));
+			};
+
+			this.Post.prototype.publish = function(callback){
+				http().put('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
+					if(typeof callback === 'function'){
+						callback();
+					}
+				}.bind(this));
+			};
+
+			model.makeModels(this);
+			this.app = new this.App();
+		}
+	},
 	rights: {
 		resource: {
 			update: {
@@ -7,8 +87,9 @@ Behaviours.register('blog', {
 		}
 	},
 	loadResources: function(callback){
-		http().get('/blog/list/all').done(function(blogs){
-			this.resources = _.map(blogs, function(blog){
+		this.model.register();
+		this.model.app.blogs.sync(function(){
+			this.resources = this.model.app.blogs.map(function(blog){
 				if(blog.thumbnail){
 					blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';
 				}
@@ -35,22 +116,16 @@ Behaviours.register('blog', {
 			description: 'Les nouveautés vous permettent de publier les articles d\'un blog sur votre page.',
 			controller: {
 				init: function(){
-					this.blog = {};
-					http().get('/blog/' + this.source._id).done(function(blog){
-						this.blog = new Model(blog);
-						this.blog.owner = this.blog.author;
-						this.blog.behaviours('blog');
-						http().get('/blog/post/list/all/' + this.source._id).done(function(data){
-							this.posts = data;
-							this.$apply('posts');
-						}.bind(this));
-					}.bind(this));
+					Behaviours.applicationsBehaviours.blog.model.register();
+					this.blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
+					this.blog.sync();
 				},
 				initSource: function(){
-					this.blog = {};
-					Behaviours.applicationsBehaviours.blog.loadResources(function(resources){
-						this.blogs = resources;
-						this.$apply('blogs');
+					Behaviours.applicationsBehaviours.blog.model.register();
+					var app = new Behaviours.applicationsBehaviours.blog.model.App();
+					this.blog = new Behaviours.applicationsBehaviours.blog.model.Blog();
+					app.blogs.sync(function(){
+						this.blogs = app.blogs;
 					}.bind(this));
 				},
 				createBlog: function(){
@@ -60,9 +135,10 @@ Behaviours.register('blog', {
 						this.blog['comment-type'] = 'IMMEDIATE';
 						this.blog.description = '';
 					}
-					http().post('/blog', this.blog).done(function(newBlog){
+					this.blog.save(function(){
 						//sharing rights copy
 						this.snipletResource.synchronizeRights();
+
 						//filler post publication
 						var post = {
 							state: 'SUBMITTED',
@@ -72,18 +148,22 @@ Behaviours.register('blog', {
 							' des pages à votre site.</p>',
 							title: 'Votre premier article !'
 						};
-						http().post('/blog/post/' + newBlog._id, post).done(function(post){
-							http().put('/blog/post/publish/' + newBlog._id + '/' + post._id).done(function(){
-								this.setSnipletSource(newBlog);
+						post = new Behaviours.applicationsBehaviours.blog.model.Post(post);
+						this.blog.posts.addDraft(post, function(){
+							post.publish(function(){
+								this.setSnipletSource(this.blog);
 							}.bind(this));
 						}.bind(this));
 					}.bind(this));
+
 				},
 				addArticle: function(){
 					this.editBlog = {};
 				},
-				edit: function(){
-
+				saveEdit: function(post){
+					http().put('/blog/post/' + this.blog._id + '/' + post._id, post);
+					post.state = 'DRAFT';
+					post.edit = false;
 				},
 				formatDate: function(date){
 					return moment(date).format('D/MM/YYYY');

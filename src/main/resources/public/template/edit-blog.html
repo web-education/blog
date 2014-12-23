@@ -1,5 +1,5 @@
 <h1 class="text">[[currentBlog.title]]</h1>
-<em class="medium-importance"><span translate key="blog.by"></span> <a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a></em>
+<em class="medium-importance"><i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a></em>
 <div class="row">
 	<hr />
 </div>
@@ -7,8 +7,8 @@
 	<section class="row">
 		<div class="reduce-block-eight">
 			<div class="row content-line">
-				<button ng-click="openConfirmView(removeBlog)" class="cancel" translate key="blog.delete.post"></button>
-				<button ng-click="openSharingView()" translate key="share"></button>
+				<button ng-click="openConfirmView(removeBlog)"><i18n>blog.delete.post</i18n></button>
+				<button ng-click="openSharingView()"><i18n>share</i18n></button>
 			</div>
 			<form class="row content-line">
 				<div class="row">
@@ -23,8 +23,8 @@
 					</div>
 				</div>
 				<div class="row">
-					<input type="submit" class="button right-magnet" translate-attr="value" value="blog.save" data-ng-click="saveBlogChanges()">
-					<input type="button" class="button right-magnet cancel" translate-attr="value" data-ng-click="defaultView()" value="cancel">
+					<input type="submit" class="button right-magnet" i18n-value="blog.save" data-ng-click="saveBlogChanges()">
+					<input type="button" class="button right-magnet cancel" data-ng-click="defaultView()" i18n-value="cancel">
 					<div class="clear"></div>
 				</div>
 			</form>

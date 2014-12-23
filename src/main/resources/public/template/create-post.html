@@ -4,14 +4,14 @@
 <article class="twelve cell">
 	<section class="row">
 			<form data-ng-submit="savePost()">
-				<input type="text" data-ng-model="create.post.title" placeholder="post.title.placeholder" translate-attr="placeholder" required class="twelve cell" />
+				<input type="text" data-ng-model="create.post.title" i18n-placeholder="post.title.placeholder" required class="twelve cell" />
 				<html-editor
 						ng-model="create.post.content"
 						file-upload-path="'/workspace/document?application=blog-' + currentBlog.id + '&protected=true'"
 						notify="notify"></html-editor>
-				<input type="submit" class="right-magnet" translate-attr="value" value="[[getPublishButtonI18n()]]" />
-				<input type="button" class="right-magnet" translate-attr="value" value="blog.save" ng-click="saveDraft()" />
-				<input type="button" class="right-magnet cancel" translate-attr="value" data-ng-click="currentBlogView()" value="cancel" />
+				<input type="submit" class="right-magnet" i18n-value="[[getPublishButtonI18n()]]" />
+				<input type="button" class="right-magnet" i18n-value="blog.save" ng-click="saveDraft()" />
+				<input type="button" class="right-magnet cancel" data-ng-click="currentBlogView()" i18n-value="cancel" />
 			</form>
 			<div class="clear"></div>
 	</section>

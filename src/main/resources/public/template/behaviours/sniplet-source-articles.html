@@ -25,7 +25,7 @@
 							</div>
 						</div>
 						<ul class="illustrated-list">
-							<li ng-repeat="blog in blogs | filter:searchText" ng-click="setSnipletSource(blog)">
+							<li ng-repeat="blog in blogs.all | filter:searchText" ng-click="setSnipletSource(blog)">
 								<img skin-src="[[blog.icon]]" class="illustration" />
 								<a class="name">[[blog.title]]</a>
 								<em class="owner">[[blog.ownerName]]</em>
