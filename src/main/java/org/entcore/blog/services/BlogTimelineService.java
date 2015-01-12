@@ -15,4 +15,7 @@ public interface BlogTimelineService {
 	void notifyPublishPost(HttpServerRequest request, String blogId, String postId,
 						   UserInfos user, String blogUri);
 
+	void notifyPublishComment(HttpServerRequest request, String blogId, String postId,
+								UserInfos user, String blogUri);
+
 }

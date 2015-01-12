@@ -17,6 +17,9 @@ routes.define(function($routeProvider){
 		.when('/list-blogs', {
 			action: 'list'
 		})
+		.when('/view/:blogId/:postId', {
+			action: 'viewPost',
+		})
 		.otherwise({
 			redirectTo: '/list-blogs'
 		})
@@ -40,6 +43,10 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 
 	route({
 		viewBlog: function(params){
+			if($scope.lastRoute === window.location.href)
+				return;
+			$scope.lastRoute = window.location.href;
+
 			refreshBlogList(function(){
 				if(_.where($scope.blogs, { _id: params.blogId }).length > 0){
 					$scope.currentBlog = _.where($scope.blogs, { _id: params.blogId })[0];
@@ -51,7 +58,31 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 				$scope.defaultView();
 			});
 		},
+		viewPost: function(params){
+			if($scope.lastRoute === window.location.href)
+				return;
+			$scope.lastRoute = window.location.href;
+
+			refreshBlogList(function(){
+				if(_.where($scope.blogs, { _id: params.blogId }).length > 0){
+					$scope.currentBlog = _.where($scope.blogs, { _id: params.blogId })[0];
+				}
+				else{
+					notify.error('notfound');
+				}
+
+				$scope.bootParams = {
+					bootAction: 'viewPost',
+					loaded: false,
+					postId: params.postId
+				};
+
+				$scope.defaultView();
+			});
+		},
 		newArticle: function(params){
+			$scope.lastRoute = window.location.href;
+
 			refreshBlogList(function(){
 				if(_.where($scope.blogs, { _id: params.blogId }).length > 0){
 					$scope.currentBlog = _.where($scope.blogs, { _id: params.blogId })[0];
@@ -64,6 +95,8 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 			});
 		},
 		list: function(){
+			$scope.lastRoute = window.location.href;
+
 			$scope.defaultView();
 			refreshBlogList();
 		}
@@ -232,27 +265,47 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 		});
 	};
 
+	$scope.defaultFolded = function(post, isFirst){
+		post.folded = typeof post.folded === 'undefined' ? isFirst ? false : true : post.folded;
+	};
+
 	$scope.openBlog = function(blog){
 		if(!blog){
 			return;
 		}
 		resetScope();
 		$scope.currentBlog = blog;
+		initMaxResults();
+
 		http().get('/blog/post/list/all/' + blog._id).done(function(data){
 			$scope.currentBlog.posts = data;
-			initMaxResults();
+
+			if($scope.bootParams && !$scope.bootParams.loaded && $scope.bootParams.bootAction === 'viewPost'){
+				$scope.bootParams.loaded = true;
+				_.forEach($scope.currentBlog.posts, function(post, index){
+					if(post._id === $scope.bootParams.postId){
+						post.folded = false;
+						post.showComments = true;
+						if(index >= 3)
+							$scope.maxResults = index + 1;
+					} else {
+						post.folded = true;
+						post.showComments = false;
+					}
+
+				});
+			}
+
 			$scope.$apply();
 		});
 
 		http().get('/blog/post/list/all/' + blog._id + '?state=SUBMITTED').done(function(data){
 			$scope.currentBlog.submitted = data;
-			initMaxResults();
 			$scope.$apply();
 		});
 
 		http().get('/blog/post/list/all/' + blog._id + '?state=DRAFT').done(function(data){
 			$scope.currentBlog.drafts = data;
-			initMaxResults();
 			$scope.$apply();
 		});
 	};

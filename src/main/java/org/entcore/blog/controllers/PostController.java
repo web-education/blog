@@ -1,20 +1,19 @@
 package org.entcore.blog.controllers;
 
-import static org.entcore.common.http.response.DefaultResponseHandler.*;
+import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 import static org.entcore.common.user.UserUtils.getUserInfos;
 
-import fr.wseduc.mongodb.MongoDb;
+import java.util.Map;
+
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.neo4j.Neo;
-import fr.wseduc.webutils.*;
-import org.entcore.common.user.UserUtils;
 import org.entcore.common.user.UserInfos;
-import fr.wseduc.security.ActionType;
-import fr.wseduc.security.SecuredAction;
+import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VoidHandler;
@@ -23,7 +22,12 @@ import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Container;
 
-import java.util.Map;
+import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.security.ActionType;
+import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Controller;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.Utils;
 
 public class PostController extends Controller {
 
@@ -235,8 +239,21 @@ public class PostController extends Controller {
 					@Override
 					public void handle(final UserInfos user) {
 						if (user != null) {
-							post.addComment(blogId, postId, request.formAttributes().get("comment"),
-									user, defaultResponseHandler(request));
+							Handler<Either<String, JsonObject>> notifyHandler = new Handler<Either<String, JsonObject>>() {
+								@Override
+								public void handle(Either<String, JsonObject> event) {
+									if (event.isRight()) {
+										timelineService.notifyPublishComment(request, blogId, postId, user,
+												container.config().getString("host", "http://localhost:8018") +
+												pathPrefix + "#/view/" + blogId);
+										renderJson(request, event.right().getValue());
+									} else {
+										JsonObject error = new JsonObject().putString("error", event.left().getValue());
+										renderJson(request, error, 400);
+									}
+								}
+							};
+							post.addComment(blogId, postId, request.formAttributes().get("comment"), user, notifyHandler);
 						} else {
 							unauthorized(request);
 						}

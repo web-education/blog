@@ -1,12 +1,13 @@
 package org.entcore.blog.services.impl;
 
-import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.mongodb.MongoQueryBuilder;
-import fr.wseduc.webutils.collections.Joiner;
-import com.mongodb.QueryBuilder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.entcore.blog.services.BlogTimelineService;
-import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.neo4j.Neo;
+import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserInfos;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
@@ -19,10 +20,11 @@ import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
 import org.vertx.java.platform.Container;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.mongodb.QueryBuilder;
+
+import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.mongodb.MongoQueryBuilder;
+import fr.wseduc.webutils.collections.Joiner;
 
 public class DefaultBlogTimelineService implements BlogTimelineService {
 
@@ -143,6 +145,39 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 							notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
 									NOTIFICATION_TYPE + "_POST_PUBLISH", recipients,
 									blogId, postId, "notification/notify-publish-post.html", p);
+						}
+					}
+				}
+			});
+		}
+	}
+
+	@Override
+	public void notifyPublishComment(final HttpServerRequest request, final String blogId, final String postId,
+			final UserInfos user, final String resourceUri) {
+		if (resourceUri != null && user != null && blogId != null && request != null) {
+			QueryBuilder query = QueryBuilder.start("_id").is(postId);
+			JsonObject keys = new JsonObject().putNumber("title", 1).putNumber("blog", 1);
+			JsonArray fetch = new JsonArray().addString("blog");
+			findRecipiants("posts", query, keys, fetch, user, new Handler<Map<String, Object>>() {
+				@Override
+				public void handle(Map<String, Object> event) {
+					if (event != null) {
+						List<String> recipients = (List<String>) event.get("recipients");
+						JsonObject blog = (JsonObject) event.get("blog");
+						if (recipients != null) {
+							JsonObject p = new JsonObject()
+									.putString("uri", container.config().getString("userbook-host") +
+											"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+									.putString("username", user.getUsername())
+									.putString("blogTitle", blog.getObject("blog",
+											new JsonObject()).getString("title"))
+									.putString("blogUri", resourceUri)
+									.putString("postTitle", blog.getString("title"))
+									.putString("postUri", resourceUri + "/" + postId);
+							notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
+									NOTIFICATION_TYPE + "_COMMENT", recipients,
+									blogId, postId, "notification/notify-publish-comment.html", p);
 						}
 					}
 				}
