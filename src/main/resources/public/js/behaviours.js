@@ -7,7 +7,7 @@ Behaviours.register('blog', {
 		},
 		Blog: function(data){
 			var that = this;
-			if(data._id){
+			if(data && data._id){
 				http().get('/blog/' + data._id).done(function(blog) {
 					this.owner = blog.author;
 					this.updateData(blog);
@@ -129,6 +129,7 @@ Behaviours.register('blog', {
 					}.bind(this));
 				},
 				createBlog: function(){
+					console.log('automatic blog creation');
 					if(this.snipletResource){
 						this.blog.thumbnail = this.snipletResource.icon || '';
 						this.blog.title = 'Les actualités du site ' + this.snipletResource.title;
