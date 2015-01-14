@@ -9,12 +9,12 @@
 	</head>
 	<body data-ng-controller="Blog">
 	<portal>
-	<div class="row">
+	<div class="row rigid-grid">
 		<div class="four cell">
 			<h1><a data-reload><i class="blog"></i>{{#i18n}}blog.title{{/i18n}}</a></h1>
 		</div>
-		<div class="eight cell">
-			<nav class="contextual-buttons row" ng-if="currentBlog._id">
+		<div class="margin-four">
+			<nav class="contextual-buttons twelve cell" ng-if="currentBlog._id">
 				<div class="row action-buttons">
 					<button data-ng-click="showCreatePost()" ng-if="isVisible() && !isEditing()" class="cell">
 						<i class="add"></i><i18n>blog.create.post</i18n>
@@ -26,11 +26,11 @@
 			</nav>
 		</div>
 	</div>
-	<div class="row">
+	<div class="row rigid-grid">
 		<div class="four cell" ng-include="template.containers.blogsList">
 
 		</div>
-		<div class="blogs-posts-list eight cell horizontal-spacing" ng-include="template.containers.main">
+		<div class="blogs-posts-list margin-four horizontal-spacing" ng-include="template.containers.main">
 		</div>
 	</div>
 	</portal>

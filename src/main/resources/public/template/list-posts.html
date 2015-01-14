@@ -1,16 +1,15 @@
-<h1 class="text upper-title">[[currentBlog.title]]</h1>
-<em class="medium-importance" ng-if="currentBlog.author">
-	<i18n>blog.by</i18n>
-	<a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a>
-</em>
+<div class="twelve cell">
+	<h1 class="text upper-title">[[currentBlog.title]]</h1>
+	<em class="medium-importance" ng-if="currentBlog.author">
+		<i18n>blog.by</i18n>
+		<a ng-href="/userbook/annuaire#[[currentBlog.author.userId]]">[[currentBlog.author.username]]</a>
+	</em>
 
-<div class="clear"></div>
+	<article class="twelve cell" ng-if="blogs.length === 0">
+		<i18n>noblog</i18n>
+	</article>
 
-<article class="twelve cell" ng-if="blogs.length === 0">
-	<span translate content="noblog"></span>
-</article>
-
-<div ng-include="template.containers.filters"></div>
+	<div ng-include="template.containers.filters"></div>
 	<div ng-if="displayOptions.showAll || displayOptions.showDrafts">
 		<section data-ng-repeat="post in currentBlog.drafts | limitTo:nbResults('drafts')" class="line row"
 				 ng-class="{'greyed-out': post.state !== 'PUBLISHED' }">
@@ -43,4 +42,6 @@
 		<a ng-click="addResults()" class="right-magnet">[[translate('seemore')]]</a>
 		<div class="clear"></div>
 	</h3>
+</div>
+
 
