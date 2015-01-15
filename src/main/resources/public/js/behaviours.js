@@ -8,6 +8,7 @@ Behaviours.register('blog', {
 		Blog: function(data){
 			var that = this;
 			if(data && data._id){
+				this._id = data._id;
 				http().get('/blog/' + data._id).done(function(blog) {
 					this.owner = blog.author;
 					this.updateData(blog);
@@ -33,11 +34,13 @@ Behaviours.register('blog', {
 					}.bind(this));
 				},
 				addDraft: function(post, callback){
-					http().post('/blog/post/' + data._id, post).done(function(result){
+					http().post('/blog/post/' + that._id, post).done(function(result){
 						post._id = result._id;
-						this.posts.push(post);
+						this.push(post);
+						var newPost = this.last();
+						newPost.blogId = that._id;
 						if(typeof callback === 'function'){
-							callback();
+							callback(newPost);
 						}
 					}.bind(this));
 				},
@@ -59,12 +62,19 @@ Behaviours.register('blog', {
 		},
 		register: function(){
 			this.Blog.prototype.save = function(cb){
-				http().post('/blog', this).done(function(newBlog) {
-					this._id = newBlog._id;
-					if(typeof cb === 'function'){
-						cb();
-					}
-				}.bind(this));
+				http()
+					.post('/blog', {
+						title: this.title,
+						thumbnail: this.thumbnail,
+						'comment-type': this['comment-type'],
+						description: this.description
+					})
+					.done(function(newBlog) {
+						this._id = newBlog._id;
+						if(typeof cb === 'function'){
+							cb();
+						}
+					}.bind(this));
 			};
 
 			this.Post.prototype.publish = function(callback){
@@ -149,8 +159,7 @@ Behaviours.register('blog', {
 							' des pages à votre site.</p>',
 							title: 'Votre premier article !'
 						};
-						post = new Behaviours.applicationsBehaviours.blog.model.Post(post);
-						this.blog.posts.addDraft(post, function(){
+						this.blog.posts.addDraft(post, function(post){
 							post.publish(function(){
 								this.setSnipletSource(this.blog);
 							}.bind(this));
