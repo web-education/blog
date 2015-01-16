@@ -127,8 +127,13 @@ Behaviours.register('blog', {
 			controller: {
 				init: function(){
 					Behaviours.applicationsBehaviours.blog.model.register();
-					this.blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
-					this.blog.sync();
+					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
+					blog.on('change', function(){
+						this.blog = blog;
+						this.blog.behaviours('blog');
+						this.$apply();
+					}.bind(this));
+					blog.sync();
 				},
 				initSource: function(){
 					Behaviours.applicationsBehaviours.blog.model.register();
@@ -171,7 +176,10 @@ Behaviours.register('blog', {
 					this.editBlog = {};
 				},
 				saveEdit: function(post){
-					http().put('/blog/post/' + this.blog._id + '/' + post._id, post);
+					http().put('/blog/post/' + this.blog._id + '/' + post._id, {
+						content: post.content,
+						title: post.title
+					});
 					post.state = 'DRAFT';
 					post.edit = false;
 				},
