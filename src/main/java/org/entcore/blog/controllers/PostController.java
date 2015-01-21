@@ -6,6 +6,12 @@ import static org.entcore.common.user.UserUtils.getUserInfos;
 
 import java.util.Map;
 
+import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
+import fr.wseduc.webutils.http.BaseController;
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
@@ -29,20 +35,21 @@ import fr.wseduc.webutils.Controller;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Utils;
 
-public class PostController extends Controller {
+public class PostController extends BaseController {
 
-	private final PostService post;
-	private final BlogTimelineService timelineService;
+	private PostService post;
+	private BlogTimelineService timelineService;
 
-	public PostController(Vertx vertx, Container container,
-						  RouteMatcher rm, Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions,
-						  MongoDb mongo) {
-		super(vertx, container, rm, securedActions);
+	public void init(Vertx vertx, Container container, RouteMatcher rm,
+					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
+		super.init(vertx, container, rm, securedActions);
+		MongoDb mongo = MongoDb.getInstance();
 		this.post = new DefaultPostService(mongo);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(eb, log), mongo);
 	}
 
 	// TODO improve fields matcher and validater
+	@Post("/post/:blogId")
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void create(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -69,6 +76,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Put("/post/:blogId/:postId")
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void update(final HttpServerRequest request) {
 		final String postId = request.params().get("postId");
@@ -86,6 +94,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Delete("/post/:blogId/:postId")
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void delete(final HttpServerRequest request) {
 		final String postId = request.params().get("postId");
@@ -107,6 +116,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Get("/post/:blogId/:postId")
 	@SecuredAction(value = "blog.read", type = ActionType.RESOURCE)
 	public void get(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -119,6 +129,7 @@ public class PostController extends Controller {
 		post.get(blogId, postId, BlogResourcesProvider.getStateType(request), defaultResponseHandler(request));
 	}
 
+	@Get("/post/list/all/:blogId")
 	@SecuredAction(value = "blog.read", type = ActionType.RESOURCE)
 	public void list(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -139,6 +150,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Put("/post/submit/:blogId/:postId")
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void submit(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -181,6 +193,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Put("/post/publish/:blogId/:postId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void publish(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -212,6 +225,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Put("/post/unpublish/:blogId/:postId")
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void unpublish(final HttpServerRequest request) {
 		final String postId = request.params().get("postId");
@@ -222,6 +236,7 @@ public class PostController extends Controller {
 		post.unpublish(postId, defaultResponseHandler(request));
 	}
 
+	@Post("/comment/:blogId/:postId")
 	@SecuredAction(value = "blog.comment", type = ActionType.RESOURCE)
 	public void comment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -263,6 +278,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Delete("/comment/:blogId/:postId/:commentId")
 	@SecuredAction(value = "blog.comment", type = ActionType.RESOURCE)
 	public void deleteComment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -291,6 +307,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Get("/comments/:blogId/:postId")
 	@SecuredAction(value = "blog.read", type = ActionType.RESOURCE)
 	public void comments(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -319,6 +336,7 @@ public class PostController extends Controller {
 		});
 	}
 
+	@Put("/comment/:blogId/:postId/:commentId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void publishComment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");

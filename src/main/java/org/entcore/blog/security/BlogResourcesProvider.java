@@ -21,11 +21,7 @@ import java.util.List;
 
 public class BlogResourcesProvider implements ResourcesProvider {
 
-	private MongoDb mongo;
-
-	public BlogResourcesProvider(MongoDb mongo) {
-		this.mongo = mongo;
-	}
+	private MongoDb mongo = MongoDb.getInstance();
 
 	@Override
 	public void authorize(HttpServerRequest request, Binding binding,

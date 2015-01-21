@@ -4,6 +4,11 @@ import static org.entcore.common.http.response.DefaultResponseHandler.*;
 import static org.entcore.common.user.UserUtils.*;
 import fr.wseduc.mongodb.MongoDb;
 
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
+import fr.wseduc.webutils.http.BaseController;
 import org.entcore.blog.Blog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
@@ -35,18 +40,18 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Container;
 
-public class BlogController extends Controller {
+public class BlogController extends BaseController {
 
-	private final BlogService blog;
-	private final BlogTimelineService timelineService;
-	private final ShareService shareService;
+	private BlogService blog;
+	private BlogTimelineService timelineService;
+	private ShareService shareService;
 	private EventStore eventStore;
 	private enum BlogEvent { ACCESS }
 
-	public BlogController(Vertx vertx, Container container,
-		RouteMatcher rm, Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions,
-		MongoDb mongo) {
-		super(vertx, container, rm, securedActions);
+	public void init(Vertx vertx, Container container, RouteMatcher rm,
+					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
+		super.init(vertx, container, rm, securedActions);
+		MongoDb mongo = MongoDb.getInstance();
 		this.blog = new DefaultBlogService(mongo);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
@@ -55,18 +60,21 @@ public class BlogController extends Controller {
 		eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
 	}
 
+	@Get("")
 	@SecuredAction("blog.view")
 	public void blog(HttpServerRequest request) {
 		renderView(request);
 		eventStore.createAndStoreEvent(BlogEvent.ACCESS.name(), request);
 	}
 
+	@Get("/print/blog")
 	@SecuredAction("blog.print")
 	public void print(HttpServerRequest request) {
 		renderView(request, null, "print.html", null);
 	}
 
 	// TODO improve fields matcher and validater
+	@Post("")
 	@SecuredAction("blog.create")
 	public void create(final HttpServerRequest request) {
 		getUserInfos(eb, request, new Handler<UserInfos>() {
@@ -88,6 +96,7 @@ public class BlogController extends Controller {
 		});
 	}
 
+	@Put("/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void update(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -121,6 +130,7 @@ public class BlogController extends Controller {
 			pathPrefix + "#/view/" + blogId;
 	}
 
+	@Delete("/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void delete(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -142,6 +152,7 @@ public class BlogController extends Controller {
 		});
 	}
 
+	@Get("/:blogId")
 	@SecuredAction(value = "blog.read", type = ActionType.RESOURCE)
 	public void get(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -152,6 +163,7 @@ public class BlogController extends Controller {
 		blog.get(blogId, defaultResponseHandler(request));
 	}
 
+	@Get("/list/all")
 	@SecuredAction("blog.list")
 	public void list(final HttpServerRequest request) {
 		getUserInfos(eb, request, new Handler<UserInfos>() {
@@ -166,6 +178,7 @@ public class BlogController extends Controller {
 		});
 	}
 
+	@Get("/share/json/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void shareJson(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -186,6 +199,7 @@ public class BlogController extends Controller {
 		});
 	}
 
+	@Put("/share/json/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void shareJsonSubmit(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -241,6 +255,7 @@ public class BlogController extends Controller {
 		});
 	}
 
+	@Put("/share/remove/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void removeShare(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
@@ -281,6 +296,7 @@ public class BlogController extends Controller {
 	}
 
 
+	@Get("/blog/availables-workflow-actions")
 	@SecuredAction(value = "blog.habilitation", type = ActionType.AUTHENTICATED)
 	public void getActionsInfos(final HttpServerRequest request) {
 		ActionsUtils.findWorkflowSecureActions(eb, request, this);
