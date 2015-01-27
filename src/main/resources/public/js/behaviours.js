@@ -94,6 +94,10 @@ Behaviours.register('blog', {
 			update: {
 				right: 'org-entcore-blog-controllers-PostController|create'
 			}
+		},
+		workflow: {
+			create: 'org.entcore.blog.controllers.BlogController|create',
+			print: 'org.entcore.blog.controllers.BlogController|print'
 		}
 	},
 	loadResources: function(callback){

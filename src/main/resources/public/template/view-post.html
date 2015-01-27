@@ -27,8 +27,8 @@
 	</div>
 	<div class="five cell right-magnet">
 		<a ng-click="switchComments(post)" class="medium-text right-magnet">
-			<span ng-if="!post.showComments && nbComments(post) > 0" translate key="comments.show"></span>
-			<span ng-if="post.showComments && nbComments(post) > 0" translate key="comments.hide"></span>
+			<span ng-if="!post.showComments && nbComments(post) > 0"><i18n>comments.show</i18n></span>
+			<span ng-if="post.showComments && nbComments(post) > 0"><i18n>comments.hide</i18n></span>
 		</a>
 	</div>
 	<div class="clear"></div>
@@ -45,7 +45,7 @@
 				<a class="cell right-magnet"
 				   ng-click="removeComment(post, comment)"
 				   ng-if="currentBlog.myRights.comment.remove && (comment.author.userId === me.userId || currentBlog.myRights.manager)">
-					<span translate key="blog.delete.post"></span>
+					<span><i18n>blog.delete.post</i18n></span>
 				</a>
 				<p>[[comment.comment]]</p>
 			</article>

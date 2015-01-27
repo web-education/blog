@@ -194,8 +194,6 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 		});
 	}
 
-	resolveMyRights(model.me);
-
 	$scope.defaultView = function(){
 		template.open('main', 'list-posts');
 	};
