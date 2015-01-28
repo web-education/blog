@@ -104,15 +104,6 @@ public class BlogController extends Controller {
 							@Override
 							public void handle(Either<String, JsonObject> event) {
 								if (event.isRight()) {
-									UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-										@Override
-										public void handle(UserInfos user) {
-											if (user != null) {
-												timelineService.notifyUpdateBlog(request, blogId, user,
-														getBlogUri(blogId));
-											}
-										}
-									});
 									renderJson(request, event.right().getValue());
 								} else {
 									JsonObject error = new JsonObject()
