@@ -6,8 +6,8 @@
 		file-upload-path="'/workspace/document?application=blog-' + currentBlog._id + '&protected=true'"
 		ng-model="currentPost.content" notify="notify"></html-editor>
 
-	<input type="button" class="right-magnet" translate-attr="value" value="blog.publish" ng-if="currentPost.state === 'DRAFT'" ng-click="saveAndSubmit(currentPost)" />
-	<input type="submit" class="right-magnet" translate-attr="value" value="blog.save" />
+	<input type="button" class="right-magnet" translate-attr="value" value="[[getPublishButtonI18n()]]" ng-click="saveAndSubmit(currentPost)" />
+	<input type="submit" class="right-magnet" translate-attr="value" ng-if="currentPost.state === 'DRAFT'"  value="blog.save" />
 	<input type="button" class="right-magnet cancel" data-ng-click="currentBlogView()" translate-attr="value" value="cancel" />
 </form>
 <div class="row"><hr /></div>

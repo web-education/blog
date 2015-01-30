@@ -6,6 +6,11 @@ function resolveMyRights(){
 	}
 }
 
+var executeHook = function(hook){
+	if(typeof hook === 'function')
+		hook.apply(this, Array.prototype.slice.call(arguments).slice(1))
+}
+
 routes.define(function($routeProvider){
 	$routeProvider
 		.when('/view/:blogId', {
@@ -247,10 +252,10 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 	};
 
 	$scope.saveAndSubmit = function(post){
-		$scope.updatePost(post);
-		$scope.publish(post);
-
-		$scope.displayBlog($scope.currentBlog);
+		$scope.updatePost(function(){
+			$scope.publish(post);
+			$scope.displayBlog($scope.currentBlog);
+		});
 	};
 
 	$scope.submit = function(post){
@@ -478,10 +483,11 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 		blog.thumbnail = '/workspace/document/' + $scope.photo.file._id + '?thumbnail=120x120';
 	};
 
-	$scope.updatePost = function(){
+	$scope.updatePost = function(hook){
 		http().put('/blog/post/' + $scope.currentBlog._id + '/' + $scope.currentPost._id, $scope.currentPost).done(function(){
 			$scope.displayBlog($scope.currentBlog);
 			window.scrollTo(0, 0);
+			executeHook(hook)
 		})
 	};
 
@@ -592,6 +598,10 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 	}
 
 	$scope.getPublishButtonI18n = function(){
-		return ( $scope.currentBlog.myRights.manager || $scope.currentBlog['publish-type'] === 'IMMEDIATE') ? 'blog.publish' : 'blog.submitPost';
+		return $scope.canPublish() ? 'blog.publish' : 'blog.submitPost'
+	}
+
+	$scope.canPublish = function(){
+		return $scope.currentBlog.myRights.manager || $scope.currentBlog['publish-type'] === 'IMMEDIATE'
 	}
 }
