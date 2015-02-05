@@ -53,7 +53,7 @@ public class BlogController extends BaseController {
 		super.init(vertx, container, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
 		this.blog = new DefaultBlogService(mongo);
-		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(eb, log), mongo);
+		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		this.shareService = new MongoDbShareService(eb, mongo, "blogs", securedActions, groupedActions);
