@@ -32,9 +32,7 @@ public class Blog extends BaseServer {
 		mongo.init(Server.getEventBus(vertx),
 				container.config().getString("mongo-address", "wse.mongodb.persistor"));
 
-		vertx.eventBus().registerHandler("user.repository",
-				new RepositoryHandler(new BlogRepositoryEvents(
-						config.getBoolean("share-old-groups-to-users", false))));
+		setRepositoryEvents(new BlogRepositoryEvents(config.getBoolean("share-old-groups-to-users", false)));
 
 		addController(new BlogController());
 		addController(new PostController());
