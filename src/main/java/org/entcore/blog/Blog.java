@@ -18,7 +18,7 @@ public class Blog extends BaseServer {
 		eventStoreFactory.setContainer(container);
 		eventStoreFactory.setVertx(vertx);
 
-		setRepositoryEvents(new BlogRepositoryEvents(config.getBoolean("share-old-groups-to-users", false)));
+		setRepositoryEvents(new BlogRepositoryEvents());
 
 		addController(new BlogController());
 		addController(new PostController());
