@@ -6,6 +6,7 @@ import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.BaseServer;
+import org.entcore.common.mongodb.MongoDbConf;
 
 public class Blog extends BaseServer {
 
@@ -13,6 +14,8 @@ public class Blog extends BaseServer {
 	public void start() {
 		setResourceProvider(new BlogResourcesProvider());
 		super.start();
+
+		MongoDbConf.getInstance().setCollection("blogs");
 
 		EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
 		eventStoreFactory.setContainer(container);
