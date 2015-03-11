@@ -126,8 +126,7 @@ public class BlogController extends BaseController {
 	}
 
 	private String getBlogUri(String blogId) {
-		return container.config().getString("host", "http://localhost:8018") +
-			pathPrefix + "#/view/" + blogId;
+		return pathPrefix + "#/view/" + blogId;
 	}
 
 	@Delete("/:blogId")
