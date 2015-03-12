@@ -86,13 +86,23 @@ Behaviours.register('blog', {
 					}.bind(this));
 			};
 
+			this.Post.prototype.submit = function(callback){
+				http().put('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
+					if(typeof callback === 'function'){
+						callback();
+					}
+				}.bind(this));
+			};
+
 			this.Post.prototype.publish = function(callback){
 				http().put('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
 						callback();
 					}
 				}.bind(this))
-				.e401(function(){});
+				.e401(function(){
+					this.submit();
+				}.bind(this));
 			};
 
 			this.Post.prototype.create = function(callback, blog){
@@ -127,6 +137,15 @@ Behaviours.register('blog', {
 				}
 			};
 
+			this.Post.prototype.remove = function(callback){
+				http().delete('/blog/post/' + this.blogId + '/' + this._id)
+					.done(function(){
+						if(typeof callback === 'function'){
+							callback();
+						}
+					});
+			};
+
 			model.makeModels(this);
 			this.app = new this.App();
 		}
@@ -135,6 +154,12 @@ Behaviours.register('blog', {
 		resource: {
 			update: {
 				right: 'org-entcore-blog-controllers-PostController|create'
+			},
+			removePost: {
+				right: 'org-entcore-blog-controllers-PostController|delete'
+			},
+			editPost: {
+				right: 'org-entcore-blog-controllers-PostController|update'
 			}
 		},
 		workflow: {
@@ -172,6 +197,7 @@ Behaviours.register('blog', {
 			description: 'sniplet.desc',
 			controller: {
 				init: function(){
+					this.me = model.me;
 					Behaviours.applicationsBehaviours.blog.model.register();
 					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
 					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
@@ -223,7 +249,13 @@ Behaviours.register('blog', {
 					this.display.showCreateBlog = false;
 					this.newPost.save(function(){
 						this.blog.posts.sync();
+						this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
 					}.bind(this), this.blog);
+				},
+				removePost: function(post){
+					post.remove(function(){
+						this.blog.posts.sync();
+					}.bind(this));
 				},
 				addArticle: function(){
 					this.editBlog = {};

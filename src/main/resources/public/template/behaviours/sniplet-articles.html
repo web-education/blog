@@ -32,7 +32,12 @@
 			</em>
 		</div>
 		<div class="right-magnet cell">
-			<input type="button" i18n-value="edit" ng-click="post.edit = true;" />
+			<resource-right class="cell" name="editPost" resource="blog">
+				<input type="button" i18n-value="edit" ng-click="post.edit = true;" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId" />
+			</resource-right>
+			<resource-right class="cell" name="removePost" resource="blog">
+				<input type="button" i18n-value="remove" ng-click="removePost(post)" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId"/>
+			</resource-right>
 		</div>
 	</div>
 	<div class="row" ng-if="post.edit">
