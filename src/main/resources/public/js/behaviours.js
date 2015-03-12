@@ -17,18 +17,18 @@ Behaviours.register('blog', {
 
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
 				sync: function(){
-					var data = [];
+					var all = [];
 					http().get('/blog/post/list/all/' + that._id).done(function(posts){
-						data = data.concat(posts);
+						all = all.concat(posts);
 						http().get('/blog/post/list/all/' + that._id, { state: 'DRAFT'}).done(function(posts){
-							data = data.concat(posts);
+							all = all.concat(posts);
 							http().get('/blog/post/list/all/' + that._id, { state: 'SUBMITTED'}).done(function(posts){
-								data = data.concat(posts);
-								data = _.map(data, function(item){
+								all = all.concat(posts);
+								all = all.map(function(item){
 									item.blogId = data._id;
 									return item;
 								});
-								this.load(data);
+								this.load(all);
 							}.bind(this));
 						}.bind(this));
 					}.bind(this));
@@ -51,6 +51,15 @@ Behaviours.register('blog', {
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Blog, {
 				sync: function(cb){
 					http().get('/blog/list/all').done(function(blogs) {
+						blogs = blogs.map(function(item){
+							if(item.thumbnail){
+								item.icon = item.thumbnail + '?thumbnail=48x48';
+							}
+							else{
+								item.icon = '/img/illustrations/blog.png'
+							}
+							return item;
+						});
 						this.load(blogs);
 						if(typeof cb === "function"){
 							cb();
@@ -82,7 +91,40 @@ Behaviours.register('blog', {
 					if(typeof callback === 'function'){
 						callback();
 					}
+				}.bind(this))
+				.e401(function(){});
+			};
+
+			this.Post.prototype.create = function(callback, blog){
+				this.blogId = blog._id;
+				http().post('/blog/post/' + blog._id, {
+					content: this.content,
+					title: this.title
+				})
+				.done(function(data){
+					this._id = data._id;
+					blog.posts.sync();
+					this.publish(callback);
+				}.bind(this))
+			};
+
+			this.Post.prototype.saveModifications = function(callback){
+				http().put('/blog/post/' + this.blogId + '/' + this._id, {
+					content: this.content,
+					title: this.title
+				})
+				.done(function(){
+					this.publish(callback);
 				}.bind(this));
+			};
+
+			this.Post.prototype.save = function(callback, blog){
+				if(this._id){
+					this.saveModifications(callback);
+				}
+				else{
+					this.create(callback, blog);
+				}
 			};
 
 			model.makeModels(this);
@@ -126,13 +168,14 @@ Behaviours.register('blog', {
 	},
 	sniplets: {
 		articles: {
-			title: 'Nouveautés',
-			description: 'Les nouveautés vous permettent de publier les articles d\'un blog sur votre page.',
+			title: 'sniplet.title',
+			description: 'sniplet.desc',
 			controller: {
 				init: function(){
 					Behaviours.applicationsBehaviours.blog.model.register();
 					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
-					blog.on('change', function(){
+					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
+					blog.on('posts.sync, change', function(){
 						this.blog = blog;
 						this.blog.behaviours('blog');
 						this.$apply();
@@ -176,15 +219,17 @@ Behaviours.register('blog', {
 					}.bind(this));
 
 				},
+				addPost: function(){
+					this.display.showCreateBlog = false;
+					this.newPost.save(function(){
+						this.blog.posts.sync();
+					}.bind(this), this.blog);
+				},
 				addArticle: function(){
 					this.editBlog = {};
 				},
 				saveEdit: function(post){
-					http().put('/blog/post/' + this.blog._id + '/' + post._id, {
-						content: post.content,
-						title: post.title
-					});
-					post.state = 'DRAFT';
+					post.save();
 					post.edit = false;
 				},
 				formatDate: function(date){

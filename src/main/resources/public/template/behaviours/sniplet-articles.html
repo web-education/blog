@@ -1,11 +1,26 @@
-<resource-right name="update" resource="blog">
+<resource-right name="update" resource="blog" class="articles-sniplet">
 	<div class="row" style="min-height: 20px">
-		<a class="button" ng-href="/blog#/new-article/[[blog._id]]" target="_blank">Ajouter un article</a>
+		<input type="button" ng-click="display.showCreateBlog=true" target="_blank" i18n-value="sniplet.add.post"/>
+	</div>
+	<div class="row vertical-spacing" ng-if="display.showCreateBlog">
+		<div class="twelve cell">
+			<div class="row">
+				<input type="text" class="twelve cell" ng-model="newPost.title" ng-placeholder="title" />
+			</div>
+			<div class="row">
+				<html-editor ng-model="newPost.content"></html-editor>
+			</div>
+			<div class="row">
+				<button ng-click="addPost()" class="right-magnet"><i18n>publish</i18n></button>
+				<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="display.showCreateBlog=false"/>
+			</div>
+		</div>
+
 	</div>
 </resource-right>
 
 <div ng-repeat="post in blog.posts.all" class="articles-sniplet">
-	<div class="row">
+	<div class="row" ng-if="!post.edit">
 		<div class="cell">
 			<h2 class="upper-title">
 				<span class="warning-text-badge" ng-if="post.state === 'DRAFT'"><i18n>draft</i18n></span>
@@ -22,10 +37,14 @@
 	</div>
 	<div class="row" ng-if="post.edit">
 		<div class="row">
+			<input type="text" class="twelve cell" ng-model="post.title" />
+		</div>
+		<div class="row">
 			<html-editor ng-model="post.content"></html-editor>
 		</div>
 		<div class="row">
 			<input type="button" class="right-magnet cell" ng-click="saveEdit(post)" i18n-value="save" />
+			<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="post.edit=false"/>
 		</div>
 	</div>
 	<div class="row" ng-if="!post.edit">

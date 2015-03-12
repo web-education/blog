@@ -16,16 +16,16 @@
 		<h2 ng-click="existingBlog = true;"><i18n>Choisir un blog existant</i18n></h2>
 		<div class="toggle">
 			<div class="content">
-				<input type="search" ng-model="searchText" />
+				<input type="search" ng-model="searchBlog" />
 				<div class="row">
 					<article class="found-resources">
-						<div ng-if="searchText === ''" class="reduce-block-six">
+						<div ng-if="searchBlog === ''" class="reduce-block-six">
 							<div class="row">
 								Recherchez le blog dans lequel vous postez les articles que vous souhaitez afficher.
 							</div>
 						</div>
 						<ul class="illustrated-list">
-							<li ng-repeat="blog in blogs.all | filter:searchText" ng-click="setSnipletSource(blog)">
+							<li ng-repeat="blog in blogs.all | filter:{ title: searchBlog }" ng-click="setSnipletSource(blog)">
 								<img skin-src="[[blog.icon]]" class="illustration" />
 								<a class="name">[[blog.title]]</a>
 								<em class="owner">[[blog.ownerName]]</em>
