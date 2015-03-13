@@ -13,7 +13,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 	@Override
 	public void exportResources(String externalId, String userId, JsonArray groups, String exportPath,
-			String locale) {
+			String locale, String host, final Handler<Boolean> handler) {
 
 	}
 
