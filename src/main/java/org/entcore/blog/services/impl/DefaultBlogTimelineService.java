@@ -119,6 +119,54 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	}
 
 	@Override
+	public void notifySubmitPost(final HttpServerRequest request, final String blogId, final String postId,
+			final UserInfos user, final String resourceUri) {
+		if (resourceUri != null && user != null && blogId != null && request != null) {
+			QueryBuilder blogQuery = QueryBuilder.start("_id").is(blogId);
+			JsonObject blogKeys = new JsonObject().putNumber("author", 1);
+			mongo.findOne("blogs", MongoQueryBuilder.build(blogQuery), blogKeys, new Handler<Message<JsonObject>>() {
+				@Override
+				public void handle(final Message<JsonObject> event) {
+					if ("ok".equals(event.body().getString("status"))) {
+						final String authorId = event.body()
+								.getObject("result", new JsonObject())
+								.getObject("author", new JsonObject())
+								.getString("userId");
+
+						QueryBuilder query = QueryBuilder.start("_id").is(postId);
+						JsonObject keys = new JsonObject().putNumber("title", 1).putNumber("blog", 1);
+						JsonArray fetch = new JsonArray().addString("blog");
+						findRecipiants("posts", query, keys, fetch, "org-entcore-blog-controllers-PostController|update", user, new Handler<Map<String, Object>>() {
+							@Override
+							public void handle(Map<String, Object> event) {
+								if (event != null) {
+									List<String> recipients = (List<String>) event.get("recipients");
+									recipients.add(authorId);
+									JsonObject blog = (JsonObject) event.get("blog");
+									if (recipients != null) {
+										JsonObject p = new JsonObject()
+												.putString("uri", container.config().getString("userbook-host") +
+														"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+												.putString("username", user.getUsername())
+												.putString("blogTitle", blog.getObject("blog",
+														new JsonObject()).getString("title"))
+												.putString("blogUri", resourceUri)
+												.putString("postTitle", blog.getString("title"))
+												.putString("postUri", resourceUri + "&post=" + postId);
+										notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
+												NOTIFICATION_TYPE + "_POST_SUBMIT", recipients,
+												blogId, postId, "notification/notify-submit-post.html", p);
+									}
+								}
+							}
+						});
+					}
+				}
+			});
+		}
+	}
+
+	@Override
 	public void notifyPublishPost(final HttpServerRequest request, final String blogId, final String postId,
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
@@ -184,7 +232,11 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	}
 
 	private void findRecipiants(String collection, QueryBuilder query, JsonObject keys,
-			final JsonArray fetch, final UserInfos user,
+			final JsonArray fetch, final UserInfos user, final Handler<Map<String, Object>> handler) {
+		findRecipiants(collection, query, keys, fetch, null, user, handler);
+	}
+	private void findRecipiants(String collection, QueryBuilder query, JsonObject keys,
+			final JsonArray fetch, final String filterRights, final UserInfos user,
 				final Handler<Map<String, Object>> handler) {
 		mongo.findOne(collection, MongoQueryBuilder.build(query), keys, fetch, new Handler<Message<JsonObject>>() {
 			@Override
@@ -198,7 +250,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						shared = blog.getObject("blog", new JsonObject()).getArray("shared");
 					}
 					if (shared != null) {
-						List<String> shareIds = getSharedIds(shared);
+						List<String> shareIds = getSharedIds(shared, filterRights);
 						if (!shareIds.isEmpty()) {
 							Map<String, Object> params = new HashMap<>();
 							params.put("userId", user.getUserId());
@@ -236,11 +288,18 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 		});
 	}
 
-	private List<String> getSharedIds(JsonArray shared) {
+	private List<String> getSharedIds(JsonArray shared){
+		return getSharedIds(shared, null);
+	}
+	private List<String> getSharedIds(JsonArray shared, String filterRights) {
 		List<String> shareIds = new ArrayList<>();
 		for (Object o : shared) {
 			if (!(o instanceof JsonObject)) continue;
 			JsonObject userShared = (JsonObject) o;
+
+			if(filterRights != null && !userShared.getBoolean(filterRights, false))
+				continue;
+
 			String userOrGroupId = userShared.getString("groupId",
 					userShared.getString("userId"));
 			if (userOrGroupId != null && !userOrGroupId.trim().isEmpty()) {
