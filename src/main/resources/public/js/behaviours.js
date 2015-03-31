@@ -225,9 +225,6 @@ Behaviours.register('blog', {
 						this.blog.description = '';
 					}
 					this.blog.save(function(){
-						//sharing rights copy
-						this.snipletResource.synchronizeRights();
-
 						//filler post publication
 						var post = {
 							state: 'SUBMITTED',
@@ -240,6 +237,8 @@ Behaviours.register('blog', {
 						this.blog.posts.addDraft(post, function(post){
 							post.publish(function(){
 								this.setSnipletSource(this.blog);
+								//sharing rights copy
+								this.snipletResource.synchronizeRights();
 							}.bind(this));
 						}.bind(this));
 					}.bind(this));
