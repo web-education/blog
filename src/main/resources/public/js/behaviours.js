@@ -101,7 +101,7 @@ Behaviours.register('blog', {
 					}
 				}.bind(this))
 				.e401(function(){
-					this.submit();
+					this.submit(callback);
 				}.bind(this));
 			};
 
@@ -160,6 +160,9 @@ Behaviours.register('blog', {
 			},
 			editPost: {
 				right: 'org-entcore-blog-controllers-PostController|update'
+			},
+			publishPost: {
+				right: 'org-entcore-blog-controllers-PostController|publish'
 			}
 		},
 		workflow: {
@@ -270,6 +273,11 @@ Behaviours.register('blog', {
 					if(source._id){
 						return [source._id];
 					}
+				},
+				publish: function(post){
+					post.publish(function(){
+						this.blog.posts.sync();
+					}.bind(this));
 				}
 			}
 		}

@@ -32,11 +32,24 @@
 			</em>
 		</div>
 		<div class="right-magnet cell">
+			<button ng-if="post.state === 'DRAFT'" ng-click="publish(post)" class="cell">
+				<i18n ng-if="blog.myRights.publishPost">publish</i18n>
+				<i18n ng-if="!blog.myRights.publishPost">blog.submitPost</i18n>
+			</button>
+			<resource-right class="cell" name="publishPost" resource="blog">
+				<button ng-click="publish(post)" ng-if="post.state === 'SUBMITTED'">
+					<i18n>publish</i18n>
+				</button>
+			</resource-right>
 			<resource-right class="cell" name="editPost" resource="blog">
-				<input type="button" i18n-value="edit" ng-click="post.edit = true;" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId" />
+				<button type="button" ng-click="post.edit = true;" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
+					<i18n>edit</i18n>
+				</button>
 			</resource-right>
 			<resource-right class="cell" name="removePost" resource="blog">
-				<input type="button" i18n-value="remove" ng-click="removePost(post)" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId"/>
+				<button type="button" ng-click="removePost(post)" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
+					<i18n>remove</i18n>
+				</button>
 			</resource-right>
 		</div>
 	</div>
