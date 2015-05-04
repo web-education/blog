@@ -1,0 +1,94 @@
+<div class="row">
+	<h1>
+		<i class="blog">
+			<side-panel>
+				<nav class="vertical">
+					<ul>
+						<li ng-repeat="blog in blogs.all">
+							<a ng-href="#/view/[[blog._id]]">[[blog.title]]</a>
+						</li>
+					</ul>
+				</nav>
+			</side-panel>
+		</i>
+		<a href="#/list-blogs"><i18n>blog.title</i18n></a> : <a href="#/view/[[blog._id]]">[[blog.title]]</a>
+	</h1>
+</div>
+
+<div class="row rigid-grid">
+	<div class="three cell">
+		<nav class="vertical">
+			<div class="twelve cell height-seven">
+				<div class="illustration">
+					<img skin-src="[[blog.icon]]" />
+					<input type="checkbox" ng-model="blog.selected" authorize="share" resource="blog" />
+				</div>
+			</div>
+
+			<div class="row">
+				Par <a ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
+			</div>
+			<hr class="row" />
+			<div class="row">
+				<a class="button" target="_blank" ng-href="/blog/print/blog#/print/[[blog._id]]">
+					<i18n>blog.print</i18n>
+				</a>
+			</div>
+		</nav>
+		<ul stick-to-top class="hash-magnet floating-navigation">
+			<li ng-repeat="post in blog.posts.all" ng-click="redirect('/view/' + blog._id + '/' + post._id)">
+				<a>
+					[[post.title]]
+				</a>
+			</li>
+		</ul>
+	</div>
+	<div class="margin-three">
+		<div class="twelve cell">
+			<div class="row" authorize="createPost" resource="blog">
+				<container template="filters" class="ten cell"></container>
+				<a ng-href="#/new-article/[[blog._id]]" class="button cell right-magnet" authorize="createPost" resource="blog">
+					<i18n>blog.create.post</i18n>
+				</a>
+			</div>
+			<div class="row">
+				<container template="create-post"></container>
+			</div>
+			<div class="hash-magnet twelve cell" ng-repeat="post in blog.posts.all | filter:applyFilters" id="/view/[[blog._id]]/[[post._id]]">
+				<article ng-if="post.editing">
+					<container template="edit-post"></container>
+				</article>
+				<article class="twelve cell" ng-if="!post.editing">
+					<container template="read-post"></container>
+
+				</article>
+			</div>
+			<div class="row" ng-if="blog.posts.length() === 0">
+				<article>
+					Ce blog ne contient pas encore de billet.
+					<br /><a authorize="createPost" resource="blog" ng-href="#/new-article/[[blog._id]]">
+						Vous pouvez commencer à écrire en cliquant sur ce lien.
+					</a>
+				</article>
+			</div>
+		</div>
+	</div>
+</div>
+
+<lightbox show="display.showShare" on-close="display.showShare = false">
+	<container template="share"></container>
+</lightbox>
+
+<div class="toggle-buttons" ng-class="{ hide: !blog.selected }">
+	<div class="row toggle">
+		<a class="button" ng-href="#/edit/[[blog._id]]"  authorize="editBlog" resource="blog">
+			<i18n>properties</i18n>
+		</a>
+		<button ng-click="shareBlog()" authorize="share" resource="blog">
+			<i18n>share</i18n>
+		</button>
+		<button ng-click="removeBlog()" authorize="removeBlog" resource="blog">
+			<i18n>remove</i18n>
+		</button>
+	</div>
+</div>

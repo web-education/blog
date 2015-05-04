@@ -1,0 +1,53 @@
+<h2>
+	<span ng-if="post.state !== 'PUBLISHED'" class="warning-text">[[lang.translate(post.state.toLowerCase())]]</span>
+	[[post.title]]
+	<strong class="subtitle">Par <a ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a> le [[post.modified.format('dddd DD MMMM YYYY')]]</strong>
+</h2>
+<div class="row" bind-html="post.content"></div>
+
+<div class="row">
+	<a ng-click="post.showComments = !post.showComments;" class="cell" ng-if="post.state === 'PUBLISHED'">
+		Commentaires ([[post.comments.length()]])
+	</a>
+	<plus class="right-magnet">
+		<button authorize="editPost" resource="blog" ng-click="post.editing = true"><i18n>edit</i18n></button>
+		<button ng-if="blog['publish-type'] === 'IMMEDIATE'" authorize="manager" resource="blog"><i18n>unpublish</i18n></button>
+		<button authorize="removePost" resource="blog" ng-click="post.showConfirmRemove = true"><i18n>remove</i18n></button>
+	</plus>
+	<lightbox show="post.showConfirmRemove" on-close="post.showConfirmRemove = false">
+		<h2><i18n>remove</i18n></h2>
+		<p>Voulez-vous vraiment supprimer ce billet ?</p>
+		<div class="row">
+			<button type="button" class="right-magnet cancel"><i18n>cancel</i18n></button>
+			<button class="right-magnet" ng-click="blog.posts.remove(post); post.showConfirmRemove = false;"><i18n>remove</i18n></button>
+		</div>
+	</lightbox>
+	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED'">
+		<i18n>comment</i18n>
+	</button>
+	<button ng-click="post.publish()" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && blog.myRights.publishPost">
+		<i18n>publish</i18n>
+	</button>
+</div>
+<div class="row" ng-if="post.showComments">
+	<div class="row">
+		<textarea ng-model="comment.comment"></textarea>
+		<button class="right-magnet" ng-click="postComment(comment, post)">
+			<i18n>save</i18n>
+		</button>
+	</div>
+
+	<article class="comment" ng-repeat="comment in post.comments.all">
+		<div class="row">
+			<div class="cell">
+				<em><a href="/userbook#/user-view/[[comment.author.userId]]">[[comment.author.username]]</a>, [[comment.created.fromNow()]]</em>
+			</div>
+			<div class="cell right-magnet" ng-if="comment.author.userId === me.userId || blog.myRights.removeComment">
+				<a ng-click="post.comments.remove(comment)"><i18n>remove</i18n></a>
+			</div>
+		</div>
+		<div class="row">
+			[[comment.comment]]
+		</div>
+	</article>
+</div>

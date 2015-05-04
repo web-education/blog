@@ -1,13 +1,15 @@
+<form data-ng-submit="post.save(); post.editing = false;">
+	<input type="text" ng-model="post.title" class="twelve cell" required />
+	<html-editor ng-model="post.content"></html-editor>
 
-
-<form data-ng-submit="updatePost()">
-	<input type="text" data-ng-model="currentPost.title" class="twelve cell" required />
-	<html-editor
-		file-upload-path="'/workspace/document?application=blog-' + currentBlog._id + '&protected=true'"
-		ng-model="currentPost.content" notify="notify"></html-editor>
-
-  <input type="button" class="right-magnet" i18n-value="[[getPublishButtonI18n()]]" ng-click="saveAndSubmit(currentPost)" />
-  <input type="submit" class="right-magnet" ng-if="currentPost.state === 'DRAFT'"  i18n-value="blog.save" />
-  <input type="button" class="right-magnet cancel" data-ng-click="currentBlogView()" i18n-value="cancel" />
+	<button class="right-magnet" ng-click="post.save()">
+		<i18n>publish</i18n>
+	</button>
+	<button class="right-magnet" ng-click="post.save()">
+		<i18n>save</i18n>
+	</button>
+	<button class="right-magnet cancel" ng-click="post.editing = false;">
+		<i18n>cancel</i18n>
+	</button>
 </form>
 <div class="row"><hr /></div>

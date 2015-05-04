@@ -12,6 +12,8 @@ import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
 import fr.wseduc.webutils.http.BaseController;
+import fr.wseduc.webutils.request.RequestUtils;
+
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
@@ -57,21 +59,18 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-			@Override
-			public void handle(final UserInfos user) {
-				if (user != null) {
-					request.expectMultiPart(true);
-					request.endHandler(new VoidHandler() {
-						@Override
-						protected void handle() {
-							post.create(blogId, Utils.jsonFromMultimap(request.formAttributes()), user,
-									defaultResponseHandler(request));
+		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+			public void handle(final JsonObject data) {
+				UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+					@Override
+					public void handle(final UserInfos user) {
+						if (user != null) {
+							post.create(blogId, data, user, defaultResponseHandler(request));
+						} else {
+							unauthorized(request);
 						}
-					});
-				} else {
-					unauthorized(request);
-				}
+					}
+				});
 			}
 		});
 	}
@@ -84,12 +83,9 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		request.expectMultiPart(true);
-		request.endHandler(new VoidHandler() {
-			@Override
-			protected void handle() {
-				post.update(postId, Utils.jsonFromMultimap(request.formAttributes()),
-						defaultResponseHandler(request));
+		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+			public void handle(final JsonObject data) {
+				post.update(postId, data, defaultResponseHandler(request));
 			}
 		});
 	}
@@ -243,10 +239,8 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		request.expectMultiPart(true);
-		request.endHandler(new VoidHandler() {
-			@Override
-			protected void handle() {
+		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+			public void handle(final JsonObject data) {
 				UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
 					@Override
 					public void handle(final UserInfos user) {
@@ -264,7 +258,7 @@ public class PostController extends BaseController {
 									}
 								}
 							};
-							post.addComment(blogId, postId, request.formAttributes().get("comment"), user, notifyHandler);
+							post.addComment(blogId, postId, data.getString("comment"), user, notifyHandler);
 						} else {
 							unauthorized(request);
 						}
@@ -284,21 +278,16 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		request.expectMultiPart(true);
-		request.endHandler(new VoidHandler() {
+
+		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
 			@Override
-			protected void handle() {
-				UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-					@Override
-					public void handle(final UserInfos user) {
-						if (user != null) {
-							post.deleteComment(blogId, commentId, user,
-									defaultResponseHandler(request));
-						} else {
-							unauthorized(request);
-						}
-					}
-				});
+			public void handle(final UserInfos user) {
+				if (user != null) {
+					post.deleteComment(blogId, commentId, user,
+							defaultResponseHandler(request));
+				} else {
+					unauthorized(request);
+				}
 			}
 		});
 	}
@@ -313,21 +302,16 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		request.expectMultiPart(true);
-		request.endHandler(new VoidHandler() {
+
+		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
 			@Override
-			protected void handle() {
-				UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-					@Override
-					public void handle(final UserInfos user) {
-						if (user != null) {
-							post.listComment(blogId, postId, user,
-									arrayResponseHandler(request));
-						} else {
-							unauthorized(request);
-						}
-					}
-				});
+			public void handle(final UserInfos user) {
+				if (user != null) {
+					post.listComment(blogId, postId, user,
+							arrayResponseHandler(request));
+				} else {
+					unauthorized(request);
+				}
 			}
 		});
 	}

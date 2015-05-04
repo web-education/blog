@@ -1,15 +1,20 @@
 <article class="twelve cell">
 	<section class="row">
 			<form data-ng-submit="savePost()">
-				<input type="text" data-ng-model="create.post.title" i18n-placeholder="post.title.placeholder" required class="twelve cell" />
-				<html-editor
-						ng-model="create.post.content"
-						file-upload-path="'/workspace/document?application=blog-' + currentBlog.id + '&protected=true'"
-						notify="notify"></html-editor>
-				<input type="submit" class="right-magnet" i18n-value="[[getPublishButtonI18n()]]" />
-				<input type="button" class="right-magnet" i18n-value="blog.save" ng-click="saveDraft()" />
-				<input type="button" class="right-magnet cancel" data-ng-click="currentBlogView()" i18n-value="cancel" />
+				<input type="text" data-ng-model="post.title" i18n-placeholder="post.title.placeholder" required class="twelve cell" />
+				<html-editor ng-model="post.content"></html-editor>
+				<button class="right-magnet" ng-if="!blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'">
+					<i18n>submit</i18n>
+				</button>
+				<button class="right-magnet" ng-if="blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE'">
+					<i18n>publish</i18n>
+				</button>
+				<button type="button" class="right-magnet" ng-click="saveDraft()">
+					<i18n>blog.save</i18n>
+				</button>
+				<button type="button" class="right-magnet cancel" ng-click="template.close('create-post')">
+					<i18n>cancel</i18n>
+				</button>
 			</form>
-			<div class="clear"></div>
 	</section>
 </article>

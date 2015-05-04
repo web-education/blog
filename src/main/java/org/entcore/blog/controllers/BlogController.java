@@ -3,12 +3,13 @@ package org.entcore.blog.controllers;
 import static org.entcore.common.http.response.DefaultResponseHandler.*;
 import static org.entcore.common.user.UserUtils.*;
 import fr.wseduc.mongodb.MongoDb;
-
 import fr.wseduc.rs.Delete;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
 import fr.wseduc.webutils.http.BaseController;
+import fr.wseduc.webutils.request.RequestUtils;
+
 import org.entcore.blog.Blog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
@@ -77,21 +78,18 @@ public class BlogController extends BaseController {
 	@Post("")
 	@SecuredAction("blog.create")
 	public void create(final HttpServerRequest request) {
-		getUserInfos(eb, request, new Handler<UserInfos>() {
-			@Override
-			public void handle(final UserInfos user) {
-				if (user != null) {
-					request.expectMultiPart(true);
-					request.endHandler(new VoidHandler() {
-						@Override
-						protected void handle() {
-							blog.create(Utils.jsonFromMultimap(request.formAttributes()), user,
-									defaultResponseHandler(request));
+		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+			public void handle(final JsonObject data) {
+				getUserInfos(eb, request, new Handler<UserInfos>() {
+					@Override
+					public void handle(final UserInfos user) {
+						if (user != null) {
+							blog.create(data, user, defaultResponseHandler(request));
+						} else {
+							unauthorized(request);
 						}
-					});
-				} else {
-					unauthorized(request);
-				}
+					}
+				});
 			}
 		});
 	}
@@ -104,23 +102,21 @@ public class BlogController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		request.expectMultiPart(true);
-		request.endHandler(new VoidHandler() {
-			@Override
-			protected void handle() {
-				blog.update(blogId, Utils.jsonFromMultimap(request.formAttributes()),
-						new Handler<Either<String, JsonObject>>() {
-							@Override
-							public void handle(Either<String, JsonObject> event) {
-								if (event.isRight()) {
-									renderJson(request, event.right().getValue());
-								} else {
-									JsonObject error = new JsonObject()
-											.putString("error", event.left().getValue());
-									renderJson(request, error, 400);
-								}
+		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+			public void handle(JsonObject data) {
+				blog.update(blogId, data,
+					new Handler<Either<String, JsonObject>>() {
+						@Override
+						public void handle(Either<String, JsonObject> event) {
+							if (event.isRight()) {
+								renderJson(request, event.right().getValue());
+							} else {
+								JsonObject error = new JsonObject()
+										.putString("error", event.left().getValue());
+								renderJson(request, error, 400);
 							}
-						});
+						}
+					});
 			}
 		});
 	}
@@ -137,6 +133,7 @@ public class BlogController extends BaseController {
 			badRequest(request);
 			return;
 		}
+
 		blog.delete(blogId, new Handler<Either<String, JsonObject>>() {
 			@Override
 			public void handle(Either<String, JsonObject> event) {

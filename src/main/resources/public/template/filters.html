@@ -1,20 +1,29 @@
-<filters ng-if="currentBlog.myRights.post.edit">
-	<li ng-class="{ selected: displayOptions.showPosts }">
-		<label>
-			<i class="published type" tooltip="filters.published"></i>
-			<input type="checkbox" ng-model="displayOptions.showPosts" />
-		</label>
-	</li>
-	<li ng-class="{ selected: displayOptions.showDrafts }">
-		<label>
-			<i class="draft type" tooltip="filters.drafts"></i>
-			<input type="checkbox" ng-model="displayOptions.showDrafts" />
-		</label>
-	</li>
-	<li ng-class="{ selected: displayOptions.showSubmitted }">
-		<label>
-			<i class="submitted type" tooltip="filters.submitted"></i>
-			<input type="checkbox" ng-model="displayOptions.showSubmitted" />
-		</label>
-	</li>
-</filters>
+<div class="checkbox-filters">
+	<div class="cell">
+		<i18n>posts.filter</i18n>
+	</div>
+	<div class="cell checkbox-filters">
+		<ul>
+			<li>
+				<label class="checkbox cell"><input type="checkbox" ng-model="display.filters.all" ng-change="switchAll()" />
+					<i18n>filters.all</i18n>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox cell"><input type="checkbox" ng-model="display.filters.published" ng-change="checkAll()" />
+					<i18n>filters.published</i18n>
+				</label>
+			</li>
+			<li>
+				<label class="checkbox cell"><input type="checkbox" ng-model="display.filters.draft" ng-change="checkAll()" />
+					<i18n>filters.drafts</i18n>
+				</label>
+			</li>
+			<li ng-if="blog['publish-type'] === 'RESTRAINT'">
+				<label class="checkbox cell"><input type="checkbox" ng-model="display.filters.submitted" ng-change="checkAll()" />
+					<i18n>filters.submitted</i18n>
+				</label>
+			</li>
+		</ul>
+	</div>
+</div>

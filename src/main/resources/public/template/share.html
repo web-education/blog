@@ -1,14 +1,14 @@
-<share-panel resources="sharedResources" app-prefix="'blog'"></share-panel>
-	<div class="share">
-		<h3 translate key="share.publish.title"></h3>
-		<div class="row sharing-option">
-			<label>
-				<input type="radio" name="publish-type" ng-model="currentBlog['publish-type']" ng-change="updatePublishType()" value="IMMEDIATE" />
-				<span translate key="share.publish.immediate"></span>
-			</label>
-			<label>
-				<input type="radio" name="publish-type" ng-model="currentBlog['publish-type']" ng-change="updatePublishType()" value="RESTRAINT" />
-				<span translate key="share.publish.differed"></span>
-			</label>
-		</div>
+<share-panel resources="blogs.selection()" app-prefix="'blog'"></share-panel>
+<div class="share">
+	<h3><i18n>share.publish.title</i18n></h3>
+	<div class="row sharing-option">
+		<label>
+			<input type="radio" name="publish-type" ng-model="display.publishType" ng-change="updatePublishType()" value="IMMEDIATE" />
+			<i18n>share.publish.immediate</i18n>
+		</label>
+		<label>
+			<input type="radio" name="publish-type" ng-model="display.publishType" ng-change="updatePublishType()" value="RESTRAINT" />
+			<i18n>share.publish.differed</i18n>
+		</label>
 	</div>
+</div>

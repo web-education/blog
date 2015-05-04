@@ -1,18 +1,42 @@
-console.log('blog behaviours file')
+console.log('blog behaviours file');
 
 Behaviours.register('blog', {
 	model: {
-		Post: function(){
-
+		Comment: function(data){
+			if(data && data.created){
+				this.created = moment(this.created.$date);
+			}
+		},
+		Post: function(data){
+			var that = this;
+			if(data){
+				this.created = moment(data.created.$date);
+				this.modified = moment(data.modified.$date);
+			}
+			this.collection(Behaviours.applicationsBehaviours.blog.model.Comment, {
+				sync: '/blog/comments/:blogId/:_id',
+				remove: function(comment){
+					http().delete('/blog/comment/' + that.blogId + '/' + that._id + '/' + comment.id);
+					Collection.prototype.remove.call(this, comment);
+				}
+			});
 		},
 		Blog: function(data){
 			var that = this;
 			if(data && data._id){
 				this._id = data._id;
-				http().get('/blog/' + data._id).done(function(blog) {
-					this.owner = blog.author;
-					this.updateData(blog);
-				}.bind(this));
+				this.owner = data.author;
+				this.shortenedTitle = data.title || '';
+				if(this.shortenedTitle.length > 40){
+					this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
+				}
+				if(data.thumbnail){
+					this.icon = data.thumbnail + '?thumbnail=290x290';
+				}
+				else{
+					this.icon = '/img/illustrations/blog.png'
+				}
+				this.updateData(data);
 			}
 
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
@@ -20,9 +44,9 @@ Behaviours.register('blog', {
 					var all = [];
 					http().get('/blog/post/list/all/' + that._id).done(function(posts){
 						all = all.concat(posts);
-						http().get('/blog/post/list/all/' + that._id, { state: 'DRAFT'}).done(function(posts){
+						http().get('/blog/post/list/all/' + that._id, { state: 'SUBMITTED'}).done(function(posts){
 							all = all.concat(posts);
-							http().get('/blog/post/list/all/' + that._id, { state: 'SUBMITTED'}).done(function(posts){
+							http().get('/blog/post/list/all/' + that._id, { state: 'DRAFT'}).done(function(posts){
 								all = all.concat(posts);
 								all = all.map(function(item){
 									item.blogId = data._id;
@@ -34,7 +58,7 @@ Behaviours.register('blog', {
 					}.bind(this));
 				},
 				addDraft: function(post, callback){
-					http().post('/blog/post/' + that._id, post).done(function(result){
+					http().postJson('/blog/post/' + that._id, post).done(function(result){
 						post._id = result._id;
 						this.push(post);
 						var newPost = this.last();
@@ -44,60 +68,88 @@ Behaviours.register('blog', {
 						}
 					}.bind(this));
 				},
+				remove: function(post){
+					post.remove();
+					Collection.prototype.remove.call(this, post);
+				},
 				behaviours: 'blog'
 			});
+
+			if(this._id){
+				this.posts.sync();
+			}
 		},
 		App: function(){
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Blog, {
 				sync: function(cb){
 					http().get('/blog/list/all').done(function(blogs) {
-						blogs = blogs.map(function(item){
-							if(item.thumbnail){
-								item.icon = item.thumbnail + '?thumbnail=48x48';
-							}
-							else{
-								item.icon = '/img/illustrations/blog.png'
-							}
-							return item;
-						});
 						this.load(blogs);
 						if(typeof cb === "function"){
 							cb();
 						}
 					}.bind(this));
 				},
+				remove: function(blog){
+					blog.remove();
+					Collection.prototype.remove.call(this, blog);
+				},
 				behaviours: 'blog'
 			});
 		},
 		register: function(){
-			this.Blog.prototype.save = function(cb){
-				http()
-					.post('/blog', {
-						title: this.title,
-						thumbnail: this.thumbnail,
-						'comment-type': this['comment-type'],
-						description: this.description
-					})
+			this.Blog.prototype.toJSON = function(){
+				return {
+					title: this.title,
+					thumbnail: this.thumbnail || '',
+					'comment-type': this['comment-type'] || 'IMMEDIATE',
+					'publish-type': this['publish-type'] || 'RESTRAINT',
+					description: this.description || ''
+				};
+			};
+
+			this.Blog.prototype.create = function(fn){
+				http().postJson('/blog', this)
 					.done(function(newBlog) {
 						this._id = newBlog._id;
-						if(typeof cb === 'function'){
-							cb();
+						if(typeof fn === 'function'){
+							fn();
 						}
 					}.bind(this));
 			};
 
+			this.Blog.prototype.saveModifications = function(fn){
+				http().putJson('/blog/' + this._id, this).done(function(){
+					if(typeof fn === 'function'){
+						fn();
+					}
+				});
+			};
+
+			this.Blog.prototype.save = function(fn){
+				if(this._id){
+					this.saveModifications(fn);
+				}
+				else{
+					this.create(fn);
+				}
+			};
+
 			this.Post.prototype.submit = function(callback){
-				http().put('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
+				this.state = 'SUBMITTED';
+				http().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
 						callback();
+						this.trigger('change');
 					}
 				}.bind(this));
 			};
 
 			this.Post.prototype.publish = function(callback){
-				http().put('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
+				this.state = 'PUBLISHED';
+				http().putJson('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
 						callback();
+						this.trigger('change');
 					}
 				}.bind(this))
 				.e401(function(){
@@ -105,21 +157,28 @@ Behaviours.register('blog', {
 				}.bind(this));
 			};
 
-			this.Post.prototype.create = function(callback, blog){
+			this.Post.prototype.create = function(callback, blog, state){
 				this.blogId = blog._id;
-				http().post('/blog/post/' + blog._id, {
+				http().postJson('/blog/post/' + blog._id, {
 					content: this.content,
 					title: this.title
 				})
 				.done(function(data){
 					this._id = data._id;
 					blog.posts.sync();
-					this.publish(callback);
-				}.bind(this))
+					if(state !== 'DRAFT'){
+						this.publish(callback);
+					}
+					else{
+						if(typeof  callback === 'function'){
+							callback();
+						}
+					}
+				}.bind(this));
 			};
 
 			this.Post.prototype.saveModifications = function(callback){
-				http().put('/blog/post/' + this.blogId + '/' + this._id, {
+				http().putJson('/blog/post/' + this.blogId + '/' + this._id, {
 					content: this.content,
 					title: this.title
 				})
@@ -128,12 +187,12 @@ Behaviours.register('blog', {
 				}.bind(this));
 			};
 
-			this.Post.prototype.save = function(callback, blog){
+			this.Post.prototype.save = function(callback, blog, state){
 				if(this._id){
 					this.saveModifications(callback);
 				}
 				else{
-					this.create(callback, blog);
+					this.create(callback, blog, state);
 				}
 			};
 
@@ -144,6 +203,33 @@ Behaviours.register('blog', {
 							callback();
 						}
 					});
+			};
+
+			this.Post.prototype.comment = function(comment){
+				http().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
+					this.comments.sync();
+				}.bind(this))
+			};
+
+			this.Blog.prototype.open = function(){
+				http().get('/blog/' + this._id).done(function(blog) {
+					this.owner = blog.author;
+					this.shortenedTitle = blog.title || '';
+					if(this.shortenedTitle.length > 40){
+						this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
+					}
+					this.updateData(blog);
+				}.bind(this));
+			};
+
+			this.Blog.prototype.remove = function(){
+				http().delete('/blog/' + this._id);
+			};
+
+			this.Comment.prototype.toJSON = function(){
+				return {
+					comment: this.comment
+				}
 			};
 
 			model.makeModels(this);
@@ -161,8 +247,23 @@ Behaviours.register('blog', {
 			editPost: {
 				right: 'org-entcore-blog-controllers-PostController|update'
 			},
+			createPost: {
+				right: 'org-entcore-blog-controllers-PostController|create'
+			},
 			publishPost: {
 				right: 'org-entcore-blog-controllers-PostController|publish'
+			},
+			share: {
+				right: 'org-entcore-blog-controllers-BlogController|shareJson'
+			},
+			removeBlog: {
+				right: 'org-entcore-blog-controllers-BlogController|delete'
+			},
+			editBlog: {
+				right: 'org-entcore-blog-controllers-BlogController|update'
+			},
+			removeComment: {
+				right: 'org-entcore-blog-controllers-BlogController|delete'
 			}
 		},
 		workflow: {
@@ -204,6 +305,7 @@ Behaviours.register('blog', {
 					Behaviours.applicationsBehaviours.blog.model.register();
 					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
 					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
+					blog.open();
 					blog.on('posts.sync, change', function(){
 						this.blog = blog;
 						this.blog.behaviours('blog');

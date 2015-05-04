@@ -1,29 +1,52 @@
-<nav class="vertical stamps">
-	<a data-ng-click="showCreateBlog()" workflow="blog.create" class="cell classic-link">
+<div class="row">
+	<h1><a href="#/list-blogs"><i class="blog"></i><i18n>blog.title</i18n></a></h1>
+</div>
+<div class="row">
+	<div class="four cell">
+		<input type="search" class="twelve cell" ng-model="display.search" i18n-placeholder="search" />
+	</div>
+	<a class="button right-magnet" ng-href="#/edit/new" workflow="blog.create" class="right-magnet cell">
 		<i18n>blog.create.blog</i18n>
 	</a>
-	<hr class="row" />
-	<div data-ng-repeat="blog in blogs">
-		<article class="height-four twelve clip cell" data-ng-class="{
-							'lower-line': $index !== 0,
-							 'selected':isSelected(blog._id)
-							 }">
-			<div class="four cell absolute" ng-click="displayBlog(blog)">
-				<img skin-src="[[blogThumbnail(blog)]]" style="height: 100%" />
+</div>
+<hr class="row" />
+<div class="cards-list rigid-grid">
+	<div class="card four" ng-repeat="blog in blogs.all | filter:{ title: display.search }" ng-click="redirect('/view/[[blog._id]]')">
+		<div class="row">
+			<div class="illustration">
+				<img skin-src="[[blog.icon]]" class="absolute" />
+				<input type="checkbox" ng-model="blog.selected" ng-click="$event.stopPropagation()" authorize="share" resource="blog" />
 			</div>
-			<div class="eight cell absolute right-magnet">
-				<div class="row">
-					<h3 ng-click="displayBlog(blog)">[[blog.shortened]]</h3>
-					<i18n>blog.by</i18n> [[blog.author.username]]
-				</div>
-				<div class="row bottom-locked">
-
-					<a data-ng-click="showEditBlog(blog)" ng-if="blog.myRights.blog.edit" class="small-text twelve cell">
-						<i18n>blog.edit.title</i18n>
-					</a>
-				</div>
+			<div>
+				<h3 ng-click="displayBlog(blog)"><a href="#/view/[[blog._id]]">[[blog.shortenedTitle]]</a></h3>
+				<strong class="row"><i18n>blog.by</i18n> [[blog.author.username]]</strong>
 			</div>
-		</article>
-
+		</div>
+		<div class="row height-two">
+			<div class="absolute">
+				<span class="row" ng-repeat="post in blog.posts.all|limitTo:2">
+					[[post.title]], [[post.created.fromNow()]]
+				</span>
+			</div>
+		</div>
 	</div>
-</nav>
+</div>
+
+
+<lightbox show="display.showShare" on-close="display.showShare = false">
+	<container template="share"></container>
+</lightbox>
+
+<div class="toggle-buttons" ng-class="{ hide: blogs.selection().length < 1 }">
+	<div class="row toggle">
+		<a class="button" ng-href="#/edit/[[blogs.selection()[0]._id]]" ng-if="blogs.selection().length === 1" authorize="editBlog" resource="blogs.selection()">
+			<i18n>properties</i18n>
+		</a>
+		<button ng-click="shareBlog()" authorize="share" resource="blogs.selection()">
+			<i18n>share</i18n>
+		</button>
+		<button ng-click="blogs.removeSelection()" authorize="removeBlog" resource="blogs.selection()">
+			<i18n>remove</i18n>
+		</button>
+	</div>
+</div>

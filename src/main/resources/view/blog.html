@@ -6,44 +6,14 @@
 		<script src="{{#infra}}js/loader.js{{/infra}}" type="text/javascript" id="context"></script>
 		<script src="{{#static}}js/model.js{{/static}}" type="text/javascript"></script>
 		<script src="{{#static}}js/controller.js{{/static}}" type="text/javascript"></script>
+		<script type="text/ng-template" id="empty"></script>
 	</head>
-	<body data-ng-controller="Blog">
+	<body ng-controller="BlogController">
 	<portal>
 	<div class="row rigid-grid">
-		<div class="four cell">
-			<h1><a data-reload><i class="blog"></i>{{#i18n}}blog.title{{/i18n}}</a></h1>
-		</div>
-		<div class="margin-four">
-			<nav class="contextual-buttons twelve cell" ng-if="currentBlog._id">
-				<div class="row action-buttons">
-					<button data-ng-click="showCreatePost()" ng-if="isVisible() && !isEditing()" class="cell">
-						<i class="add"></i><i18n>blog.create.post</i18n>
-					</button>
-					<a ng-href="/blog/print/blog?blog=[[currentBlog._id]]" target="_blank" workflow="blog.print" class="button cell">
-						<i18n>print</i18n>
-					</a>
-				</div>
-			</nav>
-		</div>
-	</div>
-	<div class="row rigid-grid">
-		<div class="four cell" ng-include="template.containers.blogsList">
-
-		</div>
-		<div class="blogs-posts-list margin-four horizontal-spacing" ng-include="template.containers.main">
+		<div ng-include="template.containers.main">
 		</div>
 	</div>
 	</portal>
-	<section class="lightbox-backdrop"></section>
-	<section class="lightbox-window six cell">
-		<div class="twelve cell">
-				<section ng-include="lightboxPath">
-				</section>
-		</div>
-		<div class="close-lightbox">
-			<i class="close-2x"></i>
-		</div>
-		<div class="clear"></div>
-	</section>
 	</body>
 </html>
