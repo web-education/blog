@@ -77,5 +77,8 @@
     "share.title": "Share with...",
     "share.users": "Users",
     "share.varyingrights": "Caution, you will modify sharing rights of this folder: all documents and directories in this folder will be affected",
+    "sniplet.add.post": "Ajouter un billet",
+    "sniplet.desc": "Ce sniplet vous permet d'afficher les articles d'un blog sur votre page.",
+    "sniplet.title": "Blog",
     "submitted": "(Submitted post)"
 }
