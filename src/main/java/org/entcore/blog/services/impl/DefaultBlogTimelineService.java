@@ -181,8 +181,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						JsonObject blog = (JsonObject) event.get("blog");
 						if (recipients != null) {
 							JsonObject p = new JsonObject()
-									.putString("uri", container.config().getString("userbook-host") +
-											"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 									.putString("username", user.getUsername())
 									.putString("blogTitle", blog.getObject("blog",
 											new JsonObject()).getString("title"))

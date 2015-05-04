@@ -175,8 +175,7 @@ public class PostController extends BaseController {
 								}
 								else if ("SUBMITTED".equals(event.right().getValue().getString("state"))) {
 									timelineService.notifySubmitPost(request, blogId, postId, user,
-											container.config().getString("host", "http://localhost:8018") +
-													pathPrefix + "#/view/" + blogId);
+											pathPrefix + "#/view/" + blogId);
 								}
 								renderJson(request, event.right().getValue());
 							} else {
@@ -211,7 +210,6 @@ public class PostController extends BaseController {
 						@Override
 						public void handle(UserInfos user) {
 							timelineService.notifyPublishPost(request, blogId, postId, user,
-									container.config().getString("host", "http://localhost:8018") +
 									pathPrefix + "#/view/" + blogId);
 						}
 					});
