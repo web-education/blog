@@ -2,20 +2,21 @@
 	<a data-ng-click="showCreateBlog()" workflow="blog.create" class="cell classic-link">
 		<i18n>blog.create.blog</i18n>
 	</a>
+	<hr class="row" />
 	<div data-ng-repeat="blog in blogs">
-		<article class="height-four twelve clip small-text cell" data-ng-class="{
+		<article class="height-four twelve clip cell" data-ng-class="{
 							'lower-line': $index !== 0,
 							 'selected':isSelected(blog._id)
 							 }">
 			<div class="four cell absolute" ng-click="displayBlog(blog)">
 				<img skin-src="[[blogThumbnail(blog)]]" style="height: 100%" />
 			</div>
-			<div class="eight cell absolute right-magnet reduce-block-four">
+			<div class="eight cell absolute right-magnet">
 				<div class="row">
 					<h3 ng-click="displayBlog(blog)">[[blog.shortened]]</h3>
 					<i18n>blog.by</i18n> [[blog.author.username]]
 				</div>
-				<div class="row bottom-locked reduce-block-four">
+				<div class="row bottom-locked">
 
 					<a data-ng-click="showEditBlog(blog)" ng-if="blog.myRights.blog.edit" class="small-text twelve cell">
 						<i18n>blog.edit.title</i18n>
