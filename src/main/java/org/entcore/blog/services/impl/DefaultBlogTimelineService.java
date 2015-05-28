@@ -34,13 +34,11 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	private final Neo neo;
 	private final MongoDb mongo;
 	private final TimelineHelper notification;
-	private final Container container;
 
 	public DefaultBlogTimelineService(Vertx vertx, EventBus eb, Container container, Neo neo, MongoDb mongo) {
 		this.neo = neo;
 		this.mongo = mongo;
 		this.notification = new TimelineHelper(vertx, eb, container);
-		this.container = container;
 	}
 
 	@Override
@@ -103,8 +101,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						JsonObject blog = (JsonObject) event.get("blog");
 						if (recipients != null) {
 							JsonObject p = new JsonObject()
-									.putString("uri", container.config().getString("userbook-host") +
-											"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 									.putString("username", user.getUsername())
 									.putString("blogTitle", blog.getString("title"))
 									.putString("resourceUri", resourceUri);
@@ -145,7 +142,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									JsonObject blog = (JsonObject) event.get("blog");
 									if (recipients != null) {
 										JsonObject p = new JsonObject()
-												.putString("uri", container.config().getString("userbook-host") +
+												.putString("uri",
 														"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 												.putString("username", user.getUsername())
 												.putString("blogTitle", blog.getObject("blog",
