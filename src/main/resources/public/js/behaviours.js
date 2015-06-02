@@ -231,11 +231,11 @@ Behaviours.register('blog', {
 						//filler post publication
 						var post = {
 							state: 'SUBMITTED',
-							content: '<p>Voici le premier article publié sur votre site !</p><p>Vous pouvez créer de nouveaux articles en cliquant sur le bouton "Ajouter un billet" ' +
+							content: '<p>Voici le premier billet publié sur votre site !</p><p>Vous pouvez créer de nouveaux billets (si vous êtes contributeur) en cliquant sur le bouton "Ajouter un billet" ' +
 							'ci-dessus, ou en accédant directement à l\'application Blog. Vos visiteurs pourront également suivre vos actualités depuis leur application, ' +
-							'et seront notifiés lorsque votre site sera mis à jour.</p><p>La navigation, à gauche des articles, est automatiquement mise à jour lorsque vous ajoutez'+
+							'et seront notifiés lorsque votre site sera mis à jour.</p><p>La navigation, à gauche des billets, est automatiquement mise à jour lorsque vous ajoutez'+
 							' des pages à votre site.</p>',
-							title: 'Votre premier article !'
+							title: 'Votre premier billet !'
 						};
 						this.blog.posts.addDraft(post, function(post){
 							post.publish(function(){
