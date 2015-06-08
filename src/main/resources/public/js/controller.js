@@ -181,6 +181,9 @@ function Blog($scope, date, _, ui, lang, notify, template, route){
 				callback(data);
 			}
 
+			if($scope.printBlogId){
+				$scope.currentBlog = _.findWhere($scope.blogs, { _id: $scope.printBlogId });
+			}
 			if(!$scope.currentBlog){
 				$scope.currentBlog = $scope.blogs[0];
 			}

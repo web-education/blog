@@ -70,7 +70,7 @@ public class BlogController extends BaseController {
 	@Get("/print/blog")
 	@SecuredAction("blog.print")
 	public void print(HttpServerRequest request) {
-		renderView(request, null, "print.html", null);
+		renderView(request, new JsonObject().putString("printBlogId", request.params().get("blog")), "print.html", null);
 	}
 
 	// TODO improve fields matcher and validater
