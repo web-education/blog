@@ -251,7 +251,9 @@ Behaviours.register('blog', {
 					this.display.showCreateBlog = false;
 					this.newPost.save(function(){
 						this.blog.posts.sync();
-						this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
+						delete(this.newPost._id);
+						this.newPost.content = "";
+						this.newPost.title = "";
 					}.bind(this), this.blog);
 				},
 				removePost: function(post){
