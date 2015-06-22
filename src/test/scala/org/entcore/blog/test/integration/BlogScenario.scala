@@ -24,28 +24,43 @@ object BlogScenario {
 //        jsonPath("$._id").find.saveAs("blogImgId")))
   .exec(http("Create blog")
     .post("/blog")
-    .formParam("title", "Mon premier blog")
-    .formParam("description", "Le blog de la classe")
-    .formParam("thumbnail", "/blog/public/img/blog.png") //"/workspace/document/${blogImgId}")
-    .formParam("comment-type", "NONE")
-    .formParam("publish-type", "RESTRAINT")
+	.header("Content-Type", "application/json")
+	.body(StringBody("""{
+		"title": "Mon premier blog",
+		"description": "Le blog de la classe",
+		"thumbnail": "/blog/public/img/blog.png",
+		"comment-type": "NONE",
+		"publish-type": "RESTRAINT"
+	}""")).asJSON
     .check(status.is(200), jsonPath("$._id").find.saveAs("blogId")))
   .exec(http("Create post")
     .post("/blog/post/${blogId}")
-    .formParam("title", "Le billet de l'enseignant")
-    .formParam("content", "Lorem ipsum si amet dolor...")
+	.header("Content-Type", "application/json")
+	.body(StringBody("""{
+		"title": "Le billet de l'enseignant",
+		"content": "Lorem ipsum si amet dolor..."
+	}""")).asJSON
     .check(status.is(200), jsonPath("$._id").find.saveAs("postId")))
   .exec(http("Create comment with comment-type: none")
     .post("/blog/comment/${blogId}/${postId}")
-    .formParam("comment", "Le commentaire qui n'est pas autorisé")
+	.header("Content-Type", "application/json")
+	.body(StringBody("""{
+		"comment": "Le commentaire qui n'est pas autorisé"
+	}""")).asJSON
     .check(status.is(400)))
   .exec(http("Update blog")
     .put("/blog/${blogId}")
-    .bodyPart(StringBodyPart("comment-type", "RESTRAINT"))
+	.header("Content-Type", "application/json")
+	.body(StringBody("""{
+		"comment-type": "RESTRAINT"
+	}""")).asJSON
     .check(status.is(200)))
   .exec(http("Create comment with comment-type: restraint")
     .post("/blog/comment/${blogId}/${postId}")
-    .formParam("comment", "Le commentaire qui est autorisé avec modération")
+	.header("Content-Type", "application/json")
+	.body(StringBody("""{
+		"comment": "Le commentaire qui est autorisé avec modération"
+	}""")).asJSON
     .check(status.is(200)))
   .exec(http("List blog")
     .get("/blog/list/all")
