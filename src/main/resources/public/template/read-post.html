@@ -11,7 +11,7 @@
 	</a>
 	<plus class="right-magnet">
 		<button authorize="editPost" resource="blog" ng-click="post.editing = true"><i18n>edit</i18n></button>
-		<button ng-if="blog['publish-type'] === 'IMMEDIATE'" authorize="manager" resource="blog"><i18n>unpublish</i18n></button>
+		<button ng-if="blog['publish-type'] === 'RESTRAINT'" authorize="manager" resource="blog"><i18n>unpublish</i18n></button>
 		<button authorize="removePost" resource="blog" ng-click="post.showConfirmRemove = true"><i18n>remove</i18n></button>
 	</plus>
 	<lightbox show="post.showConfirmRemove" on-close="post.showConfirmRemove = false">
