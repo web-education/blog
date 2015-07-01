@@ -6,7 +6,7 @@
 <div class="row" bind-html="post.content"></div>
 
 <div class="row">
-	<a ng-click="post.showComments = !post.showComments;" class="cell" ng-if="post.state === 'PUBLISHED'">
+	<a ng-click="post.showComments = !post.showComments;" class="cell comment" ng-if="post.state === 'PUBLISHED'">
 		Commentaires ([[post.comments.length()]])
 	</a>
 	<plus class="right-magnet">

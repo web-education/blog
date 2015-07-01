@@ -2,6 +2,7 @@
 	<h1>
 		<i class="blog">
 			<side-panel>
+				<h1><i18n>blog.list.title</i18n></h1>
 				<nav class="vertical">
 					<ul>
 						<li ng-repeat="blog in blogs.all">
@@ -29,7 +30,7 @@
 				Par <a ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
 			</div>
 			<hr class="row" />
-			<div class="row">
+			<div class="row action-row">
 				<a class="button" target="_blank" ng-href="/blog/print/blog#/print/[[blog._id]]">
 					<i18n>blog.print</i18n>
 				</a>
@@ -46,7 +47,7 @@
 	<div class="margin-three">
 		<div class="twelve cell">
 			<div class="row" authorize="createPost" resource="blog">
-				<container template="filters" class="ten cell"></container>
+				<container template="filters" class="cell"></container>
 				<a ng-href="#/new-article/[[blog._id]]" class="button cell right-magnet" authorize="createPost" resource="blog">
 					<i18n>blog.create.post</i18n>
 				</a>
