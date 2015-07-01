@@ -10,8 +10,8 @@ Behaviours.register('blog', {
 		Post: function(data){
 			var that = this;
 			if(data){
-				this.created = moment(data.created.$date);
-				this.modified = moment(data.modified.$date);
+				this.created = data.created ? moment(data.created.$date) : moment();
+				this.modified = data.modified ? moment(data.modified.$date) : moment();
 			}
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Comment, {
 				sync: '/blog/comments/:blogId/:_id',
