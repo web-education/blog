@@ -5,8 +5,8 @@
 				<h1><i18n>blog.list.title</i18n></h1>
 				<nav class="vertical">
 					<ul>
-						<li ng-repeat="blog in blogs.all">
-							<a ng-href="#/view/[[blog._id]]">[[blog.title]]</a>
+						<li ng-repeat="currBlog in blogs.all">
+							<a ng-class="{'selected': currBlog._id === blog._id}" ng-href="#/view/[[currBlog._id]]">[[currBlog.title]]</a>
 						</li>
 					</ul>
 				</nav>
