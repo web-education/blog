@@ -25,8 +25,9 @@
 		<div class="row height-two">
 			<div class="absolute">
 				<span class="row" ng-repeat="post in blog.posts.all|limitTo:2">
-					[[post.title]], [[post.created.fromNow()]]
+					<em>[[post.title]],</em><i>[[post.created.fromNow()]]</i>
 				</span>
+
 			</div>
 		</div>
 	</div>
