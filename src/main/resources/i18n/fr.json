@@ -66,6 +66,7 @@
     "noblog": "Aucun blog n'a été créé pour l'instant",
     "notfound": "Le blog n'existe pas ou vous n'y avez pas accès.",
     "post.empty": "Votre billet est vide",
+    "title.empty": "Votre billet doit comporter un titre",
     "post.title.placeholder": "Entrez le titre de votre billet",
     "posts.filter": "Voir les billets",
     "seemore": "Voir la suite",
