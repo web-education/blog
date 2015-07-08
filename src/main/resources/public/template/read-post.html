@@ -22,7 +22,7 @@
 			<button class="right-magnet" ng-click="blog.posts.remove(post); post.showConfirmRemove = false;"><i18n>remove</i18n></button>
 		</div>
 	</lightbox>
-	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED'">
+	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED' && blog.myRights.comment">
 		<i18n>comment</i18n>
 	</button>
 	<button ng-click="post.publish()" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && blog.myRights.publishPost">
@@ -30,7 +30,7 @@
 	</button>
 </div>
 <div class="row" ng-if="post.showComments">
-	<div class="row">
+	<div class="row" ng-if="blog.myRights.comment">
 		<textarea ng-model="comment.comment"></textarea>
 		<button class="right-magnet" ng-click="postComment(comment, post)">
 			<i18n>save</i18n>
