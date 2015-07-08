@@ -139,8 +139,8 @@ Behaviours.register('blog', {
 				http().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
 						callback();
-						this.trigger('change');
 					}
+					this.trigger('change');
 				}.bind(this));
 			};
 
