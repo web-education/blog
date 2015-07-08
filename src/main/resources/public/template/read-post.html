@@ -13,7 +13,7 @@
     	<plus class="right-magnet">
     		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="post.editing = true"><i18n>edit</i18n></button>
     		<button ng-if="blog['publish-type'] === 'RESTRAINT'" authorize="manager" resource="blog"><i18n>unpublish</i18n></button>
-    		<button ng-if="blog.myRights.share || post.author.userId === me.userId ng-click="post.showConfirmRemove = true"><i18n>remove</i18n></button>
+    		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="post.showConfirmRemove = true"><i18n>remove</i18n></button>
     	</plus>
 	</div>
 	
