@@ -211,6 +211,10 @@ function BlogController($scope, route, model, $location, date){
 			notify.error('post.empty');
 			return;
 		}
+		if(!$scope.post.title){
+			notify.error('title.empty');
+			return;
+		}
 		$scope.post.save(function(){
 			$location.path('/view/' + $scope.blog._id);
 			$scope.blog.posts.sync();
