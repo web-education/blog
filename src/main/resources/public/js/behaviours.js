@@ -264,6 +264,9 @@ Behaviours.register('blog', {
 			},
 			removeComment: {
 				right: 'org-entcore-blog-controllers-BlogController|delete'
+			},
+			comment: {
+			    right: 'org-entcore-blog-controllers-PostController|comment'
 			}
 		},
 		workflow: {
