@@ -28,7 +28,7 @@
 	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED' && blog.myRights.comment">
 		<i18n>comment</i18n>
 	</button>
-	<button ng-click="post.publish()" class="right-magnet" ng-if="(post.state !== 'PUBLISHED' && blog.myRights.publishPost) || (post.state === 'DRAFT)">
+	<button ng-click="post.publish()" class="right-magnet" ng-if="(post.state !== 'PUBLISHED' && blog.myRights.publishPost) || (post.state === 'DRAFT')">
 		<i18n>publish</i18n>
 	</button>
 </div>
