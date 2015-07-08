@@ -9,7 +9,7 @@
 				<button class="right-magnet" ng-if="blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE'">
 					<i18n>publish</i18n>
 				</button>
-				<button class="right-magnet" ng-click="saveDraft()">
+				<button type="button" class="right-magnet" ng-click="saveDraft()">
 					<i18n>blog.save</i18n>
 				</button>
 				<button type="button" class="right-magnet cancel" ng-click="template.close('create-post')">
