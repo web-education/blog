@@ -314,7 +314,6 @@ Behaviours.register('blog', {
 						this.blog.behaviours('blog');
 						this.$apply();
 					}.bind(this));
-					blog.sync();
 				},
 				initSource: function(){
 					Behaviours.applicationsBehaviours.blog.model.register();
