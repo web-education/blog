@@ -22,12 +22,9 @@
 				<strong class="row"><i18n>blog.by</i18n> [[blog.author.username]]</strong>
 			</div>
 		</div>
-		<div class="row height-two">
-			<div class="absolute">
-				<span class="row" ng-repeat="post in blog.posts.all|limitTo:2">
-					<em>[[post.title]],</em><i>[[post.created.fromNow()]]</i>
-				</span>
-
+		<div class="row">
+			<div class="cell-ellipsis" ng-repeat="post in blog.posts.all|limitTo:2">
+				<em>[[post.title]]</em> <i>[[post.created.fromNow()]]</i>
 			</div>
 		</div>
 	</div>
