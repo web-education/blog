@@ -99,6 +99,7 @@ Behaviours.register('blog', {
 		register: function(){
 			this.Blog.prototype.toJSON = function(){
 				return {
+					_id: this._id,
 					title: this.title,
 					thumbnail: this.thumbnail || '',
 					'comment-type': this['comment-type'] || 'IMMEDIATE',
