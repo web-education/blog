@@ -1,5 +1,5 @@
 {
-  "name": "org.entcore~blog~1.14.0",
+  "name": "org.entcore~blog~1.15-SNAPSHOT",
     "config": {
       "main":"org.entcore.blog.Blog",
       "port": 8018,
