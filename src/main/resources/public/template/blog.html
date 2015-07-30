@@ -17,7 +17,7 @@
 </div>
 
 <div class="row rigid-grid">
-	<div class="three cell">
+	<div class="three cell side-col">
 		<nav class="vertical">
 			<div class="twelve cell height-seven">
 				<div class="illustration">
@@ -44,7 +44,7 @@
 			</li>
 		</ul>
 	</div>
-	<div class="margin-three">
+	<div class="margin-three main-col">
 		<div class="twelve cell">
 			<div class="row" authorize="createPost" resource="blog">
 				<container template="filters" class="cell"></container>
@@ -59,10 +59,11 @@
 				<article ng-if="post.editing">
 					<container template="edit-post"></container>
 				</article>
-				<article class="twelve cell" ng-if="!post.editing">
-					<container template="read-post"></container>
 
+				<article class="twelve cell" ng-if="!post.editing" ng-class="{ slided: post.slided }">
+					<container template="read-post"></container>
 				</article>
+
 			</div>
 			<div class="row" ng-if="blog.posts.length() === 0">
 				<article>
