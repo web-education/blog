@@ -60,7 +60,7 @@
 					<container template="edit-post"></container>
 				</article>
 
-				<article class="twelve cell" ng-if="!post.editing" ng-class="{ slided: post.slided }">
+				<article class="twelve cell lalala" ng-if="!post.editing" ng-class="{ slided: post.slided, unpublished: (post.state !== 'PUBLISHED') }">
 					<container template="read-post"></container>
 				</article>
 
