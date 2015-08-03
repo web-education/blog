@@ -258,14 +258,6 @@ function BlogController($scope, route, model, $location, date){
 		$location.path('/list-blogs');
 	};
 
-	$scope.orderBlogsList = function(blog){
-		if(blog.myRights.blog.edit)
-			return 0;
-		if(blog.myRights.post.post)
-			return 1;
-		return 2;
-	};
-
 	$scope.applyFilters = function(item){
 		return $scope.display.filters.all || $scope.display.filters[item.state.toLowerCase()];
 	};
@@ -292,5 +284,14 @@ function BlogController($scope, route, model, $location, date){
 	$scope.postComment = function(comment, post){
 		post.comment(comment);
 		$scope.comment = new Comment();
+	};
+
+	$scope.orderBlogs = function(blog){
+		var discriminator = 0;
+		if(blog.myRights.editBlog)
+			discriminator = 2;
+		if(blog.myRights.createPost)
+			discriminator = 1;
+		return parseInt(discriminator + '' + blog.modified.$date);
 	}
 }

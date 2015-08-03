@@ -11,7 +11,7 @@
 </div>
 <hr class="row" />
 <div class="cards-list rigid-grid">
-	<div class="card four" ng-repeat="blog in blogs.all | filter:{ title: display.search }" ng-click="redirect('/view/[[blog._id]]')">
+	<div class="card four" ng-repeat="blog in blogs.all | filter:{ title: display.search } | orderBy:orderBlogs:true" ng-click="redirect('/view/[[blog._id]]')">
 		<div class="row">
 			<div class="illustration">
 				<img skin-src="[[blog.icon]]" class="absolute" />
