@@ -182,10 +182,7 @@ Behaviours.register('blog', {
 				http().putJson('/blog/post/' + this.blogId + '/' + this._id, {
 					content: this.content,
 					title: this.title
-				})
-				.done(function(){
-					this.publish(callback);
-				}.bind(this));
+				});
 			};
 
 			this.Post.prototype.save = function(callback, blog, state){
