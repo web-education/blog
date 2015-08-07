@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.entcore.blog.services.BlogTimelineService;
+import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserInfos;
@@ -24,6 +25,7 @@ import com.mongodb.QueryBuilder;
 
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.collections.Joiner;
 
 public class DefaultBlogTimelineService implements BlogTimelineService {
@@ -130,17 +132,26 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 								.getObject("author", new JsonObject())
 								.getString("userId");
 
-						QueryBuilder query = QueryBuilder.start("_id").is(postId);
-						JsonObject keys = new JsonObject().putNumber("title", 1).putNumber("blog", 1);
-						JsonArray fetch = new JsonArray().addString("blog");
-						findRecipiants("posts", query, keys, fetch, "org-entcore-blog-controllers-PostController|update", user, new Handler<Map<String, Object>>() {
-							@Override
-							public void handle(Map<String, Object> event) {
-								if (event != null) {
-									List<String> recipients = (List<String>) event.get("recipients");
-									recipients.add(authorId);
-									JsonObject blog = (JsonObject) event.get("blog");
-									if (recipients != null) {
+						final QueryBuilder query = QueryBuilder.start("_id").is(postId);
+						final JsonObject keys = new JsonObject().putNumber("title", 1).putNumber("blog", 1);
+						final JsonArray fetch = new JsonArray().addString("blog");
+
+						mongo.findOne("posts", MongoQueryBuilder.build(query), keys, fetch,
+								MongoDbResult.validResultHandler(new Handler<Either<String,JsonObject>>() {
+							public void handle(Either<String, JsonObject> event) {
+								if(event.isLeft())
+									return;
+
+								final JsonObject blog = new JsonObject().putObject("blog", event.right().getValue());
+
+								findRecipiants("posts", query, keys, fetch, "org-entcore-blog-controllers-PostController|publish", user, new Handler<Map<String, Object>>() {
+									@Override
+									public void handle(Map<String, Object> event) {
+										List<String> recipients = new ArrayList<>();
+										if (event != null)
+											recipients = (List<String>) event.get("recipients");
+
+										recipients.add(authorId);
 										JsonObject p = new JsonObject()
 												.putString("uri",
 														"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
@@ -153,10 +164,11 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 										notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
 												NOTIFICATION_TYPE + "_POST_SUBMIT", recipients,
 												blogId, postId, "notification/notify-submit-post.html", p);
+
 									}
-								}
+								});
 							}
-						});
+						}));
 					}
 				}
 			});
