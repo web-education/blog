@@ -142,7 +142,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 								if(event.isLeft())
 									return;
 
-								final JsonObject blog = new JsonObject().putObject("blog", event.right().getValue());
+								final JsonObject post = event.right().getValue();
 
 								findRecipiants("posts", query, keys, fetch, "org-entcore-blog-controllers-PostController|publish", user, new Handler<Map<String, Object>>() {
 									@Override
@@ -156,10 +156,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 												.putString("uri",
 														"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 												.putString("username", user.getUsername())
-												.putString("blogTitle", blog.getObject("blog",
+												.putString("blogTitle", post.getObject("blog",
 														new JsonObject()).getString("title"))
 												.putString("blogUri", resourceUri)
-												.putString("postTitle", blog.getString("title"))
+												.putString("postTitle", post.getString("title"))
 												.putString("postUri", resourceUri + "&post=" + postId);
 										notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
 												NOTIFICATION_TYPE + "_POST_SUBMIT", recipients,
