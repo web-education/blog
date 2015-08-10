@@ -160,7 +160,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 														new JsonObject()).getString("title"))
 												.putString("blogUri", resourceUri)
 												.putString("postTitle", post.getString("title"))
-												.putString("postUri", resourceUri + "&post=" + postId);
+												.putString("postUri", resourceUri + "/" + postId);
 										notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
 												NOTIFICATION_TYPE + "_POST_SUBMIT", recipients,
 												blogId, postId, "notification/notify-submit-post.html", p);
@@ -196,7 +196,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 											new JsonObject()).getString("title"))
 									.putString("blogUri", resourceUri)
 									.putString("postTitle", blog.getString("title"))
-									.putString("postUri", resourceUri + "&post=" + postId);
+									.putString("postUri", resourceUri + "/" + postId);
 							notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
 									NOTIFICATION_TYPE + "_POST_PUBLISH", recipients,
 									blogId, postId, "notification/notify-publish-post.html", p);
