@@ -50,6 +50,7 @@ Behaviours.register('blog', {
 								all = all.concat(posts);
 								all = all.map(function(item){
 									item.blogId = data._id;
+									item['publish-type'] = data['publish-type'];
 									return item;
 								});
 								this.load(all);
@@ -147,6 +148,9 @@ Behaviours.register('blog', {
 
 			this.Post.prototype.publish = function(callback){
 				this.state = 'PUBLISHED';
+				if(this['publish-type'] === 'IMMEDIATE'){
+					return;
+				}
 				http().putJson('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
 						callback();
