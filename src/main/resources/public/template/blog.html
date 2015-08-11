@@ -37,7 +37,7 @@
 			</div>
 		</nav>
 		<ul stick-to-top class="hash-magnet floating-navigation">
-			<li ng-repeat="post in blog.posts.all" ng-click="redirect('/view/' + blog._id + '/' + post._id)">
+			<li ng-repeat="post in blog.posts.all" ng-click="redirect('/view/' + blog._id + '/' + post._id)" ng-init="post.slided = $first ? true : false">
 				<a>
 					[[post.title]]
 				</a>

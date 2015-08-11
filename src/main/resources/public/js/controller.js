@@ -76,8 +76,8 @@ function BlogController($scope, route, model, $location, date){
 					$scope.blog.on('posts.sync', function(){
 						setTimeout(function(){
 							window.print();
-						}, 1000)
-					})
+						}, 1000);
+					});
 				}
 			});
 			model.blogs.sync();
@@ -96,10 +96,20 @@ function BlogController($scope, route, model, $location, date){
 					$scope.blog.one('posts.sync', function(){
 						$scope.blog.posts.forEach(function(post){
 							post.comments.sync();
+							if(post._id === params.postId)
+								post.slided = true;
 						});
 					});
 					if(!$scope.blog.posts.length()){
 						$scope.blog.posts.sync();
+					} else {
+						$scope.blog.posts.forEach(function(post){
+							if(post._id === params.postId)
+								post.slided = true;
+							else
+								post.slided = false;
+						});
+						$scope.$apply();
 					}
 				}
 			});
