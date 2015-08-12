@@ -18,7 +18,7 @@
     		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="post.showConfirmRemove = true"><i18n>remove</i18n></button>
     	</plus>
 	</div>
-	
+
 	<lightbox show="post.showConfirmRemove" on-close="post.showConfirmRemove = false">
 		<h2><i18n>remove</i18n></h2>
 		<p>Voulez-vous vraiment supprimer ce billet ?</p>
@@ -30,8 +30,11 @@
 	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED' && blog.myRights.comment">
 		<i18n>comment</i18n>
 	</button>
-	<button ng-click="post.publish()" class="right-magnet" ng-if="(post.state !== 'PUBLISHED' && blog.myRights.publishPost) || (post.state === 'DRAFT')">
+	<button ng-click="post.publish()" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && (blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE')">
 		<i18n>publish</i18n>
+	</button>
+	<button ng-click="post.publish()" class="right-magnet" ng-if="post.state === 'DRAFT' && !blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'">
+		<i18n>submit</i18n>
 	</button>
 </div>
 <div class="row" ng-if="post.showComments">

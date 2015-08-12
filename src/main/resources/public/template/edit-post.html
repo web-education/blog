@@ -2,9 +2,6 @@
 	<input type="text" ng-model="post.title" class="twelve cell" required />
 	<html-editor ng-model="post.content"></html-editor>
 
-	<button class="right-magnet" ng-click="post.save()">
-		<i18n>publish</i18n>
-	</button>
 	<button type="button" class="right-magnet" ng-click="post.saveModifications(); post.editing = false;">
 		<i18n>save</i18n>
 	</button>
