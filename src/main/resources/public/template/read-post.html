@@ -38,12 +38,14 @@
 	</button>
 </div>
 <div class="row" ng-if="post.showComments">
-	<div class="row" ng-if="blog.myRights.comment">
-		<textarea ng-model="comment.comment"></textarea>
-		<button class="right-magnet" ng-click="postComment(comment, post)">
-			<i18n>save</i18n>
-		</button>
-	</div>
+	<form ng-submit="postComment(comment, post)">
+		<div class="row" ng-if="blog.myRights.comment">
+			<textarea ng-model="comment.comment" required></textarea>
+			<button class="right-magnet">
+				<i18n>save</i18n>
+			</button>
+		</div>
+	</form>
 
 	<article class="comment" ng-repeat="comment in post.comments.all">
 		<div class="row">
