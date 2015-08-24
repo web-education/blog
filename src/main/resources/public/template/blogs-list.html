@@ -35,6 +35,19 @@
 	<container template="share"></container>
 </lightbox>
 
+<lightbox show="display.confirmRemoveBlog" on-close="display.confirmRemoveBlog = false">
+	<h2><i18n>remove</i18n></h2>
+	<p><i18n>confirm.remove.blog</i18n></p>
+	<div class="row">
+		<button ng-click="blogs.removeSelection(); display.confirmRemoveBlog = true" class="right-magnet">
+			<i18n>remove</i18n>
+		</button>
+		<button type="button" ng-click="display.confirmRemoveBlog = false" class="right-magnet cancel">
+			<i18n>cancel</i18n>
+		</button>
+	</div>
+</lightbox>
+
 <div class="toggle-buttons" ng-class="{ hide: blogs.selection().length < 1 }">
 	<div class="row toggle">
 		<a class="button" ng-href="#/edit/[[blogs.selection()[0]._id]]" ng-if="blogs.selection().length === 1" authorize="editBlog" resource="blogs.selection()">
@@ -43,7 +56,7 @@
 		<button ng-click="shareBlog()" authorize="share" resource="blogs.selection()">
 			<i18n>share</i18n>
 		</button>
-		<button ng-click="blogs.removeSelection()" authorize="removeBlog" resource="blogs.selection()">
+		<button ng-click="display.confirmRemoveBlog = true" authorize="removeBlog" resource="blogs.selection()">
 			<i18n>remove</i18n>
 		</button>
 	</div>

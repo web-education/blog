@@ -29,7 +29,7 @@
     "comment.placeholder": "Entrez votre commentaire",
     "comments.hide": "Masquer les commentaires ([[post.comments.length()]])",
     "comments.show": "Afficher les commentaires ([[post.comments.length()]])",
-    "confirm": "Voulez-vous vraiment le supprimer ?",
+    "confirm.remove.blog": "Voulez-vous vraiment supprimer ce blog?",
     "draft": "(Brouillon)",
     "draft.empty": "Votre brouillon est vide",
     "draft.saved": "Brouillon enregistré",
