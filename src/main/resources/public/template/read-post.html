@@ -1,6 +1,6 @@
 <h2 ng-click="post.slided = post.slided ? false : true ">
 	<span ng-if="post.state !== 'PUBLISHED'" class="warning-text">[[lang.translate(post.state.toLowerCase())]]</span>
-	[[post.title]]<i class="small-arrow d270"></i>
+	[[post.title]]<i class="small-arrow"></i>
 	<strong class="subtitle">Par <a ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a> le [[post.modified.format('dddd DD MMMM YYYY')]]</strong>
 </h2>
 <div class="row" slide="post.slided">
