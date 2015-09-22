@@ -149,6 +149,7 @@ Behaviours.register('blog', {
 			this.Post.prototype.publish = function(callback){
 				this.state = 'PUBLISHED';
 				if(this['publish-type'] === 'IMMEDIATE'){
+					http().putJson('/blog/post/publish/' + this.blogId + '/' + this._id);
 					return;
 				}
 				http().putJson('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
