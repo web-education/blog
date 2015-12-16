@@ -1,6 +1,6 @@
 <form data-ng-submit="post.save(); post.editing = false;">
 	<input type="text" ng-model="post.title" class="twelve cell" required />
-	<html-editor ng-model="post.content"></html-editor>
+	<editor ng-model="post.content"></editor>
 
 	<button type="button" class="right-magnet" ng-click="post.saveModifications(); post.editing = false;">
 		<i18n>save</i18n>
