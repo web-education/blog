@@ -12,7 +12,7 @@
 				<button type="button" class="right-magnet" ng-click="saveDraft()">
 					<i18n>blog.save</i18n>
 				</button>
-				<button type="button" class="right-magnet cancel" ng-click="template.close('create-post')">
+				<button type="button" class="right-magnet cancel" ng-click="template.close('create-post'); redirect('/view/' + blog._id)">
 					<i18n>cancel</i18n>
 				</button>
 			</form>
