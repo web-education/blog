@@ -37,8 +37,6 @@ function BlogController($scope, route, model, $location, date){
 
 	route({
 		viewBlog: function(params){
-			template.open('main', 'blog');
-			template.close('create-post');
 			model.blogs.deselectAll();
 
 			model.one('blogs.sync', function(){
@@ -47,6 +45,8 @@ function BlogController($scope, route, model, $location, date){
 					template.open('main', 'e404');
 				}
 				else{
+                    template.open('main', 'blog');
+        			template.close('create-post');
 					$scope.blog.one('posts.sync', function(){
 						$scope.blog.posts.forEach(function(post){
 							post.comments.sync();
@@ -65,13 +65,13 @@ function BlogController($scope, route, model, $location, date){
 			}
 		},
 		print: function(params){
-			template.open('main', 'blog');
 			model.one('blogs.sync', function(){
 				$scope.blog = model.blogs.findWhere({ _id: params.blogId });
 				if(!$scope.blog){
 					template.open('main', 'e404');
 				}
 				else{
+                    template.open('main', 'blog');
 					$scope.blog.posts.sync();
 					$scope.blog.on('posts.sync', function(){
 						setTimeout(function(){
@@ -83,7 +83,6 @@ function BlogController($scope, route, model, $location, date){
 			model.blogs.sync();
 		},
 		viewPost: function(params){
-			template.open('main', 'blog');
 			template.close('create-post');
 			model.blogs.deselectAll();
 
@@ -93,6 +92,7 @@ function BlogController($scope, route, model, $location, date){
 					template.open('main', 'e404');
 				}
 				else{
+                    template.open('main', 'blog');
 					$scope.blog.one('posts.sync', function(){
 						$scope.blog.posts.forEach(function(post){
 							post.comments.sync();
@@ -122,14 +122,15 @@ function BlogController($scope, route, model, $location, date){
 		},
 		newArticle: function(params){
 			$scope.post = new Post();
-			template.open('main', 'blog');
-			template.open('create-post', 'create-post');
 
 			model.one('blogs.sync', function(){
 				$scope.blog = model.blogs.findWhere({ _id: params.blogId });
 				if(!$scope.blog){
 					template.open('main', 'e404');
-				}
+				} else {
+                    template.open('main', 'blog');
+        			template.open('create-post', 'create-post');
+                }
 			});
 			if(!$scope.blog){
 				model.blogs.sync();
