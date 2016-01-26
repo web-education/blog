@@ -326,6 +326,10 @@ Behaviours.register('blog', {
 						this.blogs = app.blogs;
 					}.bind(this));
 				},
+                pickBlog: function(blog) {
+                    this.setSnipletSource(blog);
+                    this.snipletResource.synchronizeRights();
+                },
 				createBlog: function(){
 					console.log('automatic blog creation');
 					if(this.snipletResource){
