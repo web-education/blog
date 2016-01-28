@@ -377,6 +377,7 @@ Behaviours.register('blog', {
 				},
 				saveEdit: function(post){
 					post.save();
+                    post.publish();
 					post.edit = false;
 				},
 				formatDate: function(date){
