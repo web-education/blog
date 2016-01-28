@@ -359,7 +359,7 @@ Behaviours.register('blog', {
 
 				},
 				addPost: function(){
-					this.display.showCreateBlog = false;
+					this.newPost.showCreateBlog = false;
 					this.newPost.save(function(){
 						this.blog.posts.sync();
 						delete(this.newPost._id);
