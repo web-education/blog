@@ -8,9 +8,12 @@
 </div>
 
 <div class="row">
-	<a ng-click="post.showComments = !post.showComments;" class="cell comment" ng-if="post.state === 'PUBLISHED'">
-		Commentaires ([[post.comments.length()]])
-	</a>
+	<div class="cell twelve-mobile">
+		<a ng-click="post.showComments = !post.showComments;" class="cell comment" ng-if="post.state === 'PUBLISHED'">
+			Commentaires ([[post.comments.length()]])
+		</a>
+	</div>
+
 	<div ng-if="blog.myRights.share || post.author.userId === me.userId">
     	<plus class="right-magnet">
     		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="post.editing = true"><i18n>edit</i18n></button>

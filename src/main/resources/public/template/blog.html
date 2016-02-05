@@ -11,12 +11,15 @@
 	</side-panel>
 	<h1 class="application-title">
 		<i class="blog"></i>
-		<span ng-click="redirect('/list-blogs')"><i18n>blog.title</i18n></span> : <span ng-click="redirect('/view/' + blog._id)">[[blog.title]]</span>
+		<span ng-click="redirect('/list-blogs')"><i18n>blog.title</i18n></span> : <span subtitle ng-click="redirect('/view/' + blog._id)">[[blog.title]]</span>
 	</h1>
 </div>
 
 <div class="row rigid-grid">
+
+
 	<div class="three cell side-col">
+
 		<nav class="vertical">
 			<div class="twelve cell height-seven">
 				<div class="illustration">
@@ -28,13 +31,14 @@
 			<div class="row">
 				Par <a ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
 			</div>
-			<hr class="row" />
-			<div class="row action-row">
+			<hr class="row zero-mobile" />
+			<div class="row action-row zero-mobile">
 				<a class="button" target="_blank" ng-href="/blog/print/blog#/print/[[blog._id]]">
 					<i18n>blog.print</i18n>
 				</a>
 			</div>
 		</nav>
+
 		<ul stick-to-top class="hash-magnet floating-navigation zero-mobile">
 			<li ng-repeat="post in blog.posts.all" ng-click="redirect('/view/' + blog._id + '/' + post._id)" ng-init="post.slided = $first ? true : false">
 				<a>
@@ -46,12 +50,22 @@
 
 	<div class="margin-three main-col">
 		<div class="twelve cell">
+
+
 			<div class="row" authorize="createPost" resource="blog">
 				<container template="filters" class="cell"></container>
 				<a ng-href="#/new-article/[[blog._id]]" class="button cell right-magnet" authorize="createPost" resource="blog">
 					<i18n>blog.create.post</i18n>
 				</a>
 			</div>
+
+
+		</div>
+	</div>
+
+
+	<div class="margin-three main-col twelve-mobile">
+		<div class="twelve cell">
 
 			<div class="row">
 				<container template="create-post"></container>
@@ -74,7 +88,9 @@
 					</a>
 				</article>
 			</div>
+
 		</div>
+
 	</div>
 </div>
 
