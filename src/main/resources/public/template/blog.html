@@ -29,7 +29,7 @@
 			</div>
 
 			<div class="row">
-				Par <a ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
+                <i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
 			</div>
 			<hr class="row zero-mobile" />
 			<div class="row action-row zero-mobile">
@@ -82,9 +82,9 @@
 			</div>
 			<div class="row" ng-if="blog.posts.length() === 0">
 				<article>
-					Ce blog ne contient pas encore de billet.
+                    <i18n>blog.empty</i18n>
 					<br /><a authorize="createPost" resource="blog" ng-href="#/new-article/[[blog._id]]">
-						Vous pouvez commencer à écrire en cliquant sur ce lien.
+                    <i18n>blog.starthere</i18n>
 					</a>
 				</article>
 			</div>

@@ -1,7 +1,7 @@
 <h2 ng-click="post.slided = post.slided ? false : true ">
 	<span ng-if="post.state !== 'PUBLISHED'" class="warning-text">[[lang.translate(post.state.toLowerCase())]]</span>
 	[[post.title]]<i class="small-arrow"></i>
-	<strong class="subtitle">Par <a ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a> le [[post.modified.format('dddd DD MMMM YYYY')]]</strong>
+	<strong class="subtitle"><i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a> <i18n>blog.on.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]</strong>
 </h2>
 <div class="row" slide="post.slided">
 	<div bind-html="post.content"> </div>
@@ -10,7 +10,7 @@
 <div class="row">
 	<div class="cell twelve-mobile">
 		<a ng-click="post.showComments = !post.showComments;" class="cell comment" ng-if="post.state === 'PUBLISHED'">
-			Commentaires ([[post.comments.length()]])
+            <i18n>blog.comments</i18n> ([[post.comments.length()]])
 		</a>
 	</div>
 
@@ -24,7 +24,7 @@
 
 	<lightbox show="post.showConfirmRemove" on-close="post.showConfirmRemove = false">
 		<h2><i18n>remove</i18n></h2>
-		<p>Voulez-vous vraiment supprimer ce billet ?</p>
+		<p><i18n>confirm.remove.post</i18n></p>
 		<div class="row">
 			<button class="right-magnet" ng-click="blog.posts.remove(post); post.showConfirmRemove = false;"><i18n>remove</i18n></button>
 			<button type="button" class="right-magnet cancel" ng-click="post.showConfirmRemove = false;"><i18n>cancel</i18n></button>
