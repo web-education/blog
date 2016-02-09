@@ -9,10 +9,12 @@
 			</ul>
 		</nav>
 	</side-panel>
-	<h1 class="application-title">
-		<i class="blog"></i>
-		<span ng-click="redirect('/list-blogs')"><i18n>blog.title</i18n></span> : <span subtitle ng-click="redirect('/view/' + blog._id)">[[blog.title]]</span>
-	</h1>
+	<app-title>
+		<h1>
+			<i class="blog"></i>
+			<span ng-click="redirect('/list-blogs')"><i18n>blog.title</i18n></span> : <span subtitle ng-click="redirect('/view/' + blog._id)">[[blog.title]]</span>
+		</h1>
+	</app-title>
 </div>
 
 <div class="row rigid-grid">
