@@ -55,10 +55,16 @@
 
 
 			<div class="row" authorize="createPost" resource="blog">
-				<container template="filters" class="cell"></container>
-				<a ng-href="#/new-article/[[blog._id]]" class="button cell right-magnet" authorize="createPost" resource="blog">
-					<i18n>blog.create.post</i18n>
-				</a>
+				<div class="cell right-magnet twelve-mobile">
+					<a ng-href="#/new-article/[[blog._id]]" class="button cell" authorize="createPost" resource="blog">
+						<i18n>blog.create.post</i18n>
+					</a>
+				</div>
+				<div class="cell twelve-mobile">
+					<microbox title="posts.filter" close="ok">
+						<container template="filters" class="cell"></container>
+					</microbox>
+				</div>
 			</div>
 
 
