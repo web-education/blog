@@ -56,7 +56,9 @@ Behaviours.register('blog', {
 								this.load(all);
 							}.bind(this));
 						}.bind(this));
-					}.bind(this));
+					}.bind(this))
+			        .e401(function () { })
+			        .e404(function () { });
 				},
 				addDraft: function(post, callback){
 					http().postJson('/blog/post/' + that._id, post).done(function(result){
@@ -330,10 +332,10 @@ Behaviours.register('blog', {
 					    this.foundBlog = false;
 					    this.$apply();
 					}.bind(this));
-					blog.on('posts.sync, change', function(){
-						this.blog = blog;
-						this.blog.behaviours('blog');
-						this.$apply();
+					blog.on('posts.sync, change', function () {
+					    this.blog = blog;
+					    this.blog.behaviours('blog');
+					    this.$apply();
 					}.bind(this));
 				},
 				initSource: function(){
