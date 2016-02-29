@@ -214,15 +214,29 @@ Behaviours.register('blog', {
 				}.bind(this))
 			};
 
-			this.Blog.prototype.open = function(){
-				http().get('/blog/' + this._id).done(function(blog) {
-					this.owner = blog.author;
-					this.shortenedTitle = blog.title || '';
-					if(this.shortenedTitle.length > 40){
-						this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
-					}
-					this.updateData(blog);
-				}.bind(this));
+			this.Blog.prototype.open = function(success, error){
+			    http().get('/blog/' + this._id)
+                    .done(function (blog) {
+					    this.owner = blog.author;
+					    this.shortenedTitle = blog.title || '';
+					    if(this.shortenedTitle.length > 40){
+						    this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
+					    }
+					    this.updateData(blog);
+					    if (typeof success === 'function') {
+					        success();
+					    }
+				    }.bind(this))
+			        .e404(function () {
+			            if (typeof error === 'function') {
+			                error();
+			            }
+			        }.bind(this))
+			        .e401(function () {
+			            if (typeof error === 'function') {
+			                error();
+			            }
+			        }.bind(this));
 			};
 
 			this.Blog.prototype.remove = function(){
@@ -306,12 +320,16 @@ Behaviours.register('blog', {
 			title: 'sniplet.title',
 			description: 'sniplet.desc',
 			controller: {
-				init: function(){
+			    init: function () {
+			        this.foundBlog = true;
 					this.me = model.me;
 					Behaviours.applicationsBehaviours.blog.model.register();
 					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
 					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
-					blog.open();
+					blog.open(undefined, function () {
+					    this.foundBlog = false;
+					    this.$apply();
+					}.bind(this));
 					blog.on('posts.sync, change', function(){
 						this.blog = blog;
 						this.blog.behaviours('blog');

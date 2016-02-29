@@ -87,5 +87,6 @@
     "sniplet.desc": "Ce sniplet vous permet d'afficher les articles d'un blog sur votre page.",
     "sniplet.title": "Blog",
     "submitted": "(Billet soumis)",
-    "blog.print": "Imprimer le blog"
+    "blog.print": "Imprimer le blog",
+    "blog.sniplet.notfound":  "Ce blog a été supprimé, ou vous n'avez pas les droits d'accès nécessaires."
 }

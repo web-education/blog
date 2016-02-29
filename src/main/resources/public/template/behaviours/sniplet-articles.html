@@ -19,6 +19,15 @@
     </article>
 </resource-right>
 
+<div ng-if="!foundBlog">
+    <h1 class="application-title"><i class="oops"></i><i18n>oops</i18n></h1>
+    <article>
+        <div class="row">
+            <i18n>blog.sniplet.notfound</i18n>
+        </div>
+    </article>
+</div>
+
 <div ng-repeat="post in blog.posts.all" class="articles-sniplet">
 	<div class="row" ng-if="!post.edit">
 		<div class="cell">
