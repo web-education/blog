@@ -73,7 +73,7 @@ function BlogController($scope, route, model, $location, date){
 				else{
                     template.open('main', 'blog');
 					$scope.blog.posts.sync();
-					$scope.blog.on('posts.sync', function(){
+					$scope.blog.one('posts.sync', function(){
 						setTimeout(function(){
 							window.print();
 						}, 1000);
