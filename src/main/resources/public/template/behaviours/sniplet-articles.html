@@ -1,4 +1,4 @@
-<resource-right name="update" resource="blog" class="articles-sniplet">
+<resource-right name="update" resource="blog" class="articles-sniplet zero-mobile">
     <div class="row" style="min-height: 20px">
         <input type="button" ng-click="newPost.showCreateBlog=true" target="_blank" i18n-value="sniplet.add.post"/>
     </div>
@@ -28,7 +28,7 @@
     </article>
 </div>
 
-<div ng-repeat="post in blog.posts.all" class="articles-sniplet">
+<article ng-repeat="post in blog.posts.all" class="articles-sniplet">
 	<div class="row" ng-if="!post.edit">
 		<div class="cell">
 			<h2 class="upper-title">
@@ -40,7 +40,7 @@
 				<i18n>post.author</i18n> <a href="/directory/annuaire#[[post.author.userId]]">[[post.author.username]]</a> <i18n>post.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]
 			</em>
 		</div>
-		<div class="right-magnet cell">
+		<div class="right-magnet cell zero-mobile">
 			<button ng-if="post.state === 'DRAFT'" ng-click="publish(post)" class="cell">
 				<i18n ng-if="blog.myRights.publishPost">publish</i18n>
 				<i18n ng-if="!blog.myRights.publishPost">blog.submitPost</i18n>
@@ -77,4 +77,4 @@
 	<div class="row" ng-if="!post.edit">
 		<div bind-html="post.content"></div>
 	</div>
-</div>
+</article>
