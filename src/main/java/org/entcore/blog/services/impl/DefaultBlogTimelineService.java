@@ -31,7 +31,6 @@ import fr.wseduc.webutils.collections.Joiner;
 public class DefaultBlogTimelineService implements BlogTimelineService {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultBlogTimelineService.class);
-	private static final String NOTIFICATION_TYPE = "BLOG";
 
 	private final Neo neo;
 	private final MongoDb mongo;
@@ -76,9 +75,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 												.putString("username", user.getUsername())
 												.putString("blogTitle", blogTitle)
 												.putString("resourceUri", resourceUri);
-										notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
-												NOTIFICATION_TYPE + "_SHARE", recipients,
-												blogId, "notification/notify-share.html", p);
+										notification.notifyTimeline(request, "blog.share", user, recipients, blogId, p);
 									}
 								}
 							});
@@ -107,9 +104,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									.putString("username", user.getUsername())
 									.putString("blogTitle", blog.getString("title"))
 									.putString("resourceUri", resourceUri);
-							notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
-									NOTIFICATION_TYPE + "_UPDATE", recipients,
-									blogId, "notification/notify-update-blog.html", p);
+							notification.notifyTimeline(request, "blog.update-blog", user, recipients, blogId, p);
 						}
 					}
 				}
@@ -160,10 +155,9 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 														new JsonObject()).getString("title"))
 												.putString("blogUri", resourceUri)
 												.putString("postTitle", post.getString("title"))
-												.putString("postUri", resourceUri + "/" + postId);
-										notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
-												NOTIFICATION_TYPE + "_POST_SUBMIT", recipients,
-												blogId, postId, "notification/notify-submit-post.html", p);
+												.putString("postUri", resourceUri + "/" + postId)
+												.putString("resourceUri", resourceUri + "/" + postId);
+										notification.notifyTimeline(request, "blog.submit-post", user, recipients, blogId, postId, p);
 
 									}
 								});
@@ -196,10 +190,9 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 											new JsonObject()).getString("title"))
 									.putString("blogUri", resourceUri)
 									.putString("postTitle", blog.getString("title"))
-									.putString("postUri", resourceUri + "/" + postId);
-							notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
-									NOTIFICATION_TYPE + "_POST_PUBLISH", recipients,
-									blogId, postId, "notification/notify-publish-post.html", p);
+									.putString("postUri", resourceUri + "/" + postId)
+									.putString("resourceUri", resourceUri + "/" + postId);
+							notification.notifyTimeline(request, "blog.publish-post", user, recipients, blogId, postId, p);
 						}
 					}
 				}
@@ -228,10 +221,9 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 											new JsonObject()).getString("title"))
 									.putString("blogUri", resourceUri)
 									.putString("postTitle", blog.getString("title"))
-									.putString("postUri", resourceUri + "/" + postId);
-							notification.notifyTimeline(request, user, NOTIFICATION_TYPE,
-									NOTIFICATION_TYPE + "_COMMENT", recipients,
-									blogId, postId, "notification/notify-publish-comment.html", p);
+									.putString("postUri", resourceUri + "/" + postId)
+									.putString("resourceUri", resourceUri + "/" + postId);
+							notification.notifyTimeline(request, "blog.publish-comment", user, recipients, blogId, postId, p);
 						}
 					}
 				}

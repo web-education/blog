@@ -1,4 +1,9 @@
 {
+    "blog.publish-comment": "Commentaire d'un billet de blog",
+    "blog.publish-post": "Publication d'un billet de blog",
+    "blog.share": "Partage d'un blog",
+    "blog.submit-post": "Soumission d'un billet de blog",
+    "blog.update-blog": "Modification d'un blog",
     "timeline.blog.in.blog": "dans le blog",
     "timeline.blog.published.comment": "a commenté le billet",
     "timeline.blog.published.post": "a publié un billet",

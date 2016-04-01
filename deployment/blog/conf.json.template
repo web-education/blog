@@ -6,6 +6,8 @@
       "address" : "wse.blog",
       "auto-redeploy": false,
       "ssl" : $ssl,
+      "app-name" : "Blog",
+      "app-address" : "/blog",
       "host": "${host}",
       "userbook-host": "${host}",
       "mode": "${mode}",
