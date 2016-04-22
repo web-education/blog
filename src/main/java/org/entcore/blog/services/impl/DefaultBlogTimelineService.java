@@ -87,32 +87,6 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	}
 
 	@Override
-	public void notifyUpdateBlog(final HttpServerRequest request, final String blogId, final UserInfos user,
-			final String resourceUri) {
-		if (resourceUri != null && user != null && blogId != null && request != null) {
-			QueryBuilder query = QueryBuilder.start("_id").is(blogId);
-			JsonObject keys = new JsonObject().putNumber("shared", 1).putNumber("title", 1);
-			findRecipiants("blogs", query, keys, null, user, new Handler<Map<String, Object>>() {
-				@Override
-				public void handle(Map<String, Object> event) {
-					if (event != null) {
-						List<String> recipients = (List<String>) event.get("recipients");
-						JsonObject blog = (JsonObject) event.get("blog");
-						if (recipients != null) {
-							JsonObject p = new JsonObject()
-									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
-									.putString("username", user.getUsername())
-									.putString("blogTitle", blog.getString("title"))
-									.putString("resourceUri", resourceUri);
-							notification.notifyTimeline(request, "blog.update-blog", user, recipients, blogId, p);
-						}
-					}
-				}
-			});
-		}
-	}
-
-	@Override
 	public void notifySubmitPost(final HttpServerRequest request, final String blogId, final String postId,
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
