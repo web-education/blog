@@ -10,6 +10,7 @@ import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserInfos;
+import org.entcore.common.utils.Config;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.eventbus.EventBus;
@@ -71,7 +72,8 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 										String blogTitle = event.body()
 												.getObject("result", new JsonObject()).getString("title");
 										JsonObject p = new JsonObject()
-												.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+												.putString("uri", Config.getInstance().getConfig().getString("host", "http://localhost:8090") +
+														"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 												.putString("username", user.getUsername())
 												.putString("blogTitle", blogTitle)
 												.putString("resourceUri", resourceUri);
@@ -122,11 +124,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 
 										recipients.add(authorId);
 										JsonObject p = new JsonObject()
-												.putString("uri",
+												.putString("uri", Config.getInstance().getConfig().getString("host", "http://localhost:8090") +
 														"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 												.putString("username", user.getUsername())
-												.putString("blogTitle", post.getObject("blog",
-														new JsonObject()).getString("title"))
+												.putString("blogTitle", post.getObject("blog", new JsonObject()).getString("title"))
 												.putString("blogUri", resourceUri)
 												.putString("postTitle", post.getString("title"))
 												.putString("postUri", resourceUri + "/" + postId)
@@ -158,10 +159,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						JsonObject blog = (JsonObject) event.get("blog");
 						if (recipients != null) {
 							JsonObject p = new JsonObject()
-									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+									.putString("uri", Config.getInstance().getConfig().getString("host", "http://localhost:8090") +
+											"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 									.putString("username", user.getUsername())
-									.putString("blogTitle", blog.getObject("blog",
-											new JsonObject()).getString("title"))
+									.putString("blogTitle", blog.getObject("blog", new JsonObject()).getString("title"))
 									.putString("blogUri", resourceUri)
 									.putString("postTitle", blog.getString("title"))
 									.putString("postUri", resourceUri + "/" + postId)
@@ -189,7 +190,8 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						JsonObject blog = (JsonObject) event.get("blog");
 						if (recipients != null) {
 							JsonObject p = new JsonObject()
-									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+									.putString("uri", Config.getInstance().getConfig().getString("host", "http://localhost:8090") +
+											"/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 									.putString("username", user.getUsername())
 									.putString("blogTitle", blog.getObject("blog",
 											new JsonObject()).getString("title"))
