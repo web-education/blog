@@ -38,7 +38,7 @@ Behaviours.register('blog', {
 				}
 				this.updateData(data);
                 this.fetchPosts = _.map(this.fetchPosts, function(post){
-                    return new Post(post);
+                    return new Behaviours.applicationsBehaviours.blog.model.Post(post);
                 });
 			}
 
