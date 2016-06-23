@@ -11,6 +11,7 @@ import fr.wseduc.webutils.*;
 
 import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.user.UserInfos;
+import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
@@ -59,6 +60,9 @@ public class DefaultPostService implements PostService {
 				.putObject("blog", blogRef);
 		JsonObject b = Utils.validAndGet(post, FIELDS, FIELDS);
 		if (validationError(result, b)) return;
+		if (b.containsField("content")) {
+			b.putString("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
+		}
 		mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
 			public void handle(Either<String, JsonObject> event) {
 				if(event.isLeft()){
@@ -77,6 +81,9 @@ public class DefaultPostService implements PostService {
 		post.putObject("modified", MongoDb.now());
 		JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
 		if (validationError(result, b)) return;
+		if (b.containsField("content")) {
+			b.putString("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
+		}
 		b.putString("state", StateType.DRAFT.name());
 		QueryBuilder query = QueryBuilder.start("_id").is(postId);
 		MongoUpdateBuilder modifier = new MongoUpdateBuilder();
