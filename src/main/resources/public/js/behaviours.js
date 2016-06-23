@@ -188,8 +188,8 @@ Behaviours.register('blog', {
 					title: this.title
 				})
 				.done(function(data){
-					this.updateData(data);
-					blog.posts.push(this);
+				    this.updateData(data);
+				    blog.posts.push(new Behaviours.applicationsBehaviours.blog.model.Post(data));
 					if(state !== 'DRAFT'){
 						this.publish(callback);
 					}
