@@ -282,6 +282,17 @@ function BlogController($scope, route, model, $location, date){
 			}, $scope.blog)
 		}
 	};
+	
+	$scope.savePublishedPost = function(){
+		if($scope.post._id !== undefined){
+			$scope.post.publish();
+		}
+		else{
+			$scope.post.save(function(){
+				$location.path('/view/' + $scope.blog._id + '/' + $scope.post._id);
+			}, $scope.blog, 'PUBLISHED');
+		}
+	};
 
     $scope.setDraftCb = function(post){
         post.state = "DRAFT"

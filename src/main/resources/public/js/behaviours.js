@@ -182,16 +182,17 @@ Behaviours.register('blog', {
 			};
 
 			this.Post.prototype.create = function(callback, blog, state){
-				this.blogId = blog._id;
 				http().postJson('/blog/post/' + blog._id, {
 					content: this.content,
 					title: this.title
 				})
 				.done(function(data){
 				    this.updateData(data);
-				    blog.posts.push(new Behaviours.applicationsBehaviours.blog.model.Post(data));
+					var post = new Behaviours.applicationsBehaviours.blog.model.Post(data);
+				    blog.posts.push(post);
+					post.blogId = blog._id;
 					if(state !== 'DRAFT'){
-						this.publish(callback);
+						post.publish(callback);
 					}
 					else{
 						if(typeof  callback === 'function'){
