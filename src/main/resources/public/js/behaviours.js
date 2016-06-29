@@ -187,9 +187,9 @@ Behaviours.register('blog', {
 					title: this.title
 				})
 				.done(function(data){
-				    this.updateData(data);
 					var post = new Behaviours.applicationsBehaviours.blog.model.Post(data);
 				    blog.posts.push(post);
+					post = blog.posts.last();
 					post.blogId = blog._id;
 					if(state !== 'DRAFT'){
 						post.publish(callback);
