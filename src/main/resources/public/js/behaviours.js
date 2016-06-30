@@ -167,7 +167,12 @@ Behaviours.register('blog', {
 			this.Post.prototype.publish = function(callback){
 				this.state = 'PUBLISHED';
 				if(this['publish-type'] === 'IMMEDIATE'){
-					http().putJson('/blog/post/publish/' + this.blogId + '/' + this._id);
+				    http().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
+				        if (typeof callback === 'function') {
+				            callback();
+				            this.trigger('change');
+				        }
+				    });
 					return;
 				}
 				http().putJson('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
@@ -191,6 +196,7 @@ Behaviours.register('blog', {
 				    blog.posts.push(post);
 					post = blog.posts.last();
 					post.blogId = blog._id;
+					post['publish-type'] = blog['publish-type'];
 					if(state !== 'DRAFT'){
 						post.publish(callback);
 					}
