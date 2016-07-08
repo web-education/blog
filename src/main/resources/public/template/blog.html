@@ -20,26 +20,25 @@
 <div class="row rigid-grid">
 
 
-	<div class="three cell side-col">
+	<div class="three cell side-col five-mobile">
 
 		<nav class="vertical">
 			<div class="twelve cell height-seven">
 				<div class="illustration">
 					<img skin-src="[[blog.icon]]" />
-					<!-- <input type="checkbox" ng-model="blog.selected" authorize="share" resource="blog" /> -->
-
-					<authorize name="share" resource="blog" >
-						<check-tool ng-model="blog.selected"></check-tool>
-					</authorize>
 				</div>
+				<authorize name="share" resource="blog" >
+					<check-tool ng-model="blog.selected"></check-tool>
+				</authorize>
+
 			</div>
 
-			<div class="row">
+			<div class="row centered-text block-container">
                 <i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
 			</div>
 			<hr class="row zero-mobile" />
-			<div class="row action-row zero-mobile">
-				<a class="button" target="_blank" ng-href="/blog/print/blog#/print/[[blog._id]]">
+			<div class="row action-row zero-mobile centered-text">
+				<a class="button text-flow" target="_blank" ng-href="/blog/print/blog#/print/[[blog._id]]">
 					<i18n>blog.print</i18n>
 				</a>
 			</div>
@@ -57,24 +56,23 @@
 		</floating-navigation>
 	</div>
 
-	<div class="margin-three main-col">
+	<div class="margin-three option-row five-mobile">
+		
+		<div class="cell right-magnet">
+			<a ng-href="#/new-article/[[blog._id]]" class="button cell" authorize="createPost" resource="blog">
+				<i18n>blog.create.post</i18n>
+			</a>
+		</div>
+
 		<div class="twelve cell">
-
-
 			<div class="row" authorize="createPost" resource="blog">
-				<div class="cell right-magnet twelve-mobile">
-					<a ng-href="#/new-article/[[blog._id]]" class="button cell" authorize="createPost" resource="blog">
-						<i18n>blog.create.post</i18n>
-					</a>
-				</div>
+
 				<div class="cell twelve-mobile">
 					<microbox title="posts.filter" close="ok">
 						<container template="filters" class="cell"></container>
 					</microbox>
 				</div>
 			</div>
-
-
 		</div>
 	</div>
 
