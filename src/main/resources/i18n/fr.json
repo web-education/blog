@@ -42,7 +42,7 @@
   "filters.drafts": "Brouillons ([[count('DRAFT')]])",
   "filters.published": "Publiés",
   "filters.submitted": "Soumis ([[count('SUBMITTED')]])",
-  "group.AdminLocal": "Tous les administrateurs locaux",
+  "group.AdminLocal": "Tous les administrateurs locaux du groupe {0}.",
   "group.Personnel": "Tous les personnels du groupe {0}.",
   "group.Relative": "Tous les parents du groupe {0}.",
   "group.Student": "Tous les élèves du groupe {0}.",
