@@ -149,6 +149,8 @@ Behaviours.register('blog', {
             this.Post.prototype.open = function(cb){
                 http().get('/blog/post/' + this.blogId + '/' + this._id, {state: this.state}).done(function(data){
                     this.content = data.content;
+                    this.data.content = data.content;
+                    this.trigger('change');
                     if(typeof cb === 'function')
                         cb();
                 }.bind(this));

@@ -257,6 +257,11 @@ function BlogController($scope, route, model, $location, date){
 			});
 	};
 
+	$scope.cancelEditing = function (post) {
+	    post.editing = false;
+	    post.content = post.data.content;
+	}
+
 	$scope.saveDraft = function(){
 		if(!$scope.post.content){
 			notify.error('post.empty');
