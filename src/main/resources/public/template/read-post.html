@@ -54,7 +54,7 @@
 	<article class="comment" ng-repeat="comment in post.comments.all">
 		<div class="row">
 			<div class="cell">
-				<em><a href="/userbook#/user-view/[[comment.author.userId]]">[[comment.author.username]]</a>, [[comment.created.fromNow()]]</em>
+				<em><a href="/userbook/annuaire#/user-view/[[comment.author.userId]]">[[comment.author.username]]</a>, [[comment.created.fromNow()]]</em>
 			</div>
 			<div class="cell right-magnet" ng-if="comment.author.userId === me.userId || blog.myRights.removeComment">
 				<a ng-click="post.comments.remove(comment)"><i18n>remove</i18n></a>
