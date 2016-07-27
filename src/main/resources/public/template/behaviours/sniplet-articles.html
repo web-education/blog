@@ -28,10 +28,13 @@
     </article>
 </div>
 
-<article ng-repeat="post in blog.posts.all | orderBy:'-firstPublishDate.$date'" class="articles-sniplet">
+<article
+        ng-repeat="post in blog.posts.all | orderBy:'-firstPublishDate.$date'"
+        ng-init="$first ? slidePost(post) : ''"
+        class="articles-sniplet">
 	<div class="row" ng-if="!post.edit">
 		<div class="cell">
-			<h2 class="upper-title">
+			<h2 class="upper-title" ng-click="slidePost(post)">
 				<span class="warning-text-badge" ng-if="post.state === 'DRAFT'"><i18n>draft</i18n></span>
 				<span class="warning-text-badge" ng-if="post.state === 'SUBMITTED'"><i18n>submitted</i18n></span>
 				[[post.title]]
@@ -51,7 +54,7 @@
 				</button>
 			</resource-right>
 			<resource-right class="cell" name="editPost" resource="blog">
-				<button type="button" ng-click="post.edit = true;" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
+				<button type="button" ng-click="slidePost(post); post.edit = true;" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
 					<i18n>edit</i18n>
 				</button>
 			</resource-right>
@@ -74,7 +77,7 @@
 			<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="post.edit=false"/>
 		</div>
 	</div>
-	<div class="row" ng-if="!post.edit">
+	<div class="row" ng-if="!post.edit && post.slided">
 		<div bind-html="post.content"></div>
 	</div>
 </article>

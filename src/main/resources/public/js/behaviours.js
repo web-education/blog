@@ -358,9 +358,7 @@ Behaviours.register('blog', {
 					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
 					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
 					blog.open(function(){
-                        blog.posts.syncPosts(function(){
-                            this.$apply();
-                        }.bind(this));
+                        blog.posts.syncPosts();
                     }.bind(this), function () {
 					    this.foundBlog = false;
 					    this.$apply();
@@ -414,15 +412,19 @@ Behaviours.register('blog', {
 				addPost: function(){
 					this.newPost.showCreateBlog = false;
 					this.newPost.save(function(){
-						this.blog.posts.sync();
-						delete(this.newPost._id);
-						this.newPost.content = "";
-						this.newPost.title = "";
+						this.blog.posts.syncPosts(function(){
+                            this.$apply();
+                        }.bind(this));
+                        delete(this.newPost._id);
+                        this.newPost.content = "";
+                        this.newPost.title = "";
 					}.bind(this), this.blog);
 				},
 				removePost: function(post){
 					post.remove(function(){
-						this.blog.posts.sync();
+						this.blog.posts.syncPosts(function(){
+                            this.$apply();
+                        }.bind(this));
 					}.bind(this));
 				},
 				addArticle: function(){
@@ -443,9 +445,23 @@ Behaviours.register('blog', {
 				},
 				publish: function(post){
 					post.publish(function(){
-						this.blog.posts.sync();
+						this.blog.posts.syncPosts(function(){
+                            this.$apply();
+                        }.bind(this));
 					}.bind(this));
-				}
+				},
+                slidePost: function(post){
+                    var scope = this
+                    post.open(function(){
+                        scope.blog.posts.forEach(function(p){
+                            if(post._id === p._id)
+                                p.slided = true
+                            else
+                                p.slided = false
+                            scope.$apply()
+                        })
+                    })
+                }
 			}
 		}
 	}
