@@ -431,8 +431,12 @@ Behaviours.register('blog', {
 					this.editBlog = {};
 				},
 				saveEdit: function(post){
-					post.save();
-                    post.publish();
+                    var scope = this
+					post.save(function(){
+                        post.publish(function(){
+                            scope.apply();
+                        });
+                    });
 					post.edit = false;
 				},
 				formatDate: function(date){
