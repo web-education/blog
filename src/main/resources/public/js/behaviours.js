@@ -357,7 +357,11 @@ Behaviours.register('blog', {
 					Behaviours.applicationsBehaviours.blog.model.register();
 					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
 					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
-					blog.open(undefined, function () {
+					blog.open(function(){
+                        blog.posts.syncPosts(function(){
+                            this.$apply();
+                        }.bind(this));
+                    }.bind(this), function () {
 					    this.foundBlog = false;
 					    this.$apply();
 					}.bind(this));
