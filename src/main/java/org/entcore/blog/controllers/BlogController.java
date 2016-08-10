@@ -142,8 +142,8 @@ public class BlogController extends BaseController {
 		});
 	}
 
-	private String getBlogUri(String blogId) {
-		return container.config().getString("host", "http://localhost:8018") + pathPrefix + "#/view/" + blogId;
+	private String getBlogUri(HttpServerRequest request, String blogId) {
+		return getScheme(request) + "://" + getHost(request) + pathPrefix + "#/view/" + blogId;
 	}
 
 	@Delete("/:blogId")
@@ -283,7 +283,7 @@ public class BlogController extends BaseController {
 										JsonObject n = event.right().getValue().getObject("notify-timeline");
 										if (n != null) {
 											timelineService.notifyShare(
-												request, blogId, user, new JsonArray().add(n), getBlogUri(blogId));
+												request, blogId, user, new JsonArray().add(n), getBlogUri(request, blogId));
 										}
 										renderJson(request, event.right().getValue());
 									} else {
