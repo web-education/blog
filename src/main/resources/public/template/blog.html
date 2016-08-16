@@ -44,7 +44,7 @@
 			</div>
 		</nav>
 
-		<h2 class="float-title"><i18n>blog.posts.list</i18n></h2>
+		<h2 class="float-title zero-mobile"><i18n>blog.posts.list</i18n></h2>
 		<floating-navigation title="blog.posts.list" class="zero-mobile" ng-if="blog.posts.length() != 0">
 			<ul>
 				<li ng-repeat="post in blog.posts.all | filter:applyFilters | orderBy:'-firstPublishDate.$date'" ng-click="redirect('/view/' + blog._id + '/' + post._id)" ng-init="$first ? openFirstPost(blog, post) : ''">
@@ -57,7 +57,7 @@
 	</div>
 
 	<div class="margin-three option-row five-mobile">
-		
+
 		<div class="cell right-magnet">
 			<a ng-href="#/new-article/[[blog._id]]" class="button cell" authorize="createPost" resource="blog">
 				<i18n>blog.create.post</i18n>
