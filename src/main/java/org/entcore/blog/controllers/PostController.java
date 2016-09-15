@@ -186,11 +186,11 @@ public class PostController extends BaseController {
 							if (event.isRight()) {
 								if ("PUBLISHED".equals(event.right().getValue().getString("state"))) {
 									timelineService.notifyPublishPost(request, blogId, postId, user,
-											getScheme(request) + "://" + getHost(request) + pathPrefix + "#/view/" + blogId);
+											pathPrefix + "#/view/" + blogId);
 								}
 								else if ("SUBMITTED".equals(event.right().getValue().getString("state"))) {
 									timelineService.notifySubmitPost(request, blogId, postId, user,
-											getScheme(request) + "://" + getHost(request) + pathPrefix + "#/view/" + blogId);
+											pathPrefix + "#/view/" + blogId);
 								}
 								renderJson(request, event.right().getValue());
 							} else {
@@ -225,7 +225,7 @@ public class PostController extends BaseController {
 						@Override
 						public void handle(UserInfos user) {
 							timelineService.notifyPublishPost(request, blogId, postId, user,
-									getScheme(request) + "://" + getHost(request) + pathPrefix + "#/view/" + blogId);
+									pathPrefix + "#/view/" + blogId);
 						}
 					});
 					renderJson(request, event.right().getValue());
@@ -270,7 +270,7 @@ public class PostController extends BaseController {
 								public void handle(Either<String, JsonObject> event) {
 									if (event.isRight()) {
 										timelineService.notifyPublishComment(request, blogId, postId, user,
-												getScheme(request) + "://" + getHost(request) + pathPrefix + "#/view/" + blogId);
+												pathPrefix + "#/view/" + blogId);
 										renderJson(request, event.right().getValue());
 									} else {
 										JsonObject error = new JsonObject().putString("error", event.left().getValue());

@@ -143,7 +143,7 @@ public class BlogController extends BaseController {
 	}
 
 	private String getBlogUri(HttpServerRequest request, String blogId) {
-		return getScheme(request) + "://" + getHost(request) + pathPrefix + "#/view/" + blogId;
+		return pathPrefix + "#/view/" + blogId;
 	}
 
 	@Delete("/:blogId")
