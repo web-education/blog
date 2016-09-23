@@ -193,6 +193,7 @@ function BlogController($scope, route, model, $location, date){
 	    }
 	    else {
 	        $scope.redirect('/view/' + blog._id + '/' + post._id);
+			$scope.currPost = post._id;
 	    }
 	};
 
@@ -201,6 +202,7 @@ function BlogController($scope, route, model, $location, date){
         post.open(function(){
             $scope.$apply();
         });
+		$scope.currPost = post._id;
     };
 
 	$scope.display = {
@@ -287,7 +289,7 @@ function BlogController($scope, route, model, $location, date){
 			}, $scope.blog)
 		}
 	};
-	
+
 	$scope.savePublishedPost = function(){
 		if($scope.post._id !== undefined){
 			$scope.post.publish();
@@ -365,4 +367,5 @@ function BlogController($scope, route, model, $location, date){
 			discriminator = 1;
 		return parseInt(discriminator + '' + blog.modified.$date);
 	}
+
 }

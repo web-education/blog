@@ -47,8 +47,8 @@
 		<h2 class="float-title zero-mobile"><i18n>blog.posts.list</i18n></h2>
 		<floating-navigation title="blog.posts.list" class="zero-mobile" ng-if="blog.posts.length() != 0">
 			<ul>
-				<li ng-repeat="post in blog.posts.all | filter:applyFilters | orderBy:'-firstPublishDate.$date'" ng-click="redirect('/view/' + blog._id + '/' + post._id)" ng-init="$first ? openFirstPost(blog, post) : ''">
-					<a>
+				<li ng-repeat="post in blog.posts.all | filter:applyFilters | orderBy:'-firstPublishDate.$date'" ng-click="openClosePost(blog, post)" ng-init="$first ? openFirstPost(blog, post) : ''">
+					<a ng-class="{'selected': post._id === currPost}" >
 						[[post.title]]
 					</a>
 				</li>
