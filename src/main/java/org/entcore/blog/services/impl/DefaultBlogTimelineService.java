@@ -208,6 +208,15 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 					if (event != null) {
 						List<String> recipients = (List<String>) event.get("recipients");
 						JsonObject blog = (JsonObject) event.get("blog");
+						String ownerId = blog.getObject("blog", new JsonObject())
+								.getObject("author", new JsonObject())
+								.getString("userId");
+						if(ownerId != null && !ownerId.equals(user.getUserId())){
+							if(recipients == null){
+								recipients = new ArrayList<String>();
+							}
+							recipients.add(ownerId);
+						}
 						if (recipients != null) {
 							JsonObject p = new JsonObject()
 									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
