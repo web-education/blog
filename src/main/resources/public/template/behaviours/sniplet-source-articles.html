@@ -7,6 +7,9 @@
 					Vos actualités seront ajoutées dans un nouveau blog automatiquement créé.
 				</p>
 				<div class="row">
+					<input type="text" ng-model="blog.title" i18n-placeholder="title" class="twelve cell" />
+				</div>
+				<div class="row">
 					<input type="button" i18n-value="Créer le blog" ng-click="createBlog()" class="cell right-magnet" />
 				</div>
 			</div>

@@ -385,7 +385,7 @@ Behaviours.register('blog', {
 					console.log('automatic blog creation');
 					if(this.snipletResource){
 						this.blog.thumbnail = this.snipletResource.icon || '';
-						this.blog.title = 'Les actualités du site ' + this.snipletResource.title;
+						this.blog.title = this.blog.title || 'Les actualités du site ' + this.snipletResource.title;
 						this.blog['comment-type'] = 'IMMEDIATE';
 						this.blog.description = '';
 					}
