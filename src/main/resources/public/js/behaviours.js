@@ -323,26 +323,31 @@ Behaviours.register('blog', {
 		}
 	},
 	loadResources: function(callback){
-		this.model.register();
-		this.model.app.blogs.sync(function(){
-			this.resources = this.model.app.blogs.map(function(blog){
+		http().get('/blog/linker').done(function(data){
+			let posts = [];
+			data.forEach(function(blog){
 				if(blog.thumbnail){
 					blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';
 				}
 				else{
 					blog.thumbnail = '/img/illustrations/blog.png'
 				}
-				return {
-					title: blog.title,
-					owner: {
-						name: blog.author.username,
-						userId: blog.author.userId
-					},
-					icon: blog.thumbnail,
-					path: '/blog#/view/' + blog._id,
-					_id: blog._id
-				};
+
+				let addedPosts = _.map(blog.fetchPosts, function(post){
+					return {
+						owner: {
+							name: blog.author.username,
+							userId: blog.author.userId
+						},
+						title: post.title + ' [' + blog.title + ']',
+						_id: blog._id,
+						icon: blog.thumbnail,
+						path: '/blog#/view/' + blog._id + '/' + post._id,
+					}
+				});
+				posts = posts.concat(addedPosts);
 			});
+			this.resources = posts;
 			callback(this.resources);
 		}.bind(this));
 	},

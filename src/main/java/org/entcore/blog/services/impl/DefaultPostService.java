@@ -200,9 +200,6 @@ public class DefaultPostService implements PostService {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 			}
 		});
-
-
-
 	}
 
 	@Override

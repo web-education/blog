@@ -113,6 +113,7 @@ function BlogController($scope, route, model, $location, date){
                                 post.open(function(){
                                     post.slided = true;
                                     post.comments.sync();
+									$scope.currPost = post._id;
                                     $scope.$apply();
                                 });
                             } else {
@@ -126,6 +127,7 @@ function BlogController($scope, route, model, $location, date){
 					} else {
 						$scope.blog.posts.forEach(function(post){
 							if(post._id === params.postId){
+								$scope.currPost = post._id;
 								post.open(function(){
                                     post.slided = true;
                                     $scope.$apply();
@@ -193,7 +195,6 @@ function BlogController($scope, route, model, $location, date){
 	    }
 	    else {
 	        $scope.redirect('/view/' + blog._id + '/' + post._id);
-			$scope.currPost = post._id;
 	    }
 	};
 

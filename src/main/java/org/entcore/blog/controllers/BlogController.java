@@ -238,6 +238,58 @@ public class BlogController extends BaseController {
 		});
 	}
 
+	@Get("/linker")
+	@SecuredAction("blog.linker")
+	public void listBlogsIds(final HttpServerRequest request) {
+		getUserInfos(eb, request, new Handler<UserInfos>() {
+			@Override
+			public void handle(final UserInfos user) {
+				if (user != null) {
+					blog.list(user, new Handler<Either<String,JsonArray>>() {
+						public void handle(Either<String, JsonArray> event) {
+							if(event.isLeft()){
+								arrayResponseHandler(request).handle(event);;
+								return;
+							}
+
+							final JsonArray blogs = event.right().getValue();
+
+							if(blogs.size() < 1){
+								renderJson(request, new JsonArray());
+								return;
+							}
+
+							final AtomicInteger countdown = new AtomicInteger(blogs.size());
+							final VoidHandler finalHandler = new VoidHandler() {
+								protected void handle() {
+									if(countdown.decrementAndGet() <= 0){
+										renderJson(request, blogs);
+									}
+								}
+							};
+
+							for(Object blogObj : blogs){
+								final JsonObject blog = (JsonObject) blogObj;
+
+								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, 0, new Handler<Either<String,JsonArray>>() {
+									public void handle(Either<String, JsonArray> event) {
+										if(event.isRight()){
+											blog.putArray("fetchPosts", event.right().getValue());
+										}
+										finalHandler.handle(null);
+									}
+								});
+							}
+
+						}
+					});
+				} else {
+					unauthorized(request);
+				}
+			}
+		});
+	}
+
 	@Get("/share/json/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void shareJson(final HttpServerRequest request) {
