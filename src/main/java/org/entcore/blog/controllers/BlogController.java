@@ -239,7 +239,7 @@ public class BlogController extends BaseController {
 	}
 
 	@Get("/linker")
-	@SecuredAction("blog.linker")
+    @SecuredAction(value = "blog.linker", type = ActionType.AUTHENTICATED)
 	public void listBlogsIds(final HttpServerRequest request) {
 		getUserInfos(eb, request, new Handler<UserInfos>() {
 			@Override
@@ -248,7 +248,7 @@ public class BlogController extends BaseController {
 					blog.list(user, new Handler<Either<String,JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
 							if(event.isLeft()){
-								arrayResponseHandler(request).handle(event);;
+								arrayResponseHandler(request).handle(event);
 								return;
 							}
 
