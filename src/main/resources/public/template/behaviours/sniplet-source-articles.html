@@ -1,8 +1,8 @@
 <div class="open-source">
-	<button ng-click="pickBlog = true"><i18n>sniplet.add.blog</i18n></button>
+	<button ng-click="showPickBlog = true"><i18n>sniplet.add.blog</i18n></button>
 </div>
 
-<lightbox show="pickBlog">
+<lightbox show="showPickBlog">
 	<div class="row accordions">
 		<article class="accordion" ng-class="{ opened: !existingBlog }">
 			<h2 ng-click="existingBlog = false;"><i18n>Nouveau blog</i18n></h2>
