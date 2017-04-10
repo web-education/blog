@@ -31,9 +31,9 @@
 				<em><i18n>blog.empty</i18n></em>
 			</div>
 		</div>
-		<authorize name="share" resource="blog" >
+		<resources-right name="share" resource="blog" >
 			<check-tool ng-model="blog.selected" ng-click="$event.stopPropagation()" ></check-tool>
-		</authorize>
+		</resources-right>
 	</div>
 </div>
 

@@ -54,8 +54,6 @@ import fr.wseduc.webutils.http.Renders;
 
 public class DefaultBlogTimelineService implements BlogTimelineService {
 
-	private static final Logger log = LoggerFactory.getLogger(DefaultBlogTimelineService.class);
-
 	private final Neo neo;
 	private final MongoDb mongo;
 	private final TimelineHelper notification;
@@ -254,6 +252,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						shared = blog.getObject("blog", new JsonObject()).getArray("shared");
 					}
 					if (shared != null) {
+						shared.add(blog.getObject("blog", new JsonObject()).getObject("author")); //Allows owner to get notified for contributors posts
 						List<String> shareIds = getSharedIds(shared, filterRights);
 						if (!shareIds.isEmpty()) {
 							Map<String, Object> params = new HashMap<>();

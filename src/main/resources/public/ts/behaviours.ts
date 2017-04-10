@@ -1,14 +1,17 @@
+import { Behaviours, http, Collection, model } from 'entcore/entcore';
+import { _ } from 'entcore/libs/underscore/underscore';
+import { moment } from 'entcore/libs/moment/moment';
+
 console.log('blog behaviours file');
 
-Behaviours.register('blog', {
-	model: {
+export let blogModel: any = {
 		Comment: function(data){
 			if(data && data.created){
 				this.created = moment(this.created.$date);
 			}
 		},
 		Post: function(data){
-			var that = this;
+			let that = this;
 			if(data){
 				this.created = data.created ? moment(data.created.$date) : moment();
 				this.modified = data.modified ? moment(data.modified.$date) : moment();
@@ -22,7 +25,7 @@ Behaviours.register('blog', {
 			});
 		},
 		Blog: function(data){
-			var that = this;
+			let that = this;
 			if(data && data._id){
 				this._id = data._id;
 				this.owner = data.author;
@@ -52,7 +55,7 @@ Behaviours.register('blog', {
 						posts.map(function(item){
 							item.blogId = data._id;
 							item['publish-type'] = data['publish-type'];
-                            item['firstPublishDate'] = item['firstPublishDate'] || item['modified']
+                            item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
 							return item;
 						});
 						this.load(posts);
@@ -67,7 +70,7 @@ Behaviours.register('blog', {
 					http().postJson('/blog/post/' + that._id, post).done(function(result){
 						post._id = result._id;
 						this.push(post);
-						var newPost = this.last();
+						let newPost = this.last();
 						newPost.blogId = that._id;
 						if(typeof callback === 'function'){
 							callback(newPost);
@@ -116,8 +119,8 @@ Behaviours.register('blog', {
 					'comment-type': this['comment-type'] || 'IMMEDIATE',
 					'publish-type': this['publish-type'] || 'RESTRAINT',
 					description: this.description || ''
-				};
-			};
+				}
+			}
 
 			this.Blog.prototype.create = function(fn){
 				http().postJson('/blog', this)
@@ -127,15 +130,15 @@ Behaviours.register('blog', {
 							fn();
 						}
 					}.bind(this));
-			};
+			}
 
 			this.Blog.prototype.saveModifications = function(fn){
 				http().putJson('/blog/' + this._id, this).done(function(){
 					if(typeof fn === 'function'){
 						fn();
 					}
-				});
-			};
+				})
+			}
 
 			this.Blog.prototype.save = function(fn){
 				if(this._id){
@@ -144,7 +147,7 @@ Behaviours.register('blog', {
 				else{
 					this.create(fn);
 				}
-			};
+			}
 
             this.Post.prototype.open = function(cb){
                 http().get('/blog/post/' + this.blogId + '/' + this._id, {state: this.state}).done(function(data){
@@ -154,7 +157,7 @@ Behaviours.register('blog', {
                     if(typeof cb === 'function')
                         cb();
                 }.bind(this));
-            };
+            }
 
 			this.Post.prototype.submit = function(callback){
 				this.state = 'SUBMITTED';
@@ -164,7 +167,7 @@ Behaviours.register('blog', {
 					}
 					this.trigger('change');
 				}.bind(this));
-			};
+			}
 
 			this.Post.prototype.publish = function(callback){
 				this.state = 'PUBLISHED';
@@ -186,7 +189,7 @@ Behaviours.register('blog', {
 				.e401(function(){
 					this.submit(callback);
 				}.bind(this));
-			};
+			}
 
 			this.Post.prototype.create = function(callback, blog, state){
 				http().postJson('/blog/post/' + blog._id, {
@@ -194,7 +197,7 @@ Behaviours.register('blog', {
 					title: this.title
 				})
 				.done(function(data){
-					var post = new Behaviours.applicationsBehaviours.blog.model.Post(data);
+					let post = new Behaviours.applicationsBehaviours.blog.model.Post(data);
 				    blog.posts.push(post);
 					post = blog.posts.last();
 					post.blogId = blog._id;
@@ -208,7 +211,7 @@ Behaviours.register('blog', {
 						}
 					}
 				}.bind(this));
-			};
+			}
 
 			this.Post.prototype.saveModifications = function(callback){
 				http().putJson('/blog/post/' + this.blogId + '/' + this._id, {
@@ -219,7 +222,7 @@ Behaviours.register('blog', {
                         callback();
                     }
                 });
-			};
+			}
 
 			this.Post.prototype.save = function(callback, blog, state){
 				if(this._id){
@@ -228,7 +231,7 @@ Behaviours.register('blog', {
 				else{
 					this.create(callback, blog, state);
 				}
-			};
+			}
 
 			this.Post.prototype.remove = function(callback){
 				http().delete('/blog/post/' + this.blogId + '/' + this._id)
@@ -237,13 +240,13 @@ Behaviours.register('blog', {
 							callback();
 						}
 					});
-			};
+			}
 
 			this.Post.prototype.comment = function(comment){
 				http().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
 					this.comments.sync();
-				}.bind(this))
-			};
+				}.bind(this));
+			}
 
 			this.Blog.prototype.open = function(success, error){
 			    http().get('/blog/' + this._id)
@@ -260,30 +263,33 @@ Behaviours.register('blog', {
 				    }.bind(this))
 			        .e404(function () {
 			            if (typeof error === 'function') {
-			                error();
+			                error()
 			            }
 			        }.bind(this))
 			        .e401(function () {
 			            if (typeof error === 'function') {
-			                error();
+			                error()
 			            }
 			        }.bind(this));
-			};
+			}
 
 			this.Blog.prototype.remove = function(){
 				http().delete('/blog/' + this._id);
-			};
+			}
 
 			this.Comment.prototype.toJSON = function(){
 				return {
 					comment: this.comment
 				}
-			};
+			}
 
 			model.makeModels(this);
 			this.app = new this.App();
 		}
-	},
+	}
+
+Behaviours.register('blog', {
+	model: blogModel,
 	rights: {
 		resource: {
 			update: {
@@ -324,13 +330,13 @@ Behaviours.register('blog', {
 	},
 	loadResources: function(callback){
 		http().get('/blog/linker').done(function(data){
-			var posts = [];
+			const posts = [];
 			data.forEach(function(blog){
 				if(blog.thumbnail){
 					blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';
 				}
 				else{
-					blog.thumbnail = '/img/illustrations/blog.png'
+					blog.thumbnail = '/img/illustrations/blog.png';
 				}
 
 				var addedPosts = _.map(blog.fetchPosts, function(post){
@@ -346,7 +352,7 @@ Behaviours.register('blog', {
 					}
 				});
 				posts = posts.concat(addedPosts);
-			});
+			})
 			this.resources = posts;
 			callback(this.resources);
 		}.bind(this));
@@ -360,7 +366,7 @@ Behaviours.register('blog', {
 			        this.foundBlog = true;
 					this.me = model.me;
 					Behaviours.applicationsBehaviours.blog.model.register();
-					var blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
+					let blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
 					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
 					blog.open(function(){
                         blog.posts.syncPosts();
@@ -376,7 +382,7 @@ Behaviours.register('blog', {
 				},
 				initSource: function(){
 					Behaviours.applicationsBehaviours.blog.model.register();
-					var app = new Behaviours.applicationsBehaviours.blog.model.App();
+					let app = new Behaviours.applicationsBehaviours.blog.model.App();
 					this.blog = new Behaviours.applicationsBehaviours.blog.model.Blog();
 					app.blogs.sync(function(){
 						this.blogs = app.blogs;
@@ -396,21 +402,21 @@ Behaviours.register('blog', {
 					}
 					this.blog.save(function(){
 						//filler post publication
-						var post = {
+						let post = {
 							state: 'SUBMITTED',
 							content: '<p>Voici le premier billet publié sur votre site !</p><p>Vous pouvez créer de nouveaux billets (si vous êtes contributeur) en cliquant sur le bouton "Ajouter un billet" ' +
 							'ci-dessus, ou en accédant directement à l\'application Blog. Vos visiteurs pourront également suivre vos actualités depuis leur application, ' +
 							'et seront notifiés lorsque votre site sera mis à jour.</p><p>La navigation, à gauche des billets, est automatiquement mise à jour lorsque vous ajoutez'+
 							' des pages à votre site.</p>',
 							title: 'Votre premier billet !'
-						};
+						}
 						this.blog.posts.addDraft(post, function(post){
 							post.publish(function(){
 								this.setSnipletSource(this.blog);
 								//sharing rights copy
 								this.snipletResource.synchronizeRights();
-							}.bind(this));
-						}.bind(this));
+							}.bind(this))
+						}.bind(this))
 					}.bind(this));
 
 				},
@@ -429,18 +435,18 @@ Behaviours.register('blog', {
 					post.remove(function(){
 						this.blog.posts.syncPosts(function(){
                             this.$apply();
-                        }.bind(this));
-					}.bind(this));
+                        }.bind(this))
+					}.bind(this))
 				},
 				addArticle: function(){
 					this.editBlog = {};
 				},
 				saveEdit: function(post){
-                    var scope = this
+                    let scope = this;
 					post.save(function(){
                         post.publish(function(){
                             scope.apply();
-                        });
+                        })
                     });
 					post.edit = false;
 				},
@@ -456,22 +462,22 @@ Behaviours.register('blog', {
 					post.publish(function(){
 						this.blog.posts.syncPosts(function(){
                             this.$apply();
-                        }.bind(this));
-					}.bind(this));
+                        }.bind(this))
+					}.bind(this))
 				},
                 slidePost: function(post){
-                    var scope = this
+                    let scope = this;
                     post.open(function(){
                         scope.blog.posts.forEach(function(p){
                             if(post._id === p._id)
-                                p.slided = true
+                                p.slided = true;
                             else
-                                p.slided = false
-                            scope.$apply()
+                                p.slided = false;
+                            scope.$apply();
                         })
                     })
                 }
 			}
 		}
 	}
-});
+})

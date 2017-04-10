@@ -27,9 +27,9 @@
 				<div class="illustration">
 					<img skin-src="[[blog.icon]]" />
 				</div>
-				<authorize name="share" resource="blog" >
+				<resources-right name="share" resource="blog" >
 					<check-tool ng-model="blog.selected"></check-tool>
-				</authorize>
+				</resources-right>
 
 			</div>
 
@@ -45,7 +45,7 @@
 		</nav>
 
 		<h2 class="float-title zero-mobile"><i18n>blog.posts.list</i18n></h2>
-		<floating-navigation title="blog.posts.list" class="zero-mobile" ng-if="blog.posts.length() != 0">
+		<floating-navigation tooltip="blog.posts.list" class="zero-mobile" ng-if="blog.posts.length() != 0">
 			<ul>
 				<li ng-repeat="post in blog.posts.all | filter:applyFilters | orderBy:'-firstPublishDate.$date'" ng-click="openClosePost(blog, post)" ng-init="$first ? openFirstPost(blog, post) : ''">
 					<a ng-class="{'selected': post._id === currPost}" >

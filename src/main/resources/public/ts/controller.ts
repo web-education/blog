@@ -1,3 +1,5 @@
+import { Behaviours, routes, template, idiom, http, notify } from 'entcore/entcore'
+
 routes.define(function($routeProvider){
 	$routeProvider
 		.when('/view/:blogId', {
@@ -23,7 +25,8 @@ routes.define(function($routeProvider){
 		})
 });
 
-function BlogController($scope, route, model, $location, date){
+export function BlogController($scope, route, model, $location){
+
 	$scope.template = template;
 	template.open('filters', 'filters');
 	template.open('edit-post', 'edit-post');
@@ -32,7 +35,7 @@ function BlogController($scope, route, model, $location, date){
 
 	$scope.me = model.me;
 	$scope.blogs = model.blogs;
-	$scope.comment = new Comment();
+	$scope.comment = new Behaviours.applicationsBehaviours.blog.model.Comment();
 	$scope.lang = idiom;
 
 	route({
@@ -51,8 +54,8 @@ function BlogController($scope, route, model, $location, date){
     					$scope.blog.posts.syncPosts(function(){
                             $scope.blog.posts.forEach(function(post){
     							post.comments.sync();
-    						});
-                        });
+    						})
+                        })
                     }
 				}
 			});
@@ -72,15 +75,15 @@ function BlogController($scope, route, model, $location, date){
 				else{
                     template.open('main', 'blog');
 					$scope.blog.posts.syncPosts(function(){
-                        var countDown = $scope.blog.posts.length();
-                        var onFinish = function(){
+                        let countDown = $scope.blog.posts.length();
+                        let onFinish = function(){
                             if(--countDown <= 0){
                                 $scope.$apply();
         						setTimeout(function(){
-        							window.print();
+        							window.print()
         						}, 1000);
                             }
-                        };
+                        }
 
                         if(countDown === 0){
                             onFinish();
@@ -88,10 +91,10 @@ function BlogController($scope, route, model, $location, date){
                         $scope.blog.posts.forEach(function(post){
                             post.open(function(){
                                 onFinish();
-                            });
-                        });
+                            })
+                        })
 
-					});
+					})
 				}
 			});
 			model.blogs.sync();
@@ -115,13 +118,13 @@ function BlogController($scope, route, model, $location, date){
                                     post.comments.sync();
 									$scope.currPost = post._id;
                                     $scope.$apply();
-                                });
+                                })
                             } else {
                                 post.comments.sync();
                                 post.slided = false;
                             }
-						});
-					});
+						})
+					})
 					if(!$scope.blog.posts.length()){
 						$scope.blog.posts.syncPosts();
 					} else {
@@ -131,13 +134,13 @@ function BlogController($scope, route, model, $location, date){
 								post.open(function(){
                                     post.slided = true;
                                     $scope.$apply();
-                                });
+                                })
                             } else
 								post.slided = false;
-						});
+						})
 					}
 				}
-			});
+			})
 			if(!$scope.blog){
 				model.blogs.sync();
 			}
@@ -146,7 +149,7 @@ function BlogController($scope, route, model, $location, date){
 			}
 		},
 		newArticle: function(params){
-			$scope.post = new Post();
+			$scope.post = new Behaviours.applicationsBehaviours.blog.model.Post();
 
 			model.one('blogs.sync', function(){
 				$scope.blog = model.blogs.findWhere({ _id: params.blogId });
@@ -156,7 +159,7 @@ function BlogController($scope, route, model, $location, date){
                     template.open('main', 'blog');
         			template.open('create-post', 'create-post');
                 }
-			});
+			})
 			if(!$scope.blog){
 				model.blogs.sync();
 			}
@@ -175,10 +178,10 @@ function BlogController($scope, route, model, $location, date){
 					template.open('main', 'edit-blog');
 				}
 				else{
-					$scope.blog = new Blog();
+					$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog();
 					template.open('main', 'edit-blog');
 				}
-			});
+			})
 			if(!model.blogs.length()){
 				model.blogs.sync();
 			}
@@ -196,15 +199,15 @@ function BlogController($scope, route, model, $location, date){
 	    else {
 	        $scope.redirect('/view/' + blog._id + '/' + post._id);
 	    }
-	};
+	}
 
     $scope.openFirstPost = function(blog, post){
         post.slided = true;
         post.open(function(){
             $scope.$apply();
-        });
+        })
 		$scope.currPost = post._id;
-    };
+    }
 
 	$scope.display = {
 		filters: {
@@ -213,42 +216,42 @@ function BlogController($scope, route, model, $location, date){
 			published: true,
 			all: true
 		}
-	};
+	}
 
 	$scope.saveBlog = function(){
 		$scope.blog.save(function(){
 			model.blogs.sync();
 		});
 		history.back();
-	};
+	}
 
 	$scope.removeBlog = function(){
 		$scope.blog.remove(function(){
 			model.blogs.sync();
 		});
-		$scope.redirect('/list-blogs')
-	};
+		$scope.redirect('/list-blogs');
+	}
 
 	$scope.cancel = function(){
 		history.back();
-	};
+	}
 
 	$scope.count = function(state){
 		return $scope.blog.posts.where({ state: state }).length;
-	};
+	}
 
 	$scope.switchAll = function(){
-		for(var filter in $scope.display.filters){
+		for(let filter in $scope.display.filters){
 			$scope.display.filters[filter] = $scope.display.filters.all;
 		}
-	};
+	}
 
 	$scope.checkAll = function(){
 		$scope.display.filters.all = true;
-		for(var filter in $scope.display.filters){
+		for(let filter in $scope.display.filters){
 			$scope.display.filters.all = $scope.display.filters[filter] && $scope.display.filters.all;
 		}
-	};
+	}
 
 	$scope.showEditPost = function(post){
 		$scope.currentPost = post;
@@ -258,7 +261,7 @@ function BlogController($scope, route, model, $location, date){
 				$scope.editPost = post;
 				$scope.$apply();
 			});
-	};
+	}
 
 	$scope.cancelEditing = function (post) {
 	    post.editing = false;
@@ -278,7 +281,7 @@ function BlogController($scope, route, model, $location, date){
 			$location.path('/view/' + $scope.blog._id);
 		}, $scope.blog, 'DRAFT');
 		notify.info('draft.saved');
-	};
+	}
 
 	$scope.savePost = function(){
 		if($scope.post._id !== undefined){
@@ -287,9 +290,9 @@ function BlogController($scope, route, model, $location, date){
 		else{
 			$scope.post.save(function(){
 				$location.path('/view/' + $scope.blog._id + '/' + $scope.post._id);
-			}, $scope.blog)
+			}, $scope.blog);
 		}
-	};
+	}
 
 	$scope.savePublishedPost = function(){
 		if($scope.post._id !== undefined){
@@ -300,50 +303,50 @@ function BlogController($scope, route, model, $location, date){
 				$location.path('/view/' + $scope.blog._id + '/' + $scope.post._id);
 			}, $scope.blog, 'PUBLISHED');
 		}
-	};
+	}
 
     $scope.setDraftCb = function(post){
-        post.state = "DRAFT"
+        post.state = "DRAFT";
         if(!$scope.$$phase)
-            $scope.$apply()
+            $scope.$apply();
     }
 
 	function initMaxResults(){
 		$scope.maxResults = 3;
 	}
-	initMaxResults();
+	initMaxResults()
 	$scope.addResults = function(){
 		$scope.maxResults += 3;
-	};
+	}
 
 	$scope.updatePublishType = function(){
 		model.blogs.selection().forEach(function(blog){
 			blog['publish-type'] = $scope.display.publishType;
 			blog.save();
-		});
-	};
+		})
+	}
 
 	$scope.removePost = function(post){
 		http().delete('/blog/post/' + $scope.currentBlog._id + '/' + post._id);
-	};
+	}
 
 	$scope.removeBlog = function(){
 		model.blogs.remove($scope.blog);
 		$location.path('/list-blogs');
-	};
+	}
 
 	$scope.applyFilters = function(item){
 		return $scope.display.filters.all || $scope.display.filters[item.state.toLowerCase()];
-	};
+	}
 
 	$scope.redirect = function(path){
 		$location.path(path);
-	};
+	}
 
 	$scope.shareBlog = function(){
 		$scope.display.showShare = true;
-		var same = true;
-		var publishType = model.blogs.selection()[0]['publish-type'];
+		let same = true;
+		let publishType = model.blogs.selection()[0]['publish-type'];
 		model.blogs.selection().forEach(function(blog){
 			same = same && (blog['publish-type'] === publishType);
 		});
@@ -353,18 +356,18 @@ function BlogController($scope, route, model, $location, date){
 		else{
 			$scope.display.publishType = undefined;
 		}
-	};
+	}
 
 	$scope.postComment = function(comment, post){
 		post.comment(comment);
-		$scope.comment = new Comment();
-	};
+		$scope.comment = new Behaviours.applicationsBehaviours.blog.model.Comment();
+	}
 
 	$scope.orderBlogs = function(blog){
-		var discriminator = 0;
+		let discriminator = 0;
 		if(blog.myRights.editBlog)
 			discriminator = 2;
-		if(blog.myRights.createPost)
+		else if(blog.myRights.createPost)
 			discriminator = 1;
 		return parseInt(discriminator + '' + blog.modified.$date);
 	}
