@@ -239,7 +239,6 @@ public class BlogController extends BaseController {
 	}
 
 	@Get("/linker")
-    @SecuredAction(value = "blog.linker", type = ActionType.AUTHENTICATED)
 	public void listBlogsIds(final HttpServerRequest request) {
 		getUserInfos(eb, request, new Handler<UserInfos>() {
 			@Override
