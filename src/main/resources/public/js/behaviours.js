@@ -324,7 +324,7 @@ Behaviours.register('blog', {
 	},
 	loadResources: function(callback){
 		http().get('/blog/linker').done(function(data){
-			let posts = [];
+			var posts = [];
 			data.forEach(function(blog){
 				if(blog.thumbnail){
 					blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';
@@ -333,7 +333,7 @@ Behaviours.register('blog', {
 					blog.thumbnail = '/img/illustrations/blog.png'
 				}
 
-				let addedPosts = _.map(blog.fetchPosts, function(post){
+				var addedPosts = _.map(blog.fetchPosts, function(post){
 					return {
 						owner: {
 							name: blog.author.username,
