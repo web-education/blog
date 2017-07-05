@@ -303,7 +303,7 @@ export let blogModel: any = {
 			}
 
 			this.Blog.prototype.remove = async function(){
-				oldHttp().delete('/blog/' + this._id);
+				await http.delete('/blog/' + this._id);
 			}
 
 			this.Comment.prototype.toJSON = function(){
