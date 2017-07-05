@@ -157,7 +157,7 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void list(String blogId, final UserInfos user, final int limit, final Handler<Either<String, JsonArray>> result) {
+	public void list(String blogId, final UserInfos user, final Integer page, final int limit, final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId);
 		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
 		final JsonObject sort = new JsonObject().putNumber("modified", -1);
@@ -194,16 +194,20 @@ public class DefaultPostService implements PostService {
 						).get()
 				);
 
-				if(limit > 0)
+				if (limit > 0 && page == null) {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
-				else
+				} else if (page == null) {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
+				} else {
+					final int skip = (0 == page) ? -1 : page * limit;
+					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
+				}
 			}
 		});
 	}
 
 	@Override
-	public void list(String blogId, final StateType state, final UserInfos user, final int limit,
+	public void list(String blogId, final StateType state, final UserInfos user, final Integer page, final int limit,
 				final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("state").is(state.name());
 		final JsonObject sort = new JsonObject().putNumber("modified", -1);
@@ -218,10 +222,14 @@ public class DefaultPostService implements PostService {
 		};
 
 		if (StateType.PUBLISHED.equals(state)) {
-			if(limit > 0)
+			if (limit > 0 && page == null) {
 				mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
-			else
+			} else if (page == null) {
 				mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
+			} else {
+				final int skip = (0 == page) ? -1 : page * limit;
+				mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
+			}
 		} else {
 			QueryBuilder query2 = getDefautQueryBuilder(blogId, user);
 			mongo.count("blogs", MongoQueryBuilder.build(query2), new Handler<Message<JsonObject>>() {
@@ -232,10 +240,14 @@ public class DefaultPostService implements PostService {
 						1 != res.getInteger("count")) || StateType.DRAFT.equals(state)) {
 						query.put("author.userId").is(user.getUserId());
 					}
-					if(limit > 0)
+					if (limit > 0 && page == null) {
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
-					else
+					} else if (page == null) {
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
+					} else {
+						final int skip = (0 == page) ? -1 : page * limit;
+						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
+					}
 				}
 			});
 		}

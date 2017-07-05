@@ -46,19 +46,32 @@ export let blogModel: any = {
 			}
 
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
-			    syncPosts: function (cb) {
-			        if (this.postsLoading) {
-			            return;
-			        }
-			        this.postsLoading = true;
-					http().get('/blog/post/list/all/' + that._id).done(function(posts){
-						posts.map(function(item){
-							item.blogId = data._id;
-							item['publish-type'] = data['publish-type'];
-                            item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
-							return item;
-						});
-						this.load(posts);
+			    syncPosts: function (cb, paginate) {
+			        if (!paginate) {
+						this.page=0;
+						this.lastPage = false;
+						this.all = [];
+					}
+					if (this.postsLoading || this.lastPage) {
+						return;
+					}
+					this.postsLoading = true;
+					this.lastPage = false;					
+					
+					http().get('/blog/post/list/all/' + that._id,{page: this.page}).done(function(posts){
+						if(posts.length > 0){
+							posts.map(function(item){
+								item.blogId = data._id;
+								item['publish-type'] = data['publish-type'];
+								item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
+								return item;
+							});
+							this.addRange(posts);
+							this.page++;
+						}else{
+							this.lastPage=true;
+						}
+
 						this.postsLoading = false;
                         if(typeof cb === 'function')
                             cb();
@@ -90,14 +103,28 @@ export let blogModel: any = {
 		},
 		App: function(){
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Blog, {
-			    sync: function (cb) {
-			        if (this.blogsLoading) {
+			    sync: function (cb, paginate) {
+					if (!paginate) {
+						this.page=0;
+						this.lastPage = false;
+						this.all = [];
+					}
+					if (this.blogsLoading || this.lastPage) {
 			            return;
 			        }
 			        this.blogsLoading = true;
-					http().get('/blog/list/all').done(function(blogs) {
-					    this.load(blogs);
+					this.lastPage = false;
+					
+					http().get('/blog/list/all',{page: this.page}).done(function(blogs) {
+						if(blogs.length > 0){
+							this.addRange(blogs);
+							this.page++;
+						}else{
+							this.lastPage=true;
+						}
+
 					    this.blogsLoading = false;
+
 						if(typeof cb === "function"){
 							cb();
 						}

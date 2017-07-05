@@ -52,6 +52,6 @@ public interface BlogService {
 
 	void get(String blogId, Handler<Either<String, JsonObject>> result);
 
-	void list(UserInfos user, Handler<Either<String, JsonArray>> result);
+	void list(UserInfos user, final Integer page, final int limit, Handler<Either<String, JsonArray>> result);
 
 }

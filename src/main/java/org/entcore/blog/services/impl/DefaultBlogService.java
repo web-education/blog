@@ -146,7 +146,8 @@ public class DefaultBlogService implements BlogService{
 	}
 
 	@Override
-	public void list(UserInfos user, final Handler<Either<String, JsonArray>> result) {
+	public void list(UserInfos user, final Integer page, final int limit, final Handler<Either<String, JsonArray>> result) {
+
 		List<DBObject> groups = new ArrayList<>();
 		groups.add(QueryBuilder.start("userId").is(user.getUserId()).get());
 		for (String gpId: user.getProfilGroupsIds()) {
@@ -158,13 +159,25 @@ public class DefaultBlogService implements BlogService{
 				new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
 		).get());
 		JsonObject sort = new JsonObject().putNumber("modified", -1);
-		mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null,
-				new Handler<Message<JsonObject>>() {
-			@Override
-			public void handle(Message<JsonObject> event) {
-				result.handle(Utils.validResults(event));
-			}
-		});
+
+        if (page != null) {
+	        final int skip = (0 == page) ? -1 : page * limit;
+	        mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null, skip, limit, limit,
+			        new Handler<Message<JsonObject>>() {
+				        @Override
+				        public void handle(Message<JsonObject> event) {
+					        result.handle(Utils.validResults(event));
+				        }
+			        });
+        } else {
+	        mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null,
+			        new Handler<Message<JsonObject>>() {
+				        @Override
+				        public void handle(Message<JsonObject> event) {
+					        result.handle(Utils.validResults(event));
+				        }
+			        });
+        }
 	}
 
 	private boolean validationError(Handler<Either<String, JsonObject>> result, JsonObject b) {

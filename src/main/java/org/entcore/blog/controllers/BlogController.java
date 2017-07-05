@@ -73,6 +73,7 @@ public class BlogController extends BaseController {
 	private BlogTimelineService timelineService;
 	private ShareService shareService;
 	private EventStore eventStore;
+	private int pagingSize;
 	private enum BlogEvent { ACCESS }
 
 	public void init(Vertx vertx, Container container, RouteMatcher rm,
@@ -86,6 +87,10 @@ public class BlogController extends BaseController {
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		this.shareService = new MongoDbShareService(eb, mongo, "blogs", securedActions, groupedActions);
 		eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
+	}
+
+	public BlogController(final int pagingSize) {
+		this.pagingSize = pagingSize;
 	}
 
 	@Get("")
@@ -193,7 +198,16 @@ public class BlogController extends BaseController {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					blog.list(user, new Handler<Either<String,JsonArray>>() {
+					final Integer page;
+
+					try {
+						page =  (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page")) : null;
+					}catch (NumberFormatException e) {
+						badRequest(request, e.getMessage());
+						return;
+					}
+
+					blog.list(user, page, pagingSize, new Handler<Either<String,JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
 							if(event.isLeft()){
 								arrayResponseHandler(request).handle(event);;
@@ -219,7 +233,7 @@ public class BlogController extends BaseController {
 							for(Object blogObj : blogs){
 								final JsonObject blog = (JsonObject) blogObj;
 
-								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, 2, new Handler<Either<String,JsonArray>>() {
+								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 2, new Handler<Either<String,JsonArray>>() {
 									public void handle(Either<String, JsonArray> event) {
 										if(event.isRight()){
 											blog.putArray("fetchPosts", event.right().getValue());
@@ -244,7 +258,7 @@ public class BlogController extends BaseController {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					blog.list(user, new Handler<Either<String,JsonArray>>() {
+					blog.list(user, null, pagingSize, new Handler<Either<String,JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
 							if(event.isLeft()){
 								arrayResponseHandler(request).handle(event);
@@ -270,7 +284,7 @@ public class BlogController extends BaseController {
 							for(Object blogObj : blogs){
 								final JsonObject blog = (JsonObject) blogObj;
 
-								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, 0, new Handler<Either<String,JsonArray>>() {
+								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 0, new Handler<Either<String,JsonArray>>() {
 									public void handle(Either<String, JsonArray> event) {
 										if(event.isRight()){
 											blog.putArray("fetchPosts", event.right().getValue());

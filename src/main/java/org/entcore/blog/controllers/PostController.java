@@ -63,6 +63,7 @@ public class PostController extends BaseController {
 
 	private PostService post;
 	private BlogTimelineService timelineService;
+	private int pagingSize;
 
 	public void init(Vertx vertx, Container container, RouteMatcher rm,
 					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
@@ -70,6 +71,10 @@ public class PostController extends BaseController {
 		MongoDb mongo = MongoDb.getInstance();
 		this.post = new DefaultPostService(mongo);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(vertx, eb, log), mongo);
+	}
+
+	public PostController(final int pagingSize) {
+		this.pagingSize = pagingSize;
 	}
 
 	// TODO improve fields matcher and validater
@@ -155,15 +160,25 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
+
+		final Integer page;
+
+		try {
+			page =  (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page")) : null;
+		}catch (NumberFormatException e) {
+			badRequest(request, e.getMessage());
+			return;
+		}
+
 		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
 					if(request.params().get("state") == null){
-						post.list(blogId, user, 0, arrayResponseHandler(request));
+						post.list(blogId, user, page, pagingSize, arrayResponseHandler(request));
 					} else {
 						post.list(blogId, BlogResourcesProvider.getStateType(request),
-							user, 0, arrayResponseHandler(request));
+							user, page, pagingSize, arrayResponseHandler(request));
 					}
 				} else {
 					unauthorized(request);

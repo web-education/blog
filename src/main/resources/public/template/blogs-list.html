@@ -13,7 +13,7 @@
 </div>
 <hr class="row" />
 <div class="cards-list rigid-grid">
-	<div class="card four height-two" ng-repeat="blog in blogs.all | filter:{ title: display.search } | orderBy:orderBlogs:true" ng-click="redirect('/view/[[blog._id]]')">
+	<div class="card four height-two" ng-repeat="blog in blogs.all | filter:{ title: display.search } | orderBy:orderBlogs:true" ng-click="redirect('/view/[[blog._id]]')" bottom-scroll="loadBlogs()">
 		<div class="row">
 			<div class="illustration">
 				<img skin-src="[[blog.icon]]" class="absolute" />
@@ -45,7 +45,7 @@
 	<h2><i18n>remove</i18n></h2>
 	<p><i18n>confirm.remove.blog</i18n></p>
 	<div class="row">
-		<button ng-click="blogs.removeSelection(); display.confirmRemoveBlog = false" class="right-magnet">
+		<button ng-click="removeBlogs(); display.confirmRemoveBlog = false" class="right-magnet">
 			<i18n>remove</i18n>
 		</button>
 		<button type="button" ng-click="display.confirmRemoveBlog = false" class="right-magnet cancel">

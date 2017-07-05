@@ -2,6 +2,7 @@ import { Behaviours, routes, template, idiom, http, notify } from 'entcore/entco
 
 routes.define(function($routeProvider){
 	$routeProvider
+		//fixme don't work with direct access from front route
 		.when('/view/:blogId', {
 			action: 'viewBlog'
 		})
@@ -225,13 +226,6 @@ export function BlogController($scope, route, model, $location){
 		history.back();
 	}
 
-	$scope.removeBlog = function(){
-		$scope.blog.remove(function(){
-			model.blogs.sync();
-		});
-		$scope.redirect('/list-blogs');
-	}
-
 	$scope.cancel = function(){
 		history.back();
 	}
@@ -327,12 +321,24 @@ export function BlogController($scope, route, model, $location){
 	}
 
 	$scope.removePost = function(post){
-		http().delete('/blog/post/' + $scope.currentBlog._id + '/' + post._id);
+		post.remove(function () {
+			$scope.blog.posts.syncPosts(function () {
+				$scope.blog.posts.forEach(function (post) {
+					post.comments.sync();
+				})
+			})
+		});
 	}
 
 	$scope.removeBlog = function(){
 		model.blogs.remove($scope.blog);
 		$location.path('/list-blogs');
+	}
+
+	$scope.removeBlogs = function(){
+		$scope.blogs.removeSelection();
+		//@Camille how can await remove selection, isn't an async function
+		model.blogs.sync();
 	}
 
 	$scope.applyFilters = function(item){
@@ -341,6 +347,18 @@ export function BlogController($scope, route, model, $location){
 
 	$scope.redirect = function(path){
 		$location.path(path);
+	}
+
+	$scope.loadBlogs = function(){
+		model.blogs.sync(undefined, true);
+	}
+
+	$scope.loadPosts = function() {
+		$scope.blog.posts.syncPosts(function () {
+			$scope.blog.posts.forEach(function (post) {
+				post.comments.sync();
+			})
+		}, true)
 	}
 
 	$scope.shareBlog = function(){
