@@ -337,7 +337,7 @@ export function BlogController($scope, route, model, $location){
 
 	$scope.removeBlogs = async function(){
 		await $scope.blogs.removeSelection();
-		$scope.$apply();
+		model.blogs.sync();
 	}
 
 	$scope.applyFilters = function(item){
