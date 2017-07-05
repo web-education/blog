@@ -1,6 +1,7 @@
-import { Behaviours, http, Collection, model } from 'entcore/entcore';
+import { Behaviours, http as oldHttp, Collection, model } from 'entcore/entcore';
 import { _ } from 'entcore/libs/underscore/underscore';
 import { moment } from 'entcore/libs/moment/moment';
+import http from 'axios';
 
 console.log('blog behaviours file');
 
@@ -18,8 +19,8 @@ export let blogModel: any = {
 			}
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Comment, {
 				sync: '/blog/comments/:blogId/:_id',
-				remove: function(comment){
-					http().delete('/blog/comment/' + that.blogId + '/' + that._id + '/' + comment.id);
+				remove: async function(comment){
+					await http.delete('/blog/comment/' + that.blogId + '/' + that._id + '/' + comment.id);
 					Collection.prototype.remove.call(this, comment);
 				}
 			});
@@ -58,7 +59,7 @@ export let blogModel: any = {
 					this.postsLoading = true;
 					this.lastPage = false;					
 					
-					http().get('/blog/post/list/all/' + that._id,{page: this.page}).done(function(posts){
+					oldHttp().get('/blog/post/list/all/' + that._id,{page: this.page}).done(function(posts){
 						if(posts.length > 0){
 							posts.map(function(item){
 								item.blogId = data._id;
@@ -80,7 +81,7 @@ export let blogModel: any = {
 			        .e404(function () { });
 				},
 				addDraft: function(post, callback){
-					http().postJson('/blog/post/' + that._id, post).done(function(result){
+					oldHttp().postJson('/blog/post/' + that._id, post).done(function(result){
 						post._id = result._id;
 						this.push(post);
 						let newPost = this.last();
@@ -115,7 +116,7 @@ export let blogModel: any = {
 			        this.blogsLoading = true;
 					this.lastPage = false;
 					
-					http().get('/blog/list/all',{page: this.page}).done(function(blogs) {
+					oldHttp().get('/blog/list/all',{page: this.page}).done((blogs) => {
 						if(blogs.length > 0){
 							this.addRange(blogs);
 							this.page++;
@@ -125,10 +126,11 @@ export let blogModel: any = {
 
 					    this.blogsLoading = false;
 
+						this.trigger('sync');
 						if(typeof cb === "function"){
 							cb();
 						}
-					}.bind(this));
+					});
 				},
 				remove: function(blog){
 					blog.remove();
@@ -150,7 +152,7 @@ export let blogModel: any = {
 			}
 
 			this.Blog.prototype.create = function(fn){
-				http().postJson('/blog', this)
+				oldHttp().postJson('/blog', this)
 					.done(function(newBlog) {
 						this._id = newBlog._id;
 						if(typeof fn === 'function'){
@@ -160,7 +162,7 @@ export let blogModel: any = {
 			}
 
 			this.Blog.prototype.saveModifications = function(fn){
-				http().putJson('/blog/' + this._id, this).done(function(){
+				oldHttp().putJson('/blog/' + this._id, this).done(function(){
 					if(typeof fn === 'function'){
 						fn();
 					}
@@ -177,7 +179,7 @@ export let blogModel: any = {
 			}
 
             this.Post.prototype.open = function(cb){
-                http().get('/blog/post/' + this.blogId + '/' + this._id, {state: this.state}).done(function(data){
+                oldHttp().get('/blog/post/' + this.blogId + '/' + this._id, {state: this.state}).done(function(data){
                     this.content = data.content;
                     this.data.content = data.content;
                     this.trigger('change');
@@ -188,7 +190,7 @@ export let blogModel: any = {
 
 			this.Post.prototype.submit = function(callback){
 				this.state = 'SUBMITTED';
-				http().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
+				oldHttp().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
 						callback();
 					}
@@ -199,7 +201,7 @@ export let blogModel: any = {
 			this.Post.prototype.publish = function(callback){
 				this.state = 'PUBLISHED';
 				if(this['publish-type'] === 'IMMEDIATE'){
-				    http().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
+				    oldHttp().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
 				        if (typeof callback === 'function') {
 				            callback();
 				            this.trigger('change');
@@ -207,7 +209,7 @@ export let blogModel: any = {
 				    });
 					return;
 				}
-				http().putJson('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
+				oldHttp().putJson('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
 						callback();
 						this.trigger('change');
@@ -219,7 +221,7 @@ export let blogModel: any = {
 			}
 
 			this.Post.prototype.create = function(callback, blog, state){
-				http().postJson('/blog/post/' + blog._id, {
+				oldHttp().postJson('/blog/post/' + blog._id, {
 					content: this.content,
 					title: this.title
 				})
@@ -241,7 +243,7 @@ export let blogModel: any = {
 			}
 
 			this.Post.prototype.saveModifications = function(callback){
-				http().putJson('/blog/post/' + this.blogId + '/' + this._id, {
+				oldHttp().putJson('/blog/post/' + this.blogId + '/' + this._id, {
 					content: this.content,
 					title: this.title
 				}).done(function(){
@@ -261,7 +263,7 @@ export let blogModel: any = {
 			}
 
 			this.Post.prototype.remove = function(callback){
-				http().delete('/blog/post/' + this.blogId + '/' + this._id)
+				oldHttp().delete('/blog/post/' + this.blogId + '/' + this._id)
 					.done(function(){
 						if(typeof callback === 'function'){
 							callback();
@@ -270,13 +272,13 @@ export let blogModel: any = {
 			}
 
 			this.Post.prototype.comment = function(comment){
-				http().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
+				oldHttp().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
 					this.comments.sync();
 				}.bind(this));
 			}
 
 			this.Blog.prototype.open = function(success, error){
-			    http().get('/blog/' + this._id)
+			    oldHttp().get('/blog/' + this._id)
                     .done(function (blog) {
 					    this.owner = blog.author;
 					    this.shortenedTitle = blog.title || '';
@@ -300,8 +302,8 @@ export let blogModel: any = {
 			        }.bind(this));
 			}
 
-			this.Blog.prototype.remove = function(){
-				http().delete('/blog/' + this._id);
+			this.Blog.prototype.remove = async function(){
+				oldHttp().delete('/blog/' + this._id);
 			}
 
 			this.Comment.prototype.toJSON = function(){
@@ -356,8 +358,8 @@ Behaviours.register('blog', {
 		}
 	},
 	loadResources: function(callback){
-		http().get('/blog/linker').done(function(data){
-			const posts = [];
+		oldHttp().get('/blog/linker').done(function(data){
+			let posts = [];
 			data.forEach(function(blog){
 				if(blog.thumbnail){
 					blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';

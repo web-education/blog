@@ -335,10 +335,9 @@ export function BlogController($scope, route, model, $location){
 		$location.path('/list-blogs');
 	}
 
-	$scope.removeBlogs = function(){
-		$scope.blogs.removeSelection();
-		//@Camille how can await remove selection, isn't an async function
-		model.blogs.sync();
+	$scope.removeBlogs = async function(){
+		await $scope.blogs.removeSelection();
+		$scope.$apply();
 	}
 
 	$scope.applyFilters = function(item){

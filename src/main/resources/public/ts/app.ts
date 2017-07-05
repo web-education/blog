@@ -16,11 +16,11 @@ model.build = async function(){
 	(window as any).Comment = Behaviours.applicationsBehaviours.blog.model.Comment;
 	(model as any).blogs = Behaviours.applicationsBehaviours.blog.model.app.blogs;
 
-	(model as any).blogs.removeSelection = function(){
-		this.selection().forEach(function(blog){
-			blog.remove();
-		});
-
-		Collection.prototype.removeSelection.call(this);
+	(model as any).blogs.removeSelection = async function(): Promise<any>{
+		for(let blog of this.selection()){
+			const index = this.all.indexOf(blog);
+			this.all.splice(index, 1);
+			await blog.remove();
+		}
 	}
 }
