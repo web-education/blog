@@ -104,7 +104,7 @@ export let blogModel: any = {
 		},
 		App: function(){
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Blog, {
-			    sync: function (cb, paginate) {
+			    sync: function (cb, paginate, search) {
 					if (!paginate) {
 						this.page=0;
 						this.lastPage = false;
@@ -115,8 +115,12 @@ export let blogModel: any = {
 			        }
 			        this.blogsLoading = true;
 					this.lastPage = false;
+
+					if (!search) {
+						search = '';
+					} 
 					
-					oldHttp().get('/blog/list/all',{page: this.page}).done((blogs) => {
+					oldHttp().get('/blog/list/all',{page: this.page, search: search}).done((blogs) => {
 						if(blogs.length > 0){
 							this.addRange(blogs);
 							this.page++;

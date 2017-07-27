@@ -7,13 +7,16 @@
 	</app-title>
 </div>
 <div class="row">
-	<div class="four cell twelve-mobile">
-		<input type="search" class="twelve cell" ng-model="display.search" i18n-placeholder="search" />
+	<div class="four cell twelve-mobile" style="width:50%;padding: 8px 18px 10px;">
+		<input type="search" class="twelve cell" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) : null"  />
+	</div>
+	<div class="cell">
+		<button ng-click="searching();"><i18n>label.search</i18n></button>
 	</div>
 </div>
 <hr class="row" />
 <div class="cards-list rigid-grid">
-	<div class="card four height-two" ng-repeat="blog in blogs.all | filter:{ title: display.search } | orderBy:orderBlogs:true" ng-click="redirect('/view/[[blog._id]]')" bottom-scroll="loadBlogs()">
+	<div class="card four height-two" ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/[[blog._id]]')" bottom-scroll="loadBlogs()">
 		<div class="row">
 			<div class="illustration">
 				<img skin-src="[[blog.icon]]" class="absolute" />
@@ -34,6 +37,11 @@
 		<resource-right name="share" resource="blog" >
 			<check-tool ng-model="blog.selected" ng-click="$event.stopPropagation()" ></check-tool>
 		</resource-right>
+	</div>
+	<div ng-show="blogs.all.length == 0 && display.search">
+		<div class="row">
+			<div class="info"><i18n>blog.search.internal.empty</i18n></div>
+		</div>
 	</div>
 </div>
 

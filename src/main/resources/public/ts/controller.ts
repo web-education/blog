@@ -192,6 +192,15 @@ export function BlogController($scope, route, model, $location){
 		}
 	});
 
+	$scope.launchSearching = function(mysearch, event) {
+		event.stopPropagation();		
+		model.blogs.sync(undefined, false, mysearch);
+	};
+
+	$scope.searching = function() {
+		model.blogs.sync(undefined, false, $scope.display.search);
+	};
+
 	$scope.openClosePost = function (blog, post) {
 	    if (post.slided) {
 	        post.slided = false;
@@ -349,7 +358,7 @@ export function BlogController($scope, route, model, $location){
 	}
 
 	$scope.loadBlogs = function(){
-		model.blogs.sync(undefined, true);
+		model.blogs.sync(undefined, true, $scope.display.search);
 	}
 
 	$scope.loadPosts = function() {

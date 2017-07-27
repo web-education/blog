@@ -58,7 +58,7 @@ public class Blog extends BaseServer {
         conf.setCollection(BLOGS_COLLECTION);
         conf.setResourceIdLabel("id");
 
-        addController(new BlogController(config.getInteger("blog-paging-size", 30)));
+        addController(new BlogController());
         addController(new PostController(config.getInteger("post-paging-size", 20)));
 
     }

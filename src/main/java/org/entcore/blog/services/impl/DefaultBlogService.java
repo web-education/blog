@@ -29,24 +29,28 @@ import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import org.entcore.blog.services.BlogService;
 import fr.wseduc.webutils.*;
+import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
+import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class DefaultBlogService implements BlogService{
 
 	protected static final String BLOG_COLLECTION = "blogs";
 
 	private final MongoDb mongo;
+	private int pagingSize;
+	private int searchWordMinSize;
 
-	public DefaultBlogService(MongoDb mongo) {
+	public DefaultBlogService(MongoDb mongo, int pagingSize, int searchWordMinSize) {
 		this.mongo = mongo;
+		this.pagingSize = pagingSize;
+		this.searchWordMinSize = searchWordMinSize;
 	}
 
 	@Override
@@ -146,30 +150,48 @@ public class DefaultBlogService implements BlogService{
 	}
 
 	@Override
-	public void list(UserInfos user, final Integer page, final int limit, final Handler<Either<String, JsonArray>> result) {
+	public void list(UserInfos user, final Integer page, final String search, final Handler<Either<String, JsonArray>> result) {
 
 		List<DBObject> groups = new ArrayList<>();
 		groups.add(QueryBuilder.start("userId").is(user.getUserId()).get());
 		for (String gpId: user.getProfilGroupsIds()) {
 			groups.add(QueryBuilder.start("groupId").is(gpId).get());
 		}
-		QueryBuilder query = new QueryBuilder().or(
+		QueryBuilder rightQuery = new QueryBuilder().or(
 				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
 				QueryBuilder.start("shared").elemMatch(
 				new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
 		).get());
+
+		final QueryBuilder query;
+
+		if (!StringUtils.isEmpty(search)) {
+			final List<String> searchWords = checkAndComposeWordFromSearchText(search);
+			if (!searchWords.isEmpty()) {
+				final QueryBuilder searchQuery = new QueryBuilder();
+				searchQuery.text(MongoDbSearchService.textSearchedComposition(searchWords));
+				query = new QueryBuilder().and(rightQuery.get(), searchQuery.get());
+			} else {
+				query = null;
+				//empty result (no word to search)
+				result.handle(new Either.Right<String, JsonArray>(new JsonArray()));
+			}
+		} else {
+			query = rightQuery;
+		}
+
 		JsonObject sort = new JsonObject().putNumber("modified", -1);
 
-        if (page != null) {
-	        final int skip = (0 == page) ? -1 : page * limit;
-	        mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null, skip, limit, limit,
+        if (page != null && query != null) {
+	        final int skip = (0 == page) ? -1 : page * this.pagingSize;
+	        mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null, skip, this.pagingSize, this.pagingSize,
 			        new Handler<Message<JsonObject>>() {
 				        @Override
 				        public void handle(Message<JsonObject> event) {
 					        result.handle(Utils.validResults(event));
 				        }
 			        });
-        } else {
+        } else if (query != null) {
 	        mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null,
 			        new Handler<Message<JsonObject>>() {
 				        @Override
@@ -178,6 +200,27 @@ public class DefaultBlogService implements BlogService{
 				        }
 			        });
         }
+	}
+
+	//TODO put this code in SearchUtils on entcore with (same code in searchengine app) and adding searchWordMinSize param
+	private List<String> checkAndComposeWordFromSearchText(final String searchText) {
+		final Set<String> searchWords = new HashSet<>();
+
+		if (searchText != null) {
+			//delete all useless spaces
+			final String searchTextTreaty = searchText.replaceAll("\\s+", " ").trim();
+			if (!searchTextTreaty.isEmpty()) {
+				final List<String> words = Arrays.asList(searchTextTreaty.split(" "));
+				//words search
+				for (String w : words) {
+					final String wTraity = w.replaceAll("(?!')\\p{Punct}", "");
+					if (wTraity.length() >= this.searchWordMinSize) {
+						searchWords.add(wTraity);
+					}
+				}
+			}
+		}
+		return new ArrayList<>(searchWords);
 	}
 
 	private boolean validationError(Handler<Either<String, JsonObject>> result, JsonObject b) {

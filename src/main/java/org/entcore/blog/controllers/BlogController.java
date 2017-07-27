@@ -73,24 +73,19 @@ public class BlogController extends BaseController {
 	private BlogTimelineService timelineService;
 	private ShareService shareService;
 	private EventStore eventStore;
-	private int pagingSize;
 	private enum BlogEvent { ACCESS }
 
 	public void init(Vertx vertx, Container container, RouteMatcher rm,
 					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, container, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.blog = new DefaultBlogService(mongo);
+		this.blog = new DefaultBlogService(mongo, container.config().getInteger("blog-paging-size", 30), container.config().getInteger("search-word-min-size", 4));
 		this.postService = new DefaultPostService(mongo);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		this.shareService = new MongoDbShareService(eb, mongo, "blogs", securedActions, groupedActions);
 		eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
-	}
-
-	public BlogController(final int pagingSize) {
-		this.pagingSize = pagingSize;
 	}
 
 	@Get("")
@@ -207,7 +202,9 @@ public class BlogController extends BaseController {
 						return;
 					}
 
-					blog.list(user, page, pagingSize, new Handler<Either<String,JsonArray>>() {
+					final String search = request.params().get("search");
+
+					blog.list(user, page, search, new Handler<Either<String,JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
 							if(event.isLeft()){
 								arrayResponseHandler(request).handle(event);;
@@ -258,7 +255,7 @@ public class BlogController extends BaseController {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					blog.list(user, null, pagingSize, new Handler<Either<String,JsonArray>>() {
+					blog.list(user, null, null, new Handler<Either<String,JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
 							if(event.isLeft()){
 								arrayResponseHandler(request).handle(event);

@@ -1,0 +1,1 @@
+db.blogs.createIndex({ "title": "text" });
