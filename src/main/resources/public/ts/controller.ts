@@ -41,111 +41,142 @@ export function BlogController($scope, route, model, $location){
 
 	route({
 		viewBlog: function(params){
+			//fixme Camille,
+			// I must make a disgusting code to be able to display in the post view the button "create a ticket".
+			// The rights rely on a collection of object instead of being done on the object
 			model.blogs.deselectAll();
 
-			model.one('blogs.sync', function(){
-				$scope.blog = model.blogs.findWhere({ _id: params.blogId });
-				if(!$scope.blog){
-					template.open('main', 'e404');
+			$scope.blog = model.blogs.findWhere({_id: params.blogId});
+
+			if (!$scope.blog) {				
+				var data = {_id: params.blogId};
+				$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(data);
+				$scope.blog.open(function () {
+					    //@camille there
+						model.blogs.push($scope.blog);
+					    //@camille again there
+						model.one('blogs.sync', function () {							
+							$scope.blog = model.blogs.findWhere({_id: params.blogId});
+
+							if (!$scope.blog) {
+								template.open('main', 'e404');
+							} else {
+
+								template.open('main', 'blog');
+								template.close('create-post');
+
+								if ($scope.blog.posts.length() < 1) {
+									$scope.blog.posts.syncPosts(function () {
+										$scope.blog.posts.forEach(function (post) {
+											post.comments.sync();
+
+										})
+									})
+								}
+							}
+						});
+					}, function () {
+						template.open('main', 'e404');
+					}
+				);
+			} else {
+				template.open('main', 'blog');
+				template.close('create-post');
+
+				if ($scope.blog.posts.length() < 1) {
+					$scope.blog.posts.syncPosts(function () {
+						$scope.blog.posts.forEach(function (post) {
+							post.comments.sync();
+
+						})
+					})
 				}
-				else{
-                    template.open('main', 'blog');
-        			template.close('create-post');
-                    if($scope.blog.posts.length() < 1){
-    					$scope.blog.posts.syncPosts(function(){
-                            $scope.blog.posts.forEach(function(post){
-    							post.comments.sync();
-    						})
-                        })
-                    }
-				}
-			});
-			if(!model.blogs.length()){
-				model.blogs.sync();
 			}
-			else{
+
+			if (model.blogs.length()) {
 				model.blogs.trigger('sync');
 			}
 		},
 		print: function(params){
-			model.one('blogs.sync', function(){
-				$scope.blog = model.blogs.findWhere({ _id: params.blogId });
-				if(!$scope.blog){
-					template.open('main', 'e404');
-				}
-				else{
-                    template.open('main', 'blog');
-					$scope.blog.posts.syncPosts(function(){
-                        let countDown = $scope.blog.posts.length();
-                        let onFinish = function(){
-                            if(--countDown <= 0){
-                                $scope.$apply();
-        						setTimeout(function(){
-        							window.print()
-        						}, 1000);
-                            }
-                        }
+			var data = {_id:params.blogId}
+			$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(data);
+			$scope.blog.open(function() {
+				$scope.blog.posts.syncAllPosts(function () {
 
-                        if(countDown === 0){
-                            onFinish();
-                        }
-                        $scope.blog.posts.forEach(function(post){
-                            post.open(function(){
-                                onFinish();
-                            })
-                        })
+					let countDown = $scope.blog.posts.length();
+					let onFinish = function () {
+						if (--countDown <= 0) {
+							$scope.$apply();
+							setTimeout(function () {
+								window.print()
+							}, 1000);
+						}
+					};
 
+					if (countDown === 0) {
+						onFinish();
+					}
+					$scope.blog.posts.forEach(function (post) {
+						post.open(function () {
+							onFinish();
+						})
 					})
-				}
+
+				});
+			}, function() {
+				template.open('main', 'e404');
 			});
-			model.blogs.sync();
 		},
 		viewPost: function(params){
 			template.close('create-post');
 			model.blogs.deselectAll();
 
-			model.one('blogs.sync', function(){
-				$scope.blog = model.blogs.findWhere({ _id: params.blogId });
-				if(!$scope.blog){
+			$scope.blog = model.blogs.findWhere({ _id: params.blogId });
+
+			if (!$scope.blog) {
+				var data = {_id: params.blogId};
+				$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(data);
+				$scope.blog.open(function () {
+					model.blogs.push($scope.blog);
+					model.one('blogs.sync', function () {
+						$scope.blog = model.blogs.findWhere({_id: params.blogId});
+						if (!$scope.blog) {
+							template.open('main', 'e404');
+						} else {
+							template.open('main', 'blog');
+							if ($scope.blog.posts.length() < 1) {
+								$scope.blog.posts.syncOnePost(function () {
+									$scope.blog.posts.forEach(function (post) {
+										post.comments.sync();
+										$scope.post = post;
+										$scope.post.open(function () {
+											$scope.post.slided = true;
+											$scope.currPost = $scope.post._id;
+											$scope.$apply();
+										});
+									})
+								}, params.postId);
+							}
+						}
+					});
+				}, function () {
 					template.open('main', 'e404');
-				}
-				else{
-                    template.open('main', 'blog');
-					$scope.blog.one('posts.sync', function(){
-						$scope.blog.posts.forEach(function(post){
-							if(post._id === params.postId){
-                                post.open(function(){
-                                    post.slided = true;
-                                    post.comments.sync();
-									$scope.currPost = post._id;
-                                    $scope.$apply();
-                                })
-                            } else {
-                                post.comments.sync();
-                                post.slided = false;
-                            }
+				});
+			} else {
+				template.open('main', 'blog');
+				$scope.blog.posts.forEach(function(post){
+					if(post._id === params.postId){
+						$scope.currPost = post._id;
+						post.open(function(){
+							post.slided = true;
+							$scope.$apply();
 						})
-					})
-					if(!$scope.blog.posts.length()){
-						$scope.blog.posts.syncPosts();
-					} else {
-						$scope.blog.posts.forEach(function(post){
-							if(post._id === params.postId){
-								$scope.currPost = post._id;
-								post.open(function(){
-                                    post.slided = true;
-                                    $scope.$apply();
-                                })
-                            } else
-								post.slided = false;
-						})
-					}
-				}
-			})
-			if(!$scope.blog){
-				model.blogs.sync();
+					} else
+						post.slided = false;
+				})
 			}
-			else{
+
+			if ($scope.blog) {
 				model.blogs.trigger('sync');
 			}
 		},
@@ -171,6 +202,7 @@ export function BlogController($scope, route, model, $location){
 		list: function(){
 			model.blogs.deselectAll();
 			template.open('main', 'blogs-list');
+			model.blogs.sync(undefined, false, $scope.display.search);
 		},
 		editBlog: function(params){
 			model.one('blogs.sync', function(){

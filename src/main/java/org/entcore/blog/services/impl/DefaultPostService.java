@@ -253,6 +253,48 @@ public class DefaultPostService implements PostService {
 		}
 	}
 
+	@Override
+	public void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result) {
+		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("_id").is(postId);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
+		final JsonObject sort = new JsonObject().putNumber("modified", -1);
+		final JsonObject projection = defaultKeys.copy();
+		projection.removeField("content");
+
+		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
+			@Override
+			public void handle(Message<JsonObject> event) {
+				result.handle(Utils.validResults(event));
+			}
+		};
+
+		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
+			public void handle(Message<JsonObject> event) {
+				JsonObject res = event.body();
+				if(res == null || !"ok".equals(res.getString("status"))){
+					result.handle(new Either.Left<String, JsonArray>(event.body().encodePrettily()));
+					return;
+				}
+				boolean isManager = 1 == res.getInteger("count", 0);
+
+				query.or(
+						QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
+						QueryBuilder.start().and(
+								QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+								QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
+						).get(),
+						isManager ?
+								QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get() :
+								QueryBuilder.start().and(
+										QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+										QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
+								).get()
+				);
+				mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
+			}
+		});
+	}
+
 	private QueryBuilder getDefautQueryBuilder(String blogId, UserInfos user) {
 		List<DBObject> groups = new ArrayList<>();
 		groups.add(QueryBuilder.start("userId").is(user.getUserId())

@@ -48,11 +48,18 @@ export let blogModel: any = {
 
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
 			    syncPosts: function (cb, paginate) {
-			        if (!paginate) {
+					//for direct resource access (via uri)
+					if (paginate && !this.page) {
+						paginate = false;
+					}
+					//end direct access
+
+					if (!paginate) {
 						this.page=0;
 						this.lastPage = false;
 						this.all = [];
 					}
+
 					if (this.postsLoading || this.lastPage) {
 						return;
 					}
@@ -79,6 +86,44 @@ export let blogModel: any = {
 					}.bind(this))
 			        .e401(function () { })
 			        .e404(function () { });
+				},
+				syncAllPosts: function (cb) {
+					if (this.postsLoading) {
+						return;
+					}
+					this.postsLoading = true;
+					
+					oldHttp().get('/blog/post/list/all/' + that._id).done(function(posts) {
+						posts.map(function (item) {
+							item.blogId = data._id;
+							item['publish-type'] = data['publish-type'];
+							item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
+							return item;
+						});
+						this.load(posts);
+
+						this.postsLoading = false;
+						if (typeof cb === 'function')
+							cb();
+					}.bind(this))
+						.e401(function () { })
+						.e404(function () { });
+				},
+				syncOnePost: function (cb, id) {
+					oldHttp().get('/blog/post/list/all/' + that._id , {postId:id}).done(function(posts) {
+						posts.map(function (item) {
+							item.blogId = data._id;
+							item['publish-type'] = data['publish-type'];
+							item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
+							return item;
+						});
+						this.load(posts);
+						
+						if (typeof cb === 'function')
+							cb();
+					}.bind(this))
+						.e401(function () { })
+						.e404(function () { });
 				},
 				addDraft: function(post, callback){
 					oldHttp().postJson('/blog/post/' + that._id, post).done(function(result){
@@ -129,6 +174,22 @@ export let blogModel: any = {
 						}
 
 					    this.blogsLoading = false;
+
+						this.trigger('sync');
+						if(typeof cb === "function"){
+							cb();
+						}
+					});
+				},
+				syncAll: function (cb) {
+					if (this.blogsLoading) {
+						return;
+					}
+					this.blogsLoading = true;
+
+					oldHttp().get('/blog/list/all').done((blogs) => {
+						this.load(blogs);
+						this.blogsLoading = false;
 
 						this.trigger('sync');
 						if(typeof cb === "function"){
@@ -391,6 +452,7 @@ Behaviours.register('blog', {
 		}.bind(this));
 	},
 	sniplets: {
+		//TODO Managing paging from sniplets !
 		articles: {
 			title: 'sniplet.title',
 			description: 'sniplet.desc',
@@ -402,7 +464,7 @@ Behaviours.register('blog', {
 					let blog = new Behaviours.applicationsBehaviours.blog.model.Blog({ _id: this.source._id });
 					this.newPost = new Behaviours.applicationsBehaviours.blog.model.Post();
 					blog.open(function(){
-                        blog.posts.syncPosts();
+                        blog.posts.syncAllPosts();
                     }.bind(this), function () {
 					    this.foundBlog = false;
 					    this.$apply();
@@ -417,7 +479,7 @@ Behaviours.register('blog', {
 					Behaviours.applicationsBehaviours.blog.model.register();
 					let app = new Behaviours.applicationsBehaviours.blog.model.App();
 					this.blog = new Behaviours.applicationsBehaviours.blog.model.Blog();
-					app.blogs.sync(function(){
+					app.blogs.syncAll(function(){
 						this.blogs = app.blogs;
 					}.bind(this));
 				},
@@ -456,7 +518,7 @@ Behaviours.register('blog', {
 				addPost: function(){
 					this.newPost.showCreateBlog = false;
 					this.newPost.save(function(){
-						this.blog.posts.syncPosts(function(){
+						this.blog.posts.syncAllPosts(function(){
                             this.$apply();
                         }.bind(this));
                         delete(this.newPost._id);
@@ -466,7 +528,7 @@ Behaviours.register('blog', {
 				},
 				removePost: function(post){
 					post.remove(function(){
-						this.blog.posts.syncPosts(function(){
+						this.blog.posts.syncAllPosts(function(){
                             this.$apply();
                         }.bind(this))
 					}.bind(this))
@@ -493,7 +555,7 @@ Behaviours.register('blog', {
 				},
 				publish: function(post){
 					post.publish(function(){
-						this.blog.posts.syncPosts(function(){
+						this.blog.posts.syncAllPosts(function(){
                             this.$apply();
                         }.bind(this))
 					}.bind(this))

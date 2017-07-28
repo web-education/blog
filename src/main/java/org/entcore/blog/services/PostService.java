@@ -50,6 +50,7 @@ public interface PostService {
 
 	void list(String blogId, UserInfos user, Integer page, int limit, Handler<Either<String, JsonArray>> result);
 	void list(String blogId, StateType state, UserInfos user, Integer page, int limit, Handler<Either<String, JsonArray>> result);
+	void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result);
 
 	void submit(String blogId, String postId, UserInfos user, Handler<Either<String, JsonObject>> result);
 

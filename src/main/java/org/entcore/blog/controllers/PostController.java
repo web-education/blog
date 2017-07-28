@@ -44,6 +44,7 @@ import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
+import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VoidHandler;
@@ -161,6 +162,7 @@ public class PostController extends BaseController {
 			return;
 		}
 
+		final String postId =  request.params().get("postId");
 		final Integer page;
 
 		try {
@@ -170,11 +172,15 @@ public class PostController extends BaseController {
 			return;
 		}
 
+		final int pagingSize = (page == null) ? 0 : this.pagingSize;
+
 		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					if(request.params().get("state") == null){
+					if (!StringUtils.isEmpty(postId)) {
+						post.listOne(blogId, postId, user, arrayResponseHandler(request));
+					} else if(request.params().get("state") == null){
 						post.list(blogId, user, page, pagingSize, arrayResponseHandler(request));
 					} else {
 						post.list(blogId, BlogResourcesProvider.getStateType(request),
