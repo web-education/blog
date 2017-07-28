@@ -70,12 +70,9 @@ public class PostController extends BaseController {
 					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, container, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.post = new DefaultPostService(mongo);
+		this.post = new DefaultPostService(mongo, container.config().getInteger("post-search-word-min-size", 4));
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(vertx, eb, log), mongo);
-	}
-
-	public PostController(final int pagingSize) {
-		this.pagingSize = pagingSize;
+		this.pagingSize = container.config().getInteger("post-paging-size", 20);
 	}
 
 	// TODO improve fields matcher and validater
@@ -174,6 +171,8 @@ public class PostController extends BaseController {
 
 		final int pagingSize = (page == null) ? 0 : this.pagingSize;
 
+		final String search = request.params().get("search");
+
 		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
 			@Override
 			public void handle(final UserInfos user) {
@@ -181,10 +180,10 @@ public class PostController extends BaseController {
 					if (!StringUtils.isEmpty(postId)) {
 						post.listOne(blogId, postId, user, arrayResponseHandler(request));
 					} else if(request.params().get("state") == null){
-						post.list(blogId, user, page, pagingSize, arrayResponseHandler(request));
+						post.list(blogId, user, page, pagingSize, search, arrayResponseHandler(request));
 					} else {
 						post.list(blogId, BlogResourcesProvider.getStateType(request),
-							user, page, pagingSize, arrayResponseHandler(request));
+							user, page, pagingSize, search, arrayResponseHandler(request));
 					}
 				} else {
 					unauthorized(request);

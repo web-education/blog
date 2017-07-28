@@ -224,8 +224,25 @@ export function BlogController($scope, route, model, $location){
 		}
 	});
 
+	$scope.launchSearchingPost = function(mysearch, event) {
+		event.stopPropagation();
+		$scope.blog.posts.syncPosts(function () {
+			$scope.blog.posts.forEach(function (post) {
+				post.comments.sync();
+			})
+		},false, mysearch);
+	};
+
+	$scope.searchingPost = function() {
+		$scope.blog.posts.syncPosts(function () {
+			$scope.blog.posts.forEach(function (post) {
+				post.comments.sync();
+			})
+		},false, $scope.display.postSearch);
+	};
+
 	$scope.launchSearching = function(mysearch, event) {
-		event.stopPropagation();		
+		event.stopPropagation();
 		model.blogs.sync(undefined, false, mysearch);
 	};
 
@@ -367,7 +384,7 @@ export function BlogController($scope, route, model, $location){
 				$scope.blog.posts.forEach(function (post) {
 					post.comments.sync();
 				})
-			})
+			}, false, $scope.display.postSearch)
 		});
 	}
 
@@ -398,7 +415,7 @@ export function BlogController($scope, route, model, $location){
 			$scope.blog.posts.forEach(function (post) {
 				post.comments.sync();
 			})
-		}, true)
+		}, true, $scope.display.postSearch)
 	}
 
 	$scope.shareBlog = function(){

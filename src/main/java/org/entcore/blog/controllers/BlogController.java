@@ -79,8 +79,8 @@ public class BlogController extends BaseController {
 					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, container, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.blog = new DefaultBlogService(mongo, container.config().getInteger("blog-paging-size", 30), container.config().getInteger("search-word-min-size", 4));
-		this.postService = new DefaultPostService(mongo);
+		this.blog = new DefaultBlogService(mongo, container.config().getInteger("blog-paging-size", 30), container.config().getInteger("blog-search-word-min-size", 4));
+		this.postService = new DefaultPostService(mongo, container.config().getInteger("post-search-word-min-size", 4));
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
@@ -230,7 +230,7 @@ public class BlogController extends BaseController {
 							for(Object blogObj : blogs){
 								final JsonObject blog = (JsonObject) blogObj;
 
-								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 2, new Handler<Either<String,JsonArray>>() {
+								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 2, null, new Handler<Either<String,JsonArray>>() {
 									public void handle(Either<String, JsonArray> event) {
 										if(event.isRight()){
 											blog.putArray("fetchPosts", event.right().getValue());
@@ -281,7 +281,7 @@ public class BlogController extends BaseController {
 							for(Object blogObj : blogs){
 								final JsonObject blog = (JsonObject) blogObj;
 
-								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 0, new Handler<Either<String,JsonArray>>() {
+								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 0, null, new Handler<Either<String,JsonArray>>() {
 									public void handle(Either<String, JsonArray> event) {
 										if(event.isRight()){
 											blog.putArray("fetchPosts", event.right().getValue());

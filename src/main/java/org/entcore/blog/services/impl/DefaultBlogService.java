@@ -166,7 +166,7 @@ public class DefaultBlogService implements BlogService{
 		final QueryBuilder query;
 
 		if (!StringUtils.isEmpty(search)) {
-			final List<String> searchWords = checkAndComposeWordFromSearchText(search);
+			final List<String> searchWords = checkAndComposeWordFromSearchText(search, this.searchWordMinSize);
 			if (!searchWords.isEmpty()) {
 				final QueryBuilder searchQuery = new QueryBuilder();
 				searchQuery.text(MongoDbSearchService.textSearchedComposition(searchWords));
@@ -175,6 +175,7 @@ public class DefaultBlogService implements BlogService{
 				query = null;
 				//empty result (no word to search)
 				result.handle(new Either.Right<String, JsonArray>(new JsonArray()));
+				return;
 			}
 		} else {
 			query = rightQuery;
@@ -203,7 +204,7 @@ public class DefaultBlogService implements BlogService{
 	}
 
 	//TODO put this code in SearchUtils on entcore with (same code in searchengine app) and adding searchWordMinSize param
-	private List<String> checkAndComposeWordFromSearchText(final String searchText) {
+	public static List<String> checkAndComposeWordFromSearchText(final String searchText, final int searchWordMinSize) {
 		final Set<String> searchWords = new HashSet<>();
 
 		if (searchText != null) {
@@ -214,7 +215,7 @@ public class DefaultBlogService implements BlogService{
 				//words search
 				for (String w : words) {
 					final String wTraity = w.replaceAll("(?!')\\p{Punct}", "");
-					if (wTraity.length() >= this.searchWordMinSize) {
+					if (wTraity.length() >= searchWordMinSize) {
 						searchWords.add(wTraity);
 					}
 				}

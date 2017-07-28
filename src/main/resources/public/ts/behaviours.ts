@@ -47,7 +47,7 @@ export let blogModel: any = {
 			}
 
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
-			    syncPosts: function (cb, paginate) {
+			    syncPosts: function (cb, paginate, search) {
 					//for direct resource access (via uri)
 					if (paginate && !this.page) {
 						paginate = false;
@@ -64,9 +64,13 @@ export let blogModel: any = {
 						return;
 					}
 					this.postsLoading = true;
-					this.lastPage = false;					
-					
-					oldHttp().get('/blog/post/list/all/' + that._id,{page: this.page}).done(function(posts){
+					this.lastPage = false;
+
+					if (!search) {
+						search = '';
+					}
+
+					oldHttp().get('/blog/post/list/all/' + that._id,{page: this.page, search: search}).done(function(posts){
 						if(posts.length > 0){
 							posts.map(function(item){
 								item.blogId = data._id;

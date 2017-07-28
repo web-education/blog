@@ -72,7 +72,7 @@
   "post.empty": "Votre billet est vide",
   "title.empty": "Votre billet doit comporter un titre",
   "post.title.placeholder": "Entrez le titre de votre billet",
-  "posts.filter": "Filtrer",
+  "posts.filter": "Filtrer sur les billets affichés",
   "sniplet.add.blog": "Ajouter un blog",
   "seemore": "Voir la suite",
   "share": "Partager",
@@ -95,6 +95,6 @@
   "label.search" : "Rechercher",
   "blog.search.description.none": "Billet intitulé : {0}.",
   "blog.search.description.one": "Billet intitulé : {0}, dont un message répond à vos critères de recherche.",
-  "blog.posts.list": "Liste des billets du blog",
+  "blog.posts.list": "Liste des billets affichés du blog",
   "blog.search.description.several" : "Billet intitulé : {0}, dont {1} messages répondent à vos critères de recherche."
 }
