@@ -92,6 +92,7 @@
   "blog.sniplet.notfound":  "Ce blog a été supprimé, ou vous n'avez pas les droits d'accès nécessaires.",
   "blog.search.internal": "Saisir votre recherche et appuyer sur entrée",
   "blog.search.internal.empty" : "Aucun titre de blog ne correspond à votre recherche.",
+  "post.search.internal.empty" : "Aucun titre et aucun contenu de billet ne correspond à votre recherche.",
   "label.search" : "Rechercher",
   "blog.search.description.none": "Billet intitulé : {0}.",
   "blog.search.description.one": "Billet intitulé : {0}, dont un message répond à vos critères de recherche.",

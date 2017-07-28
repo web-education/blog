@@ -99,7 +99,7 @@
 				</article>
 
 			</div>
-			<div class="row" ng-if="blog.posts.length() === 0">
+			<div class="row" ng-if="blog.posts.length() === 0 && !display.postSearch">
 				<article>
                     <i18n>blog.empty</i18n>
 					<br /><a authorize="createPost" resource="blog" ng-href="#/new-article/[[blog._id]]">
@@ -107,7 +107,11 @@
 					</a>
 				</article>
 			</div>
-
+			<div class="row" ng-if="blog.posts.length() === 0 && display.postSearch">
+				<article>
+					<i18n>post.search.internal.empty</i18n>
+				</article>
+			</div>
 		</div>
 
 	</div>
