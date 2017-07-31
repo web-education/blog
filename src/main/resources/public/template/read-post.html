@@ -34,10 +34,10 @@
 	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED' && blog.myRights.comment">
 		<i18n>comment</i18n>
 	</button>
-	<button ng-click="post.publish()" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && (blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE')">
+	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && (blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE')">
 		<i18n>publish</i18n>
 	</button>
-	<button ng-click="post.publish()" class="right-magnet" ng-if="post.state === 'DRAFT' && !blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'">
+	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state === 'DRAFT' && !blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'">
 		<i18n>submit</i18n>
 	</button>
 </div>

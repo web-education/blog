@@ -91,7 +91,9 @@ export function BlogController($scope, route, model, $location){
 						})
 					})
 				}
-			}
+			};
+
+			initPostCounter(params.blogId);
 
 			if (model.blogs.length()) {
 				model.blogs.trigger('sync');
@@ -152,7 +154,7 @@ export function BlogController($scope, route, model, $location){
 										$scope.post.open(function () {
 											$scope.post.slided = true;
 											$scope.currPost = $scope.post._id;
-											$scope.$apply();
+											initPostCounter(params.blogId);
 										});
 									})
 								}, params.postId);
@@ -169,7 +171,7 @@ export function BlogController($scope, route, model, $location){
 						$scope.currPost = post._id;
 						post.open(function(){
 							post.slided = true;
-							$scope.$apply();
+							initPostCounter(params.blogId);
 						})
 					} else
 						post.slided = false;
@@ -202,6 +204,12 @@ export function BlogController($scope, route, model, $location){
 		list: function(){
 			model.blogs.deselectAll();
 			template.open('main', 'blogs-list');
+			$scope.display.filters.submitted = true;
+			$scope.display.filters.draft = true;
+			$scope.display.filters.published = true;
+			$scope.display.filters.all = true;
+			$scope.display.postSearch = '';
+
 			model.blogs.sync(undefined, false, $scope.display.search);
 		},
 		editBlog: function(params){
@@ -224,13 +232,23 @@ export function BlogController($scope, route, model, $location){
 		}
 	});
 
+	function initPostCounter(blogId){
+		model.blogs.counterPost(blogId, function(counters) {
+			$scope.display.countPublished = counters.countPublished;
+			$scope.display.countDraft = counters.countDraft;
+			$scope.display.countSubmitted = counters.countSubmitted;
+			$scope.display.countAll = counters.countAll;
+			$scope.$apply();
+		});
+	}
+
 	$scope.launchSearchingPost = function(mysearch, event) {
 		event.stopPropagation();
 		$scope.blog.posts.syncPosts(function () {
 			$scope.blog.posts.forEach(function (post) {
 				post.comments.sync();
 			})
-		},false, mysearch);
+		},false, mysearch, $scope.display.filters);
 	};
 
 	$scope.searchingPost = function() {
@@ -238,7 +256,7 @@ export function BlogController($scope, route, model, $location){
 			$scope.blog.posts.forEach(function (post) {
 				post.comments.sync();
 			})
-		},false, $scope.display.postSearch);
+		},false, $scope.display.postSearch, $scope.display.filters);
 	};
 
 	$scope.launchSearching = function(mysearch, event) {
@@ -296,12 +314,32 @@ export function BlogController($scope, route, model, $location){
 		for(let filter in $scope.display.filters){
 			$scope.display.filters[filter] = $scope.display.filters.all;
 		}
+
+		if ($scope.display.filters.all) {
+			$scope.blog.posts.syncPosts(function () {
+				$scope.blog.posts.forEach(function (post) {
+					post.comments.sync();
+				})
+			}, false, $scope.display.postSearch, $scope.display.filters);
+		} else {
+			$scope.blog.posts.all = [];
+		}
 	}
 
 	$scope.checkAll = function(){
 		$scope.display.filters.all = true;
 		for(let filter in $scope.display.filters){
 			$scope.display.filters.all = $scope.display.filters[filter] && $scope.display.filters.all;
+		}
+
+		if (!$scope.display.filters.all && ($scope.display.filters.submitted || $scope.display.filters.draft || $scope.display.filters.published)) {
+			$scope.blog.posts.syncPosts(function () {
+				$scope.blog.posts.forEach(function (post) {
+					post.comments.sync();
+				});
+			}, false, $scope.display.postSearch, $scope.display.filters);
+		} else {
+			$scope.blog.posts.all = [];
 		}
 	}
 
@@ -357,6 +395,12 @@ export function BlogController($scope, route, model, $location){
 		}
 	}
 
+	$scope.publishPost = function(post) {
+		post.publish(function() {
+			initPostCounter(post.blogId);
+		});
+	};
+
     $scope.setDraftCb = function(post){
         post.state = "DRAFT";
         if(!$scope.$$phase)
@@ -380,11 +424,12 @@ export function BlogController($scope, route, model, $location){
 
 	$scope.removePost = function(post){
 		post.remove(function () {
+			initPostCounter(post.blogId);
 			$scope.blog.posts.syncPosts(function () {
 				$scope.blog.posts.forEach(function (post) {
 					post.comments.sync();
 				})
-			}, false, $scope.display.postSearch)
+			}, false, $scope.display.postSearch, $scope.display.filters)
 		});
 	}
 
@@ -396,10 +441,6 @@ export function BlogController($scope, route, model, $location){
 	$scope.removeBlogs = async function(){
 		await $scope.blogs.removeSelection();
 		model.blogs.sync();
-	}
-
-	$scope.applyFilters = function(item){
-		return $scope.display.filters.all || $scope.display.filters[item.state.toLowerCase()];
 	}
 
 	$scope.redirect = function(path){
@@ -415,7 +456,7 @@ export function BlogController($scope, route, model, $location){
 			$scope.blog.posts.forEach(function (post) {
 				post.comments.sync();
 			})
-		}, true, $scope.display.postSearch)
+		}, true, $scope.display.postSearch, $scope.display.filters)
 	}
 
 	$scope.shareBlog = function(){

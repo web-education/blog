@@ -40,10 +40,7 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class DefaultPostService implements PostService {
 
@@ -161,8 +158,14 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void list(String blogId, final UserInfos user, final Integer page, final int limit, final String search, final Handler<Either<String, JsonArray>> result) {
-		final QueryBuilder accessQuery = QueryBuilder.start("blog.$id").is(blogId);
+	public void list(String blogId, final UserInfos user, final Integer page, final int limit, final String search, final Set<String> states, final Handler<Either<String, JsonArray>> result) {
+		final QueryBuilder accessQuery;
+		if (states == null || states.isEmpty()) {
+			accessQuery = QueryBuilder.start("blog.$id").is(blogId);
+		} else {
+			accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").in(states);
+		}
+
 		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
 		final JsonObject sort = new JsonObject().putNumber("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
@@ -210,6 +213,49 @@ public class DefaultPostService implements PostService {
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
 					}
 				}
+			}
+		});
+	}
+
+	@Override
+	public void counter(final String blogId, final UserInfos user,
+	                    final Handler<Either<String, JsonArray>> result) {
+		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
+		final JsonObject projection = new JsonObject();
+		projection.putNumber("state", 1);
+		projection.putNumber("_id", -1);
+
+		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
+			@Override
+			public void handle(Message<JsonObject> event) {
+				result.handle(Utils.validResults(event));
+			}
+		};
+
+		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
+			public void handle(Message<JsonObject> event) {
+				JsonObject res = event.body();
+				if (res == null || !"ok".equals(res.getString("status"))) {
+					result.handle(new Either.Left<String, JsonArray>(event.body().encodePrettily()));
+					return;
+				}
+				boolean isManager = 1 == res.getInteger("count", 0);
+
+				query.or(
+						QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
+						QueryBuilder.start().and(
+								QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+								QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
+						).get(),
+						isManager ?
+								QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get() :
+								QueryBuilder.start().and(
+										QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+										QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
+								).get()
+				);
+    			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), null, projection, finalHandler);
 			}
 		});
 	}

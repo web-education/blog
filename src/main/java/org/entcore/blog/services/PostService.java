@@ -30,6 +30,7 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public interface PostService {
 
@@ -48,7 +49,7 @@ public interface PostService {
 
 	void get(String blogId, String postId, StateType state, Handler<Either<String, JsonObject>> result);
 
-	void list(String blogId, UserInfos user, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);
+	void list(String blogId, UserInfos user, Integer page, int limit, String search, final Set<String> states, Handler<Either<String, JsonArray>> result);
 	void list(String blogId, StateType state, UserInfos user, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);
 	void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result);
 
@@ -66,5 +67,7 @@ public interface PostService {
 	void listComment(String blogId, String postId, UserInfos author, Handler<Either<String, JsonArray>> result);
 
 	void publishComment(String blogId, String commentId, Handler<Either<String, JsonObject>> result);
+
+	void counter(final String blogId, final UserInfos user, final Handler<Either<String, JsonArray>> result);
 
 }

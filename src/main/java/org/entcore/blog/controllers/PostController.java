@@ -26,7 +26,9 @@ import static org.entcore.common.http.response.DefaultResponseHandler.arrayRespo
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 import static org.entcore.common.user.UserUtils.getUserInfos;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.rs.Delete;
@@ -180,7 +182,13 @@ public class PostController extends BaseController {
 					if (!StringUtils.isEmpty(postId)) {
 						post.listOne(blogId, postId, user, arrayResponseHandler(request));
 					} else if(request.params().get("state") == null){
-						post.list(blogId, user, page, pagingSize, search, arrayResponseHandler(request));
+						final String statesParam = request.params().get("states");
+						final Set<String> states = new HashSet<String>();
+						if (!StringUtils.isEmpty(statesParam)) {
+							states.addAll(StringUtils.split(statesParam, ","));
+						}
+
+						post.list(blogId, user, page, pagingSize, search, states, arrayResponseHandler(request));
 					} else {
 						post.list(blogId, BlogResourcesProvider.getStateType(request),
 							user, page, pagingSize, search, arrayResponseHandler(request));

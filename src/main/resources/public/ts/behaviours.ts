@@ -47,7 +47,7 @@ export let blogModel: any = {
 			}
 
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
-			    syncPosts: function (cb, paginate, search) {
+			    syncPosts: function (cb, paginate, search, filters) {
 					//for direct resource access (via uri)
 					if (paginate && !this.page) {
 						paginate = false;
@@ -70,7 +70,25 @@ export let blogModel: any = {
 						search = '';
 					}
 
-					oldHttp().get('/blog/post/list/all/' + that._id,{page: this.page, search: search}).done(function(posts){
+					let jsonParam = {page: this.page, search: search};
+
+					if (filters) {						
+						if (!filters.all) {							
+							let filterValues = "";
+							for (let filter in filters) {
+								let filterValue = filters[filter];
+								if (filter !== 'all' && filters[filter]) {
+									filterValues = (filterValues === "") ? filter.toUpperCase() : filterValues + "," + filter.toUpperCase();
+								}
+							}
+
+							if (filterValues !== "") {
+								jsonParam["states"] = filterValues;
+							}
+						}
+					}
+
+					oldHttp().get('/blog/post/list/all/' + that._id, jsonParam).done(function(posts){
 						if(posts.length > 0){
 							posts.map(function(item){
 								item.blogId = data._id;
@@ -204,6 +222,13 @@ export let blogModel: any = {
 				remove: function(blog){
 					blog.remove();
 					Collection.prototype.remove.call(this, blog);
+				},
+				counterPost: function(blogId, cb){
+					oldHttp().get('/blog/counter/' + blogId).done((obj) => {
+						if(typeof cb === "function"){
+							cb(obj);
+						}
+					});
 				},
 				behaviours: 'blog'
 			});

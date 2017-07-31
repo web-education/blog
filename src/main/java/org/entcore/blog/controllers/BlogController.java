@@ -22,16 +22,18 @@
 
 package org.entcore.blog.controllers;
 
-import static org.entcore.common.http.response.DefaultResponseHandler.*;
-import static org.entcore.common.user.UserUtils.*;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.rs.Delete;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
+import fr.wseduc.security.ActionType;
+import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.BaseController;
+import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
-
 import org.entcore.blog.Blog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
@@ -45,18 +47,8 @@ import org.entcore.common.http.request.ActionsUtils;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.share.impl.MongoDbShareService;
-
-import fr.wseduc.webutils.*;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.entcore.common.user.UserUtils;
 import org.entcore.common.user.UserInfos;
-
-import fr.wseduc.security.ActionType;
-import fr.wseduc.security.SecuredAction;
-
+import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VoidHandler;
@@ -65,6 +57,13 @@ import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Container;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
+import static org.entcore.common.user.UserUtils.getUserInfos;
 
 public class BlogController extends BaseController {
 
@@ -184,6 +183,63 @@ public class BlogController extends BaseController {
 			return;
 		}
 		blog.get(blogId, defaultResponseHandler(request));
+	}
+
+	@Get("/counter/:blogId")
+	@SecuredAction(value="blog.posts.counter", type=ActionType.AUTHENTICATED)
+	public void postCounter(final HttpServerRequest request) {
+		final String blogId = request.params().get("blogId");
+		if (StringUtils.isEmpty(blogId)) {
+			badRequest(request);
+			return;
+		}
+
+		getUserInfos(eb, request, new Handler<UserInfos>() {
+			@Override
+			public void handle(final UserInfos user) {
+				if (user != null) {
+					postService.counter(blogId, user, new Handler<Either<String,JsonArray>>() {
+						public void handle(Either<String, JsonArray> event) {
+							if(event.isLeft()){
+								arrayResponseHandler(request).handle(event);;
+								return;
+							}
+
+							final JsonArray blogs = event.right().getValue();
+
+							int countPublished = 0;
+							int countDraft = 0;
+							int countSubmitted = 0;
+							int countAll = 0;
+
+							final JsonObject result = new JsonObject();
+
+							for(Object blogObj : blogs){
+								final String blogState = ((JsonObject) blogObj).getString("state");
+								if (PostService.StateType.DRAFT.name().equals(blogState)) {
+									countDraft++;
+								} else if (PostService.StateType.PUBLISHED.name().equals(blogState)) {
+									countPublished++;
+								} else if (PostService.StateType.SUBMITTED.name().equals(blogState)) {
+									countSubmitted++;
+								}
+							}
+
+							countAll = countDraft + countPublished + countSubmitted;
+
+							result.putNumber("countPublished", countPublished);
+							result.putNumber("countDraft", countDraft);
+							result.putNumber("countSubmitted", countSubmitted);
+							result.putNumber("countAll", countAll);
+
+							Renders.renderJson(request, result);
+						}
+					});
+				} else {
+					unauthorized(request);
+				}
+			}
+		});
 	}
 
 	@Get("/list/all")
