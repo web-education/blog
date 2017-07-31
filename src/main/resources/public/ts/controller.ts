@@ -359,53 +359,75 @@ export function BlogController($scope, route, model, $location){
 	}
 
 	$scope.saveDraft = function(){
-		if(!$scope.post.content){
-			notify.error('post.empty');
-			return;
+		if (checkPost($scope.post)) {
+			$scope.post.publishing = true;
+			$scope.post.save(function () {
+				$location.path('/view/' + $scope.blog._id);
+			}, $scope.blog, 'DRAFT');
+			notify.info('draft.saved');
 		}
-		if(!$scope.post.title){
-			notify.error('title.empty');
-			return;
-		}
-		$scope.post.save(function(){
-			$location.path('/view/' + $scope.blog._id);
-		}, $scope.blog, 'DRAFT');
-		notify.info('draft.saved');
-	}
+	};
 
-	$scope.savePost = function(){
-		if($scope.post._id !== undefined){
-			$scope.post.publish();
+	$scope.saveOrCreates = function(post){
+		if (checkPost($scope.post)) {
+			post.save(function() {
+				initPostCounter(post.blogId);
+				post.editing = false;
+			});
 		}
-		else{
-			$scope.post.save(function(){
-				$location.path('/view/' + $scope.blog._id + '/' + $scope.post._id);
-			}, $scope.blog);
+	};
+
+	$scope.saveModifications = function(post){
+		if (checkPost(post)) {
+			post.state = "DRAFT";
+			post.saveModifications(function() {
+				console.log(post);
+				if (model.me.userId !== post.author.userId) {
+					//only in the list, not the real blog
+					$scope.blog.posts.removeColl(post);
+				}
+				initPostCounter(post.blogId);
+				post.editing = false;
+			});
 		}
-	}
+	};
+
+	function checkPost(post):boolean {
+		let checked = true;
+		if(!post.title){
+			notify.error('title.empty');
+			checked = false;
+		} else if (!post.content || post.content.replace(/<[^>]*>/g, '') === '') {
+			notify.error('post.empty');
+			checked = false;
+		}
+
+		return checked;
+	};
 
 	$scope.savePublishedPost = function(){
-		if($scope.post._id !== undefined){
-			$scope.post.publish();
+		if (checkPost($scope.post)) {
+			if ($scope.post._id !== undefined) {
+				$scope.post.publish(function() {
+					$scope.post.publishing=true;
+					initPostCounter($scope.post.blogId);
+				});
+			}
+			else {
+				$scope.post.save(function () {
+					$scope.post =  $scope.blog.posts.last();
+					$scope.post.publishing=true;
+					$location.path('/view/' + $scope.post.blogId+ '/' + $scope.post._id);
+				}, $scope.blog, 'PUBLISHED');
+			}
 		}
-		else{
-			$scope.post.save(function(){
-				$location.path('/view/' + $scope.blog._id + '/' + $scope.post._id);
-			}, $scope.blog, 'PUBLISHED');
-		}
-	}
+	};
 
 	$scope.publishPost = function(post) {
 		post.publish(function() {
 			initPostCounter(post.blogId);
 		});
 	};
-
-    $scope.setDraftCb = function(post){
-        post.state = "DRAFT";
-        if(!$scope.$$phase)
-            $scope.$apply();
-    }
 
 	function initMaxResults(){
 		$scope.maxResults = 3;

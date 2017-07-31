@@ -162,6 +162,9 @@ export let blogModel: any = {
 					post.remove();
 					Collection.prototype.remove.call(this, post);
 				},
+				removeColl: function(blog){
+					Collection.prototype.remove.call(this, blog);
+				},
 				behaviours: 'blog'
 			});
 
@@ -222,7 +225,7 @@ export let blogModel: any = {
 				remove: function(blog){
 					blog.remove();
 					Collection.prototype.remove.call(this, blog);
-				},
+				},				
 				counterPost: function(blogId, cb){
 					oldHttp().get('/blog/counter/' + blogId).done((obj) => {
 						if(typeof cb === "function"){
