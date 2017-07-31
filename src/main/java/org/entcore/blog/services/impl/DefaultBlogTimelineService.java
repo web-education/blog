@@ -96,7 +96,8 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 												.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
 												.putString("username", user.getUsername())
 												.putString("blogTitle", blogTitle)
-												.putString("resourceUri", resourceUri);
+												.putString("resourceUri", resourceUri)
+												.putBoolean("disableAntiFlood", true);
 										notification.notifyTimeline(request, "blog.share", user, recipients, blogId, p);
 									}
 								}
@@ -150,7 +151,8 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 												.putString("blogUri", resourceUri)
 												.putString("postTitle", post.getString("title"))
 												.putString("postUri", resourceUri + "/" + postId)
-												.putString("resourceUri", resourceUri + "/" + postId);
+												.putString("resourceUri", resourceUri + "/" + postId)
+												.putBoolean("disableAntiFlood", true);
 										notification.notifyTimeline(request, "blog.submit-post", user, recipients, blogId, postId, p);
 
 									}
@@ -184,7 +186,8 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									.putString("blogUri", resourceUri)
 									.putString("postTitle", blog.getString("title"))
 									.putString("postUri", resourceUri + "/" + postId)
-									.putString("resourceUri", resourceUri + "/" + postId);
+									.putString("resourceUri", resourceUri + "/" + postId)
+									.putBoolean("disableAntiFlood", true);
 							notification.notifyTimeline(request, "blog.publish-post", user, recipients, blogId, postId, p);
 						}
 					}
@@ -224,7 +227,8 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									.putString("blogUri", resourceUri)
 									.putString("postTitle", blog.getString("title"))
 									.putString("postUri", resourceUri + "/" + postId)
-									.putString("resourceUri", resourceUri + "/" + postId);
+									.putString("resourceUri", resourceUri + "/" + postId)
+									.putBoolean("disableAntiFlood", true);
 							notification.notifyTimeline(request, "blog.publish-comment", user, recipients, blogId, postId, p);
 						}
 					}
