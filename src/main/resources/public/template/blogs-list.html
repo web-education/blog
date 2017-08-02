@@ -6,14 +6,14 @@
 		<h1><a href="#/list-blogs"><i class="blog"></i><i18n>blog.title</i18n></a></h1>
 	</app-title>
 </div>
-<div class="row">
-	<div class="four cell eleven-mobile" style="width:50%;padding: 8px 18px 10px;">
-		<input type="search" class="twelve cell" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) : null"  />
-	</div>
-	<div class="cell">
-		<button ng-click="searching();"><i18n>label.search</i18n></button>
+
+<div class="search-pagination flex-row justify-start mobile-justify-center horizontal-spacing-twice">
+	<div class="five ten-mobile vertical-spacing">
+		<input type="text" class="cell eleven" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) : null"  />
+		<i class="search one flex-row align-center justify-center" ng-click="searching();"></i>
 	</div>
 </div>
+
 <hr class="row" />
 <div class="cards-list rigid-grid">
 	<div class="card four height-two" ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/[[blog._id]]')" bottom-scroll="loadBlogs()">
