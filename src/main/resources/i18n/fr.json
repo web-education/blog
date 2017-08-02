@@ -90,7 +90,7 @@
   "submitted": "(Billet à valider)",
   "blog.print": "Imprimer le blog",
   "blog.sniplet.notfound":  "Ce blog a été supprimé, ou vous n'avez pas les droits d'accès nécessaires.",
-  "blog.search.internal": "Saisir votre recherche et appuyer sur entrée",
+  "blog.search.internal": "Saisissez votre recherche et appuyez sur entrée",
   "blog.search.internal.empty" : "Aucun titre de blog ne correspond à votre recherche.",
   "post.search.internal.empty" : "Aucun billet (titre, contenu, et/ou filtres) ne correspond à votre recherche.",
   "label.search" : "Rechercher",
