@@ -133,13 +133,15 @@ export let blogModel: any = {
 				},
 				syncOnePost: function (cb, id) {
 					oldHttp().get('/blog/post/list/all/' + that._id , {postId:id}).done(function(posts) {
-						posts.map(function (item) {
-							item.blogId = data._id;
-							item['publish-type'] = data['publish-type'];
-							item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
-							return item;
-						});
-						this.load(posts);
+						if(posts.length > 0) {
+							posts.map(function (item) {
+								item.blogId = data._id;
+								item['publish-type'] = data['publish-type'];
+								item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
+								return item;
+							});
+							this.load(posts);
+						}
 						
 						if (typeof cb === 'function')
 							cb();
@@ -174,7 +176,7 @@ export let blogModel: any = {
 		},
 		App: function(){
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Blog, {
-			    sync: function (cb, paginate, search) {
+			    syncPag: function (cb, paginate, search) {
 					if (!paginate) {
 						this.page=0;
 						this.lastPage = false;
@@ -200,7 +202,6 @@ export let blogModel: any = {
 
 					    this.blogsLoading = false;
 
-						this.trigger('sync');
 						if(typeof cb === "function"){
 							cb();
 						}
