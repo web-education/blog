@@ -58,14 +58,7 @@
 
 	<div class="margin-three option-row six-mobile">
 
-		<div class="twelve">
-			<div class="ten cell search-pagination flex-row justify-start mobile-justify-center horizontal-spacing-twice">
-				<div class="row six twelve-mobile">
-					<input type="text" class="twelve" ng-model="display.postSearch" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearchingPost(display.postSearch, $event) : null"  />
-					<i class="search flex-row align-center justify-center" ng-click="searchingPost();"></i>
-				</div>
-			</div>
-
+		<div class="twelve content-line overflow-hd">
 			<a ng-href="#/new-article/[[blog._id]]" class="button cell right-magnet" authorize="createPost" resource="blog">
 				<i18n>blog.create.post</i18n>
 			</a>
@@ -85,6 +78,13 @@
 
 	<div class="margin-three main-col twelve-mobile">
 		<div class="twelve cell">
+
+			<div class="search-pagination flex-row justify-start mobile-justify-center vertical-spacing-twice">
+				<div class="row twelve vertical-spacing">
+					<input type="text" class="twelve" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearchingPost(display.postSearch, $event) : null"  />
+					<i class="search flex-row align-center justify-center" ng-click="searchingPost();"></i>
+				</div>
+			</div>
 
 			<div class="row">
 				<container template="create-post"></container>
