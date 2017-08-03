@@ -195,7 +195,7 @@ export function BlogController($scope, route, model, $location){
 			$scope.display.filters.all = true;
 			$scope.display.postSearch = '';
 
-			model.blogs.syncPag(undefined, false, $scope.display.search);
+			model.blogs.syncPag(function() {$scope.$apply();}, false, $scope.display.search);
 		},
 		editBlog: function(params){
 			$scope.blog = model.blogs.findWhere({ _id: params.blogId });
@@ -211,11 +211,15 @@ export function BlogController($scope, route, model, $location){
 	
 	function openFirstPostAndCounter(blogId) {
 		$scope.post = $scope.blog.posts.first();
-		$scope.post.open(function () {
-			$scope.post.slided = true;
-			$scope.currPost = $scope.post._id;
+		if ($scope.post) {
+			$scope.post.open(function () {
+				$scope.post.slided = true;
+				$scope.currPost = $scope.post._id;
+				initPostCounter(blogId);
+			});
+		} else {
 			initPostCounter(blogId);
-		});
+		}
 	}
 
 	function initPostCounter(blogId){
@@ -227,31 +231,41 @@ export function BlogController($scope, route, model, $location){
 			$scope.$apply();
 		});
 	}
+	
+	$scope.resetSearching = function() {
+		$scope.display.searching = true;
+	};
 
 	$scope.launchSearchingPost = function(mysearch, event) {
 		event.stopPropagation();
+		pSearchingPost(mysearch);
+	};
+
+	$scope.searchingPost = function() {
+		pSearchingPost($scope.display.postSearch);
+	};
+
+	function pSearchingPost(mysearch) {
 		$scope.blog.posts.syncPosts(function () {
+			$scope.display.searching = false;
+			let counter = $scope.blog.posts.length();
+			if (counter === 0) $scope.$apply();
 			$scope.blog.posts.forEach(function (post) {
 				post.comments.sync();
+				if (--counter <= 0) {
+					$scope.$apply();
+				}
 			})
 		},false, mysearch, $scope.display.filters);
 	};
 
-	$scope.searchingPost = function() {
-		$scope.blog.posts.syncPosts(function () {
-			$scope.blog.posts.forEach(function (post) {
-				post.comments.sync();
-			})
-		},false, $scope.display.postSearch, $scope.display.filters);
-	};
-
 	$scope.launchSearching = function(mysearch, event) {
 		event.stopPropagation();
-		model.blogs.syncPag(undefined, false, mysearch);
+		model.blogs.syncPag(function () {$scope.display.searching = false; $scope.$apply();}, false, mysearch);
 	};
 
 	$scope.searching = function() {
-		model.blogs.syncPag(undefined, false, $scope.display.search);
+		model.blogs.syncPag(function () {$scope.display.searching = false; $scope.$apply();}, false, $scope.display.search);
 	};
 
 	$scope.openClosePost = function (blog, post) {
@@ -278,7 +292,8 @@ export function BlogController($scope, route, model, $location){
 			draft: true,
 			published: true,
 			all: true
-		}
+		},
+		searching: false
 	}
 
 	$scope.saveBlog = function(){

@@ -81,7 +81,7 @@
 
 			<div class="search-pagination flex-row justify-start mobile-justify-center vertical-spacing-twice">
 				<div class="row twelve vertical-spacing">
-					<input type="text" class="twelve" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearchingPost(display.postSearch, $event) : null"  />
+					<input type="text" class="twelve" ng-model="display.postSearch" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearchingPost(display.postSearch, $event) : resetSearching()"  />
 					<i class="search flex-row align-center justify-center" ng-click="searchingPost();"></i>
 				</div>
 			</div>
@@ -99,7 +99,7 @@
 				</article>
 
 			</div>
-			<div class="row" ng-if="blog.posts.length() === 0 && !display.postSearch && display.filters.all">
+			<div class="row" ng-if="blog.posts.length() === 0 && !display.searching && !display.postSearch && display.filters.all">
 				<article>
                     <i18n>blog.empty</i18n>
 					<br /><a authorize="createPost" resource="blog" ng-href="#/new-article/[[blog._id]]">
@@ -107,7 +107,7 @@
 					</a>
 				</article>
 			</div>
-			<div class="row" ng-if="blog.posts.length() === 0 && (display.postSearch || !display.filters.all)">
+			<div class="row" ng-if="blog.posts.length() === 0 && !display.searching && (display.postSearch || !display.filters.all)">
 				<article>
 					<i18n>post.search.internal.empty</i18n>
 				</article>
