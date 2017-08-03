@@ -246,6 +246,7 @@ export function BlogController($scope, route, model, $location){
 	};
 
 	function pSearchingPost(mysearch) {
+		$scope.display.searching = true;
 		$scope.blog.posts.syncPosts(function () {
 			$scope.display.searching = false;
 			let counter = $scope.blog.posts.length();
@@ -260,11 +261,13 @@ export function BlogController($scope, route, model, $location){
 	};
 
 	$scope.launchSearching = function(mysearch, event) {
+		$scope.display.searching = true;
 		event.stopPropagation();
 		model.blogs.syncPag(function () {$scope.display.searching = false; $scope.$apply();}, false, mysearch);
 	};
 
 	$scope.searching = function() {
+		$scope.display.searching = true;
 		model.blogs.syncPag(function () {$scope.display.searching = false; $scope.$apply();}, false, $scope.display.search);
 	};
 
