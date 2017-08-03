@@ -209,8 +209,9 @@ public class DefaultPostService implements PostService {
 					} else if (page == null) {
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 					} else {
+						final JsonObject sortPag = new JsonObject().putNumber("firstPublishDate", -1).putNumber("modified", -1);
 						final int skip = (0 == page) ? -1 : page * limit;
-						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
+						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 					}
 				}
 			}
@@ -286,7 +287,8 @@ public class DefaultPostService implements PostService {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 				} else {
 					final int skip = (0 == page) ? -1 : page * limit;
-					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
+					final JsonObject sortPag = new JsonObject().putNumber("firstPublishDate", -1).putNumber("modified", -1);
+					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 				}
 			} else {
 				QueryBuilder query2 = getDefautQueryBuilder(blogId, user);
@@ -306,8 +308,9 @@ public class DefaultPostService implements PostService {
 						} else if (page == null) {
 							mongo.find(POST_COLLECTION, MongoQueryBuilder.build(listQuery), sort, projection, finalHandler);
 						} else {
+							final JsonObject sortPag = new JsonObject().putNumber("firstPublishDate", -1).putNumber("modified", -1);
 							final int skip = (0 == page) ? -1 : page * limit;
-							mongo.find(POST_COLLECTION, MongoQueryBuilder.build(listQuery), sort, projection, skip, limit, limit, finalHandler);
+							mongo.find(POST_COLLECTION, MongoQueryBuilder.build(listQuery), sortPag, projection, skip, limit, limit, finalHandler);
 						}
 					}
 				});

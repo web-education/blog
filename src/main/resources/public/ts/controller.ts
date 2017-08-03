@@ -342,22 +342,20 @@ export function BlogController($scope, route, model, $location){
 		} else {
 			$scope.blog.posts.all = [];
 		}
-	}
+	};
 
-	$scope.showEditPost = function(post){
-		$scope.currentPost = post;
-		http().get('/blog/post/' + $scope.currentBlog._id + '/' + $scope.currentPost._id + '?state=' + post.state)
-			.done(function(data){
-				$scope.currentPost = data;
-				$scope.editPost = post;
-				$scope.$apply();
-			});
-	}
+	$scope.showEditPost = function(blog, post){
+		post.editing = true;
+		if (!post.slided) {
+			$scope.redirect('/view/' + blog._id + '/' + post._id);
+		}
+	};
 
 	$scope.cancelEditing = function (post) {
 	    post.editing = false;
 	    post.content = post.data.content;
-	}
+		post.title = post.data.title;
+	};
 
 	$scope.saveDraft = function(){
 		if (checkPost($scope.post)) {

@@ -47,7 +47,7 @@
 		<h2 class="float-title zero-mobile"><i18n>blog.posts.list</i18n> ([[blog.posts.length()]]/[[display.countAll]])</h2>
 		<floating-navigation tooltip="blog.posts.list" class="zero-mobile" ng-if="blog.posts.length() != 0">
 			<ul>
-				<li ng-repeat="post in blog.posts.all | orderBy:'-firstPublishDate.$date'" ng-click="openClosePost(blog, post)" ng-init="$first ? openFirstPost(blog, post) : ''">
+				<li ng-repeat="post in blog.posts.all" ng-click="openClosePost(blog, post)" ng-init="$first ? openFirstPost(blog, post) : ''">
 					<a ng-class="{'selected': post._id === currPost}" >
 						[[post.title]]
 					</a>
@@ -89,7 +89,7 @@
 			<div class="row">
 				<container template="create-post"></container>
 			</div>
-			<div class="hash-magnet twelve cell" ng-repeat="post in blog.posts.all | orderBy:'-firstPublishDate.$date'" id="/view/[[blog._id]]/[[post._id]]" bottom-scroll="loadPosts()">
+			<div class="hash-magnet twelve cell" ng-repeat="post in blog.posts.all" id="/view/[[blog._id]]/[[post._id]]" bottom-scroll="loadPosts()">
 				<article ng-if="post.editing">
 					<container template="edit-post"></container>
 				</article>
