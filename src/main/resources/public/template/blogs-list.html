@@ -7,14 +7,17 @@
 	</app-title>
 </div>
 
+<hr class="row zero block-mobile" />
+
 <div class="search-pagination flex-row justify-start mobile-justify-center horizontal-spacing-twice">
-	<div class="five ten-mobile vertical-spacing">
-		<input type="text" class="cell eleven" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) : null"  />
-		<i class="search one flex-row align-center justify-center" ng-click="searching();"></i>
+	<div class="row six twelve-mobile vertical-spacing">
+		<input type="text" class="twelve" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) : null"  />
+		<i class="search flex-row align-center justify-center" ng-click="searching();"></i>
 	</div>
 </div>
 
 <hr class="row" />
+
 <div class="cards-list rigid-grid">
 	<div class="card four height-two" ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/[[blog._id]]')" bottom-scroll="loadBlogs()">
 		<div class="row">
