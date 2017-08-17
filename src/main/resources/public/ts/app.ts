@@ -1,7 +1,33 @@
-import { model, Collection, Behaviours } from 'entcore/entcore';
-import { BlogController } from './controller';
+import { model, Collection, Behaviours, ng, routes } from 'entcore';
+import { blogController } from './controller';
 
-(window as any).BlogController = BlogController;
+routes.define(function($routeProvider){
+	$routeProvider
+		//fixme don't work with direct access from front route
+		.when('/view/:blogId', {
+			action: 'viewBlog'
+		})
+		.when('/edit/:blogId', {
+			action: 'editBlog'
+		})
+		.when('/new-article/:blogId', {
+			action: 'newArticle'
+		})
+		.when('/list-blogs', {
+			action: 'list'
+		})
+		.when('/view/:blogId/:postId', {
+			action: 'viewPost'
+		})
+		.when('/print/:blogId', {
+			action: 'print'
+		})
+		.otherwise({
+			redirectTo: '/list-blogs'
+		})
+});
+
+ng.controllers.push(blogController);
 
 console.log("Initializing model");
 

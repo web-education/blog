@@ -1,6 +1,4 @@
-import { Behaviours, http as oldHttp, Collection, model } from 'entcore/entcore';
-import { _ } from 'entcore/libs/underscore/underscore';
-import { moment } from 'entcore/libs/moment/moment';
+import { moment, _, Behaviours, http as oldHttp, Collection, model } from 'entcore';
 import http from 'axios';
 
 console.log('blog behaviours file');
@@ -12,7 +10,7 @@ export let blogModel: any = {
 			}
 		},
 		Post: function(data){
-			let that = this;
+			let that = this
 			if(data){
 				this.created = data.created ? moment(data.created.$date) : moment();
 				this.modified = data.modified ? moment(data.modified.$date) : moment();

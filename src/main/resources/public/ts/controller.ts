@@ -1,33 +1,6 @@
-import { Behaviours, routes, template, idiom, http, notify } from 'entcore/entcore'
+import { Behaviours, routes, template, idiom, http, notify, ng } from 'entcore'
 
-routes.define(function($routeProvider){
-	$routeProvider
-		//fixme don't work with direct access from front route
-		.when('/view/:blogId', {
-			action: 'viewBlog'
-		})
-		.when('/edit/:blogId', {
-			action: 'editBlog'
-		})
-		.when('/new-article/:blogId', {
-			action: 'newArticle'
-		})
-		.when('/list-blogs', {
-			action: 'list'
-		})
-		.when('/view/:blogId/:postId', {
-			action: 'viewPost'
-		})
-		.when('/print/:blogId', {
-			action: 'print'
-		})
-		.otherwise({
-			redirectTo: '/list-blogs'
-		})
-});
-
-export function BlogController($scope, route, model, $location){
-
+export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', ($scope, route, model, $location) => {
 	$scope.template = template;
 	template.open('filters', 'filters');
 	template.open('edit-post', 'edit-post');
@@ -507,4 +480,4 @@ export function BlogController($scope, route, model, $location){
 		return parseInt(discriminator + '' + blog.modified.$date);
 	}
 
-}
+}]);
