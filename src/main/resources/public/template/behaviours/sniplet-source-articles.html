@@ -5,32 +5,28 @@
 <lightbox show="showPickBlog">
 	<div class="row accordions">
 		<article class="accordion" ng-class="{ opened: !existingBlog }">
-			<h2 ng-click="existingBlog = false;"><i18n>Nouveau blog</i18n></h2>
+			<h2 ng-click="existingBlog = false;"><i18n>sniplet.blog.new</i18n></h2>
 			<div class="toggle">
 				<div class="content">
-					<p class="info">
-						Vos actualités seront ajoutées dans un nouveau blog automatiquement créé.
-					</p>
+					<p class="info"><i18n>sniplet.blog.desc</i18n></p>
 					<div class="row">
 						<input type="text" ng-model="blog.title" i18n-placeholder="title" class="twelve cell" />
 					</div>
 					<div class="row">
-						<input type="button" i18n-value="Créer le blog" ng-click="createBlog()" class="cell right-magnet" />
+						<input type="button" i18n-value="sniplet.blog.create" ng-click="createBlog()" class="cell right-magnet" />
 					</div>
 				</div>
 			</div>
 		</article>
 		<article class="accordion" ng-class="{ opened: existingBlog }">
-			<h2 ng-click="existingBlog = true;"><i18n>Choisir un blog existant</i18n></h2>
+			<h2 ng-click="existingBlog = true;"><i18n>sniplet.blog.choose</i18n></h2>
 			<div class="toggle">
 				<div class="content">
 					<input type="search" ng-model="searchBlog" />
 					<div class="row">
 						<article class="found-resources">
 							<div ng-if="searchBlog === ''" class="reduce-block-six">
-								<div class="row">
-									Recherchez le blog dans lequel vous postez les articles que vous souhaitez afficher.
-								</div>
+								<div class="row"><i18n>sniplet.blog.search</i18n></div>
 							</div>
 							<ul class="illustrated-list">
 								<li ng-repeat="blog in blogs.all | filter:{ title: searchBlog }" ng-click="pickBlog(blog)">
