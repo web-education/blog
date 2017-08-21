@@ -1,7 +1,7 @@
 import { moment, _, Behaviours, http as oldHttp, Collection, model } from 'entcore';
 import http from 'axios';
 
-console.log('blog behaviours file');
+console.log('blog behaviours file')
 
 export let blogModel: any = {
 		Comment: function(data){
@@ -462,34 +462,33 @@ Behaviours.register('blog', {
 			print: 'org.entcore.blog.controllers.BlogController|print'
 		}
 	},
-	loadResources: function(callback){
-		oldHttp().get('/blog/linker').done(function(data){
-			let posts = [];
-			data.forEach(function(blog){
-				if(blog.thumbnail){
-					blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';
-				}
-				else{
-					blog.thumbnail = '/img/illustrations/blog.png';
-				}
+	loadResources: async function(): Promise<any>{
+		const response = await http.get('/blog/linker');
+		const data = response.data;
+		let posts = [];
+		data.forEach(function(blog){
+			if(blog.thumbnail){
+				blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';
+			}
+			else{
+				blog.thumbnail = '/img/illustrations/blog.png';
+			}
 
-				var addedPosts = _.map(blog.fetchPosts, function(post){
-					return {
-						owner: {
-							name: blog.author.username,
-							userId: blog.author.userId
-						},
-						title: post.title + ' [' + blog.title + ']',
-						_id: blog._id,
-						icon: blog.thumbnail,
-						path: '/blog#/view/' + blog._id + '/' + post._id,
-					}
-				});
-				posts = posts.concat(addedPosts);
-			})
-			this.resources = posts;
-			callback(this.resources);
-		}.bind(this));
+			var addedPosts = _.map(blog.fetchPosts, function(post){
+				return {
+					owner: {
+						name: blog.author.username,
+						userId: blog.author.userId
+					},
+					title: post.title + ' [' + blog.title + ']',
+					_id: blog._id,
+					icon: blog.thumbnail,
+					path: '/blog#/view/' + blog._id + '/' + post._id,
+				}
+			});
+			posts = posts.concat(addedPosts);
+		})
+		this.resources = posts;
 	},
 	sniplets: {
 		//TODO Managing paging from sniplets !
