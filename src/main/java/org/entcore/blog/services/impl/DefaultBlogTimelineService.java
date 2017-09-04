@@ -317,8 +317,13 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	}
 
 	private String neoQuery(List<String> shareIds) {
-		return "MATCH n<-[:IN*0..1]-(u:User) " +
-				"WHERE (n:User OR n:Group) AND n.id IN ['" +
+		return "MATCH (u:User) " +
+				"WHERE u.id IN ['" +
+				Joiner.on("','").join(shareIds) + "'] AND u.id <> {userId} " +
+				"RETURN distinct u.id as id " +
+				"UNION " +
+				"MATCH (n:Group)<-[:IN]-(u:User) " +
+				"WHERE n.id IN ['" +
 				Joiner.on("','").join(shareIds) + "'] AND u.id <> {userId} " +
 				"RETURN distinct u.id as id ";
 	}
