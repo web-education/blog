@@ -14,7 +14,7 @@ module.exports = {
         "entcore/entcore": "entcore",
         "entcore": "entcore",
         "entcore/libs/moment/moment": "entcore",
-        "entcore/libs/underscore/underscore": "_",
+        "entcore/libs/underscore/underscore": "entcore",
         "entcore/libs/jquery/jquery": "entcore",
         "angular": "angular"
     },
