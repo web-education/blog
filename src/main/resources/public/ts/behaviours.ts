@@ -325,8 +325,8 @@ export let blogModel: any = {
 				})
 				.done(function(data){
 					let post = new Behaviours.applicationsBehaviours.blog.model.Post(data);
-				    blog.posts.push(post);
-					post = blog.posts.last();
+				    blog.posts.insertAt(0, post);
+					post = blog.posts.first();
 					post.blogId = blog._id;
 					post['publish-type'] = blog['publish-type'];
 					if(state !== 'DRAFT'){

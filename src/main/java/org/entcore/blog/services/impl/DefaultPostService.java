@@ -83,6 +83,7 @@ public class DefaultPostService implements PostService {
 				.putObject("blog", blogRef);
 		JsonObject b = Utils.validAndGet(post, FIELDS, FIELDS);
 		if (validationError(result, b)) return;
+		b.putObject("sorted", now);
 		if (b.containsField("content")) {
 			b.putString("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 		}
@@ -100,26 +101,48 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void update(String postId, JsonObject post, final Handler<Either<String, JsonObject>> result) {
-		post.putObject("modified", MongoDb.now());
-		JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
-		if (validationError(result, b)) return;
-		if (b.containsField("content")) {
-			b.putString("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
-		}
-		b.putString("state", StateType.DRAFT.name());
-		QueryBuilder query = QueryBuilder.start("_id").is(postId);
-		MongoUpdateBuilder modifier = new MongoUpdateBuilder();
-		for (String attr: b.getFieldNames()) {
-			modifier.set(attr, b.getValue(attr));
-		}
-		mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), modifier.build(),
-				new Handler<Message<JsonObject>>() {
-					@Override
-					public void handle(Message<JsonObject> event) {
-						result.handle(Utils.validResult(event));
+	public void update(String postId, final JsonObject post, final Handler<Either<String, JsonObject>> result) {
+
+		final JsonObject jQuery = MongoQueryBuilder.build(QueryBuilder.start("_id").is(postId));
+		mongo.findOne(POST_COLLECTION, jQuery,  MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
+			public void handle(Either<String, JsonObject> event) {
+				if(event.isLeft()){
+					result.handle(event);
+					return;
+				} else {
+					final JsonObject postFromDb = event.right().getValue().getObject("result", new JsonObject());
+					final JsonObject now = MongoDb.now();
+					post.putObject("modified", now);
+					final JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
+
+					if (validationError(result, b)) return;
+					if (b.containsField("content")) {
+						b.putString("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 					}
-				});
+
+					if (postFromDb.getObject("firstPublishDate") != null) {
+						b.putObject("sorted", postFromDb.getObject("firstPublishDate"));
+					} else {
+						b.putObject("sorted", now);
+					}
+
+					b.putString("state", StateType.DRAFT.name());
+
+					MongoUpdateBuilder modifier = new MongoUpdateBuilder();
+					for (String attr: b.getFieldNames()) {
+						modifier.set(attr, b.getValue(attr));
+					}
+					mongo.update(POST_COLLECTION, jQuery, modifier.build(),
+							new Handler<Message<JsonObject>>() {
+								@Override
+								public void handle(Message<JsonObject> event) {
+									result.handle(Utils.validResult(event));
+								}
+							});
+				}
+			}})
+		);
+
 	}
 
 	@Override
@@ -209,7 +232,7 @@ public class DefaultPostService implements PostService {
 					} else if (page == null) {
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 					} else {
-						final JsonObject sortPag = new JsonObject().putNumber("firstPublishDate", -1).putNumber("modified", -1);
+						final JsonObject sortPag = new JsonObject().putNumber("sorted", -1);
 						final int skip = (0 == page) ? -1 : page * limit;
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 					}
@@ -287,7 +310,7 @@ public class DefaultPostService implements PostService {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 				} else {
 					final int skip = (0 == page) ? -1 : page * limit;
-					final JsonObject sortPag = new JsonObject().putNumber("firstPublishDate", -1).putNumber("modified", -1);
+					final JsonObject sortPag = new JsonObject().putNumber("sorted", -1);
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 				}
 			} else {
@@ -308,7 +331,7 @@ public class DefaultPostService implements PostService {
 						} else if (page == null) {
 							mongo.find(POST_COLLECTION, MongoQueryBuilder.build(listQuery), sort, projection, finalHandler);
 						} else {
-							final JsonObject sortPag = new JsonObject().putNumber("firstPublishDate", -1).putNumber("modified", -1);
+							final JsonObject sortPag = new JsonObject().putNumber("sorted", -1);
 							final int skip = (0 == page) ? -1 : page * limit;
 							mongo.find(POST_COLLECTION, MongoQueryBuilder.build(listQuery), sortPag, projection, skip, limit, limit, finalHandler);
 						}
@@ -444,7 +467,7 @@ public class DefaultPostService implements PostService {
 					.put("blog.$id").is(blogId)
 					.put("firstPublishDate").exists(false);
 
-				MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("firstPublishDate", MongoDb.now());
+				MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("firstPublishDate", MongoDb.now()).set("sorted",  MongoDb.now());
 
 				mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), updateQuery.build(),
 						MongoDbResult.validActionResultHandler(result));
