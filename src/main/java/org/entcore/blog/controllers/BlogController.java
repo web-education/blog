@@ -369,7 +369,7 @@ public class BlogController extends BaseController {
 			public void handle(UserInfos user) {
 				if (user != null) {
 					shareService.shareInfos(user.getUserId(), blogId,
-							I18n.acceptLanguage(request), defaultResponseHandler(request));
+							I18n.acceptLanguage(request), request.params().get("search"), defaultResponseHandler(request));
 				} else {
 					unauthorized(request);
 				}
