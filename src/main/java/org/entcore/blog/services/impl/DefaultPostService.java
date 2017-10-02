@@ -101,7 +101,7 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void update(String postId, final JsonObject post, final Handler<Either<String, JsonObject>> result) {
+	public void update(String postId, final JsonObject post, final UserInfos user, final Handler<Either<String, JsonObject>> result) {
 
 		final JsonObject jQuery = MongoQueryBuilder.build(QueryBuilder.start("_id").is(postId));
 		mongo.findOne(POST_COLLECTION, jQuery,  MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
@@ -126,7 +126,12 @@ public class DefaultPostService implements PostService {
 						b.putObject("sorted", now);
 					}
 
-					b.putString("state", StateType.DRAFT.name());
+					final Boolean contributionPost = postFromDb.getBoolean("contribution", false);
+
+					//if post isn't a contribution or is a contribution and user is author, draft state
+					if (!contributionPost || (contributionPost && user.getUserId().equals(postFromDb.getObject("author", new JsonObject()).getString("userId")))) {
+						b.putString("state", StateType.DRAFT.name());
+					}
 
 					MongoUpdateBuilder modifier = new MongoUpdateBuilder();
 					for (String attr: b.getFieldNames()) {
@@ -136,7 +141,12 @@ public class DefaultPostService implements PostService {
 							new Handler<Message<JsonObject>>() {
 								@Override
 								public void handle(Message<JsonObject> event) {
-									result.handle(Utils.validResult(event));
+									if ("ok".equals(event.body().getString("status"))) {
+										final JsonObject r = new JsonObject().putString("state", b.getString("state", postFromDb.getString("state")));
+										result.handle(new Either.Right<String, JsonObject>(r));
+									} else {
+										result.handle(new Either.Left<String, JsonObject>(event.body().getString("message", "")));
+									}
 								}
 							});
 				}
@@ -436,6 +446,11 @@ public class DefaultPostService implements PostService {
 					final StateType state = (BlogService.PublishType.RESTRAINT.equals(type)) ?
 							StateType.SUBMITTED : StateType.PUBLISHED;
 					MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("state", state.name());
+					if (StateType.SUBMITTED.equals(state)) {
+						//contribution marker
+						updateQuery = updateQuery.set("contribution", true);
+					}
+
 					mongo.update(POST_COLLECTION, q, updateQuery.build(), new Handler<Message<JsonObject>>() {
 						@Override
 						public void handle(Message<JsonObject> res) {

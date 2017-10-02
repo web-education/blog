@@ -104,9 +104,19 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
-			public void handle(final JsonObject data) {
-				post.update(postId, data, defaultResponseHandler(request));
+
+		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+			@Override
+			public void handle(final UserInfos user) {
+				if (user != null) {
+					RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+						public void handle(final JsonObject data) {
+							post.update(postId, data, user, defaultResponseHandler(request));
+						}
+					});
+				} else {
+					unauthorized(request);
+				}
 			}
 		});
 	}

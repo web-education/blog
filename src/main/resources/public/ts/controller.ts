@@ -381,14 +381,9 @@ export function BlogController($scope, route, model, $location){
 
 	$scope.saveModifications = function(post){
 		if (checkPost(post)) {
-			post.state = "DRAFT";
-			post.saveModifications(function() {
-				console.log(post);
-				if (model.me.userId !== post.author.userId) {
-					//only in the list, not the real blog
-					$scope.blog.posts.removeColl(post);
-				}
+			post.saveModifications(function(state) {
 				initPostCounter(post.blogId);
+				post.state = state;
 				post.editing = false;
 			});
 		}
@@ -417,7 +412,7 @@ export function BlogController($scope, route, model, $location){
 			}
 			else {
 				$scope.post.save(function () {
-					$scope.post =  $scope.blog.posts.last();
+					$scope.post =  $scope.blog.posts.first();
 					$scope.post.publishing=true;
 					$location.path('/view/' + $scope.post.blogId+ '/' + $scope.post._id);
 				}, $scope.blog, 'PUBLISHED');

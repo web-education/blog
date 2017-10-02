@@ -43,7 +43,7 @@ public interface PostService {
 
 	void create(String blogId, JsonObject post, UserInfos author, Handler<Either<String, JsonObject>> result);
 
-	void update(String postId, JsonObject post, Handler<Either<String, JsonObject>> result);
+	void update(String postId, JsonObject post, UserInfos user, Handler<Either<String, JsonObject>> result);
 
 	void delete(String postId, Handler<Either<String, JsonObject>> result);
 

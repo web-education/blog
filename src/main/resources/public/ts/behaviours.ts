@@ -344,9 +344,9 @@ export let blogModel: any = {
 				oldHttp().putJson('/blog/post/' + this.blogId + '/' + this._id, {
 					content: this.content,
 					title: this.title
-				}).done(function(){
-                    if(typeof  callback === 'function'){
-                        callback();
+				}).done(function(rep){
+					if(typeof  callback === 'function'){
+                        callback(rep.state);
                     }
                 });
 			}
