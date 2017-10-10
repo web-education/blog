@@ -383,6 +383,13 @@ export let blogModel: any = {
 					    if(this.shortenedTitle.length > 40){
 						    this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
 					    }
+
+						if (blog.thumbnail) {
+							this.icon = blog.thumbnail + '?thumbnail=290x290';
+						} else {
+							this.icon = '/img/illustrations/blog.png';
+						}
+
 					    this.updateData(blog);
 					    if (typeof success === 'function') {
 					        success();
