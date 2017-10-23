@@ -4,18 +4,20 @@
     </div>
     <hr class="row"/>
     <article class="row vertical-spacing" ng-if="newPost.showCreateBlog">
-        <div class="twelve cell">
-            <div class="row">
-                <input type="text" class="twelve cell" ng-model="newPost.title" ng-placeholder="title" />
-            </div>
-            <div class="row">
-                <editor ng-model="newPost.content"></editor>
-            </div>
-            <div class="row">
-                <button ng-click="addPost()" class="right-magnet"><i18n>publish</i18n></button>
-                <input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="newPost.showCreateBlog=false" />
-            </div>
-        </div>
+		<form data-ng-submit="addPost()">
+			<div class="twelve cell">
+				<div class="row">
+					<input type="text" class="twelve cell" ng-model="newPost.title" required ng-placeholder="title" />
+				</div>
+				<div class="row">
+					<editor ng-model="newPost.content"></editor>
+				</div>
+				<div class="row">
+					<button class="right-magnet"><i18n>publish</i18n></button>
+					<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="cancelNewPost()" />
+				</div>
+			</div>
+		</form>
     </article>
 </resource-right>
 
@@ -66,16 +68,18 @@
 		</div>
 	</div>
 	<div class="row" ng-if="post.edit">
-		<div class="row">
-			<input type="text" class="twelve cell" ng-model="post.title" />
-		</div>
-		<div class="row">
-			<editor ng-model="post.content"></editor>
-		</div>
-		<div class="row">
-			<input type="button" class="right-magnet cell" ng-click="saveEdit(post)" i18n-value="save" />
-			<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="post.edit=false"/>
-		</div>
+		<form data-ng-submit="saveEdit(post)">
+			<div class="row">
+				<input type="text" class="twelve cell" ng-model="post.title" required />
+			</div>
+			<div class="row">
+				<editor ng-model="post.content"></editor>
+			</div>
+			<div class="row">
+				<button class="right-magnet cell"><i18n>save</i18n></button>
+				<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="cancelEditing(post)"/>
+			</div>
+		</form>
 	</div>
 	<div class="row" ng-if="!post.edit && post.slided">
 		<div bind-html="post.content"></div>

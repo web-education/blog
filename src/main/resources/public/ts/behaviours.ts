@@ -566,6 +566,16 @@ Behaviours.register('blog', {
                         this.newPost.title = "";
 					}.bind(this), this.blog);
 				},
+				cancelNewPost: function(){
+					this.newPost.showCreateBlog=false;
+					this.newPost.content = "";
+					this.newPost.title = "";	
+				},
+				cancelEditing: function(post){
+					post.edit = false;
+					post.content = post.data.content;
+					post.title = post.data.title;
+				},
 				removePost: function(post){
 					post.remove(function(){
 						this.blog.posts.syncAllPosts(function(){
@@ -580,7 +590,9 @@ Behaviours.register('blog', {
                     let scope = this;
 					post.save(function(){
                         post.publish(function(){
-                            scope.apply();
+							post.data.content = post.content;
+							post.data.title = post.title;
+                            scope.$apply();
                         })
                     });
 					post.edit = false;
