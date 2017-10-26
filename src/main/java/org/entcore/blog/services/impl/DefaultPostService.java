@@ -126,10 +126,8 @@ public class DefaultPostService implements PostService {
 						b.putObject("sorted", now);
 					}
 
-					final Boolean contributionPost = postFromDb.getBoolean("contribution", false);
-
-					//if post isn't a contribution or is a contribution and user is author, draft state
-					if (!contributionPost || (contributionPost && user.getUserId().equals(postFromDb.getObject("author", new JsonObject()).getString("userId")))) {
+					//if user is author, draft state
+					if (user.getUserId().equals(postFromDb.getObject("author", new JsonObject()).getString("userId"))) {
 						b.putString("state", StateType.DRAFT.name());
 					}
 
@@ -446,10 +444,6 @@ public class DefaultPostService implements PostService {
 					final StateType state = (BlogService.PublishType.RESTRAINT.equals(type)) ?
 							StateType.SUBMITTED : StateType.PUBLISHED;
 					MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("state", state.name());
-					if (StateType.SUBMITTED.equals(state)) {
-						//contribution marker
-						updateQuery = updateQuery.set("contribution", true);
-					}
 
 					mongo.update(POST_COLLECTION, q, updateQuery.build(), new Handler<Message<JsonObject>>() {
 						@Override
