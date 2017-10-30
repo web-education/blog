@@ -430,20 +430,25 @@ public class DefaultPostService implements PostService {
 		QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId)
 				.put("state").is(StateType.DRAFT.name()).put("author.userId").is(user.getUserId());
 		final JsonObject q = MongoQueryBuilder.build(query);
-		JsonObject keys = new JsonObject().putNumber("blog", 1);
+		JsonObject keys = new JsonObject().putNumber("blog", 1).putNumber("firstPublishDate", 1);
 		JsonArray fetch = new JsonArray().addString("blog");
 		mongo.findOne(POST_COLLECTION, q, keys, fetch,
 				new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
-				if ("ok".equals(event.body().getString("status")) &&
-						event.body().getObject("result", new JsonObject()).size() > 0) {
-					BlogService.PublishType type = Utils.stringToEnum(event.body().getObject("result")
+				final JsonObject res = event.body().getObject("result", new JsonObject());
+				if ("ok".equals(event.body().getString("status")) && res.size() > 0) {
+					BlogService.PublishType type = Utils.stringToEnum(res
 							.getObject("blog",  new JsonObject()).getString("publish-type"),
 							BlogService.PublishType.RESTRAINT, BlogService.PublishType.class);
 					final StateType state = (BlogService.PublishType.RESTRAINT.equals(type)) ?
 							StateType.SUBMITTED : StateType.PUBLISHED;
 					MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("state", state.name());
+
+					// if IMMEDIATE published post, first publishing must define the first published date
+					if (StateType.PUBLISHED.equals(state) && res.getObject("firstPublishDate") == null) {
+						updateQuery = updateQuery.set("firstPublishDate", MongoDb.now()).set("sorted",  MongoDb.now());
+					}
 
 					mongo.update(POST_COLLECTION, q, updateQuery.build(), new Handler<Message<JsonObject>>() {
 						@Override
