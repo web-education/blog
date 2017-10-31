@@ -90,9 +90,10 @@ export let blogModel: any = {
 
 					oldHttp().get('/blog/post/list/all/' + that._id, jsonParam).done(function(posts){
 						if(posts.length > 0){
+							var type = this.model.data['publish-type'];
 							posts.map(function(item){
 								item.blogId = data._id;
-								item['publish-type'] = data['publish-type'];
+								item['publish-type'] = type;
 								item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
 								return item;
 							});
@@ -134,9 +135,10 @@ export let blogModel: any = {
 				syncOnePost: function (cb, id) {
 					oldHttp().get('/blog/post/list/all/' + that._id , {postId:id}).done(function(posts) {
 						if(posts.length > 0) {
+							var type = this.model.data['publish-type'];
 							posts.map(function (item) {
 								item.blogId = data._id;
-								item['publish-type'] = data['publish-type'];
+								item['publish-type'] = type;
 								item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
 								return item;
 							});
