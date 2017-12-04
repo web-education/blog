@@ -73,7 +73,6 @@
   "title.empty": "Votre billet doit comporter un titre",
   "post.title.placeholder": "Entrez le titre de votre billet",
   "posts.filter": "Filtrer",
-  "sniplet.add.blog": "Ajouter un blog",
   "seemore": "Voir la suite",
   "share": "Partager",
   "share.groups": "Groupes",
@@ -84,9 +83,6 @@
   "share.title": "Partager avec...",
   "share.users": "Utilisateurs",
   "share.varyingrights": "Attention, vous allez modifier des droits de partage sur plusieurs blogs : tous les blogs sélectionnés seront affectés",
-  "sniplet.add.post": "Ajouter un billet",
-  "sniplet.desc": "Ce sniplet vous permet d'afficher les articles d'un blog sur votre page.",
-  "sniplet.title": "Blog",
   "submitted": "(Billet à valider)",
   "blog.print": "Imprimer le blog",
   "blog.sniplet.notfound":  "Ce blog a été supprimé, ou vous n'avez pas les droits d'accès nécessaires.",
@@ -97,5 +93,14 @@
   "blog.search.description.none": "Billet intitulé : {0}.",
   "blog.search.description.one": "Billet intitulé : {0}, dont un message répond à vos critères de recherche.",
   "blog.posts.list": "Liste des billets affichés du blog",
-  "blog.search.description.several" : "Billet intitulé : {0}, dont {1} messages répondent à vos critères de recherche."
+  "blog.search.description.several" : "Billet intitulé : {0}, dont {1} messages répondent à vos critères de recherche.",
+  "sniplet.add.blog":	"Ajouter un blog",
+  "sniplet.add.post":	"Ajouter un billet",
+  "sniplet.desc":	"Ce sniplet vous permet d'afficher les articles d'un blog sur votre page.",
+  "sniplet.title":	"Blog",
+  "sniplet.blog.new": "Nouveau blog",
+  "sniplet.blog.desc":	"Vos actualités seront ajoutées dans un nouveau blog automatiquement créé.",
+  "sniplet.blog.choose": "Choisir un blog existant",
+  "sniplet.blog.search":	"Recherchez le blog dans lequel vous postez les articles que vous souhaitez afficher.",
+  "sniplet.blog.create":	"Créer le blog"
 }
