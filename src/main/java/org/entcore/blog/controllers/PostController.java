@@ -41,12 +41,12 @@ import org.entcore.common.neo4j.Neo;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import org.entcore.common.utils.StringUtils;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.http.HttpServerRequest;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.platform.Container;
+import io.vertx.core.json.JsonObject;
+
 
 import java.util.HashSet;
 import java.util.Map;
@@ -62,13 +62,13 @@ public class PostController extends BaseController {
 	private BlogTimelineService timelineService;
 	private int pagingSize;
 
-	public void init(Vertx vertx, Container container, RouteMatcher rm,
+	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
 					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
-		super.init(vertx, container, rm, securedActions);
+		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.post = new DefaultPostService(mongo, container.config().getInteger("post-search-word-min-size", 4));
-		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(vertx, eb, log), mongo);
-		this.pagingSize = container.config().getInteger("post-paging-size", 20);
+		this.post = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4));
+		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
+		this.pagingSize = config.getInteger("post-paging-size", 20);
 	}
 
 	// TODO improve fields matcher and validater
@@ -136,7 +136,7 @@ public class PostController extends BaseController {
 					renderJson(request, event.right().getValue(), 204);
 				} else {
 					JsonObject error = new JsonObject()
-							.putString("error", event.left().getValue());
+							.put("error", event.left().getValue());
 					renderJson(request, error, 400);
 				}
 			}
@@ -233,7 +233,7 @@ public class PostController extends BaseController {
 								renderJson(request, event.right().getValue());
 							} else {
 								JsonObject error = new JsonObject()
-										.putString("error", event.left().getValue());
+										.put("error", event.left().getValue());
 								renderJson(request, error, 400);
 							}
 						}
@@ -269,7 +269,7 @@ public class PostController extends BaseController {
 					renderJson(request, event.right().getValue());
 				} else {
 					JsonObject error = new JsonObject()
-							.putString("error", event.left().getValue());
+							.put("error", event.left().getValue());
 					renderJson(request, error, 400);
 				}
 			}
@@ -311,7 +311,7 @@ public class PostController extends BaseController {
 												pathPrefix + "#/view/" + blogId);
 										renderJson(request, event.right().getValue());
 									} else {
-										JsonObject error = new JsonObject().putString("error", event.left().getValue());
+										JsonObject error = new JsonObject().put("error", event.left().getValue());
 										renderJson(request, error, 400);
 									}
 								}

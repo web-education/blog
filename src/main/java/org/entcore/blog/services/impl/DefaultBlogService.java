@@ -32,10 +32,10 @@ import fr.wseduc.webutils.*;
 import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.*;
 
@@ -61,15 +61,15 @@ public class DefaultBlogService implements BlogService{
 				PublishType.RESTRAINT, PublishType.class);
 		JsonObject now = MongoDb.now();
 		JsonObject owner = new JsonObject()
-				.putString("userId", author.getUserId())
-				.putString("username", author.getUsername())
-				.putString("login", author.getLogin());
-		blog.putObject("created", now)
-				.putObject("modified", now)
-				.putObject("author", owner)
-				.putString("comment-type", commentType.name())
-				.putString("publish-type", publishType.name())
-				.putArray("shared", new JsonArray());
+				.put("userId", author.getUserId())
+				.put("username", author.getUsername())
+				.put("login", author.getLogin());
+		blog.put("created", now)
+				.put("modified", now)
+				.put("author", owner)
+				.put("comment-type", commentType.name())
+				.put("publish-type", publishType.name())
+				.put("shared", new JsonArray());
 		JsonObject b = Utils.validAndGet(blog, FIELDS, FIELDS);
 		if (validationError(result, b)) return;
 		mongo.save(BLOG_COLLECTION, b, new Handler<Message<JsonObject>>() {
@@ -82,28 +82,28 @@ public class DefaultBlogService implements BlogService{
 
 	@Override
 	public void update(String blogId, JsonObject blog, final Handler<Either<String, JsonObject>> result) {
-		blog.putObject("modified", MongoDb.now());
+		blog.put("modified", MongoDb.now());
 		if (blog.getString("comment-type") != null) {
 			try {
 				CommentType.valueOf(blog.getString("comment-type").toUpperCase());
-				blog.putString("comment-type", blog.getString("comment-type").toUpperCase());
+				blog.put("comment-type", blog.getString("comment-type").toUpperCase());
 			} catch (IllegalArgumentException | NullPointerException e) {
-				blog.removeField("comment-type");
+				blog.remove("comment-type");
 			}
 		}
 		if (blog.getString("publish-type") != null) {
 			try {
 				PublishType.valueOf(blog.getString("publish-type").toUpperCase());
-				blog.putString("publish-type", blog.getString("publish-type").toUpperCase());
+				blog.put("publish-type", blog.getString("publish-type").toUpperCase());
 			} catch (IllegalArgumentException | NullPointerException e) {
-				blog.removeField("publish-type");
+				blog.remove("publish-type");
 			}
 		}
 		JsonObject b = Utils.validAndGet(blog, UPDATABLE_FIELDS, Collections.<String>emptyList());
 		if (validationError(result, b)) return;
 		QueryBuilder query = QueryBuilder.start("_id").is(blogId);
 		MongoUpdateBuilder modifier = new MongoUpdateBuilder();
-		for (String attr: b.getFieldNames()) {
+		for (String attr: b.fieldNames()) {
 			modifier.set(attr, b.getValue(attr));
 		}
 		mongo.update(BLOG_COLLECTION, MongoQueryBuilder.build(query), modifier.build(),
@@ -181,7 +181,7 @@ public class DefaultBlogService implements BlogService{
 			query = rightQuery;
 		}
 
-		JsonObject sort = new JsonObject().putNumber("modified", -1);
+		JsonObject sort = new JsonObject().put("modified", -1);
 
         if (page != null && query != null) {
 	        final int skip = (0 == page) ? -1 : page * this.pagingSize;

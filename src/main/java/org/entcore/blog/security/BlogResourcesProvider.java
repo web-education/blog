@@ -32,11 +32,11 @@ import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.webutils.http.Binding;
 import org.entcore.common.http.filter.ResourcesProvider;
 import org.entcore.common.user.UserInfos;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,31 +156,31 @@ public class BlogResourcesProvider implements ResourcesProvider {
 				final UserInfos user, final Handler<Boolean> handler, String postId) {
 		QueryBuilder query = QueryBuilder.start("_id").is(postId);
 		request.pause();
-		mongo.findOne("posts", MongoQueryBuilder.build(query), null, new JsonArray().addString("blog"),
+		mongo.findOne("posts", MongoQueryBuilder.build(query), null, new JsonArray().add("blog"),
 				new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
 				request.resume();
 				if ("ok".equals(event.body().getString("status"))) {
-					JsonObject res = event.body().getObject("result");
+					JsonObject res = event.body().getJsonObject("result");
 					if (res == null) {
 						handler.handle(false);
 						return;
 					}
-					if (res.getObject("author") != null  &&
-							user.getUserId().equals(res.getObject("author").getString("userId"))) {
+					if (res.getJsonObject("author") != null  &&
+							user.getUserId().equals(res.getJsonObject("author").getString("userId"))) {
 						handler.handle(true);
 						return;
 					}
-					if (res.getObject("blog") != null  &&
-							res.getObject("blog").getArray("shared") != null) {
-						String blogAuthorId =  res.getObject("blog")
-								.getObject("author", new JsonObject()).getString("userId");
+					if (res.getJsonObject("blog") != null  &&
+							res.getJsonObject("blog").getJsonArray("shared") != null) {
+						String blogAuthorId =  res.getJsonObject("blog")
+								.getJsonObject("author", new JsonObject()).getString("userId");
 						if (blogAuthorId != null && blogAuthorId.equals(user.getUserId())) {
 							handler.handle(true);
 							return;
 						}
-						for (Object o: res.getObject("blog").getArray("shared")) {
+						for (Object o: res.getJsonObject("blog").getJsonArray("shared")) {
 							if (!(o instanceof JsonObject)) continue;
 							JsonObject json = (JsonObject) o;
 							if (json != null && json.getBoolean("manager", false) &&

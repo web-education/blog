@@ -32,12 +32,12 @@ import org.entcore.blog.Blog;
 import org.entcore.common.search.SearchingEvents;
 import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.MongoDbSearchService;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,7 +62,7 @@ public class BlogSearchingEvents implements SearchingEvents {
                                final JsonArray columnsHeader, final String locale, final Handler<Either<String, JsonArray>> handler) {
 		if (appFilters.contains(BlogSearchingEvents.class.getSimpleName())) {
 
-			final List<String> groupIdsLst = groupIds.toList();
+			final List<String> groupIdsLst = groupIds.getList();
 			final List<DBObject> groups = new ArrayList<DBObject>();
 			groups.add(QueryBuilder.start("userId").is(userId).get());
 			for (String gpId: groupIdsLst) {
@@ -79,7 +79,7 @@ public class BlogSearchingEvents implements SearchingEvents {
 					).get());
 
 			final JsonObject projection = new JsonObject();
-			projection.putNumber("_id", 1);
+			projection.put("_id", 1);
 			//search all blogs of user
 			mongo.find(Blog.BLOGS_COLLECTION, MongoQueryBuilder.build(rightsQuery), null,
 					projection, new Handler<Message<JsonObject>>() {
@@ -91,19 +91,19 @@ public class BlogSearchingEvents implements SearchingEvents {
 
 								final Set<String> setIds = new HashSet<String>();
 								for (int i=0;i<blogsResult.size();i++) {
-									final JsonObject j = blogsResult.get(i);
+									final JsonObject j = blogsResult.getJsonObject(i);
 									setIds.add(j.getString("_id"));
 								}
 
 								//search posts for the blogs found
-								searchPosts(page, limit, searchWords.toList(), setIds, new Handler<Either<String, JsonArray>>() {
+								searchPosts(page, limit, searchWords.getList(), setIds, new Handler<Either<String, JsonArray>>() {
 									@Override
 									public void handle(Either<String, JsonArray> event) {
 										if (event.isRight()) {
 											if (log.isDebugEnabled()) {
 												log.debug("[BlogSearchingEvents][searchResource] The resources searched by user are found");
 											}
-											final JsonArray res = formatSearchResult(event.right().getValue(), columnsHeader, searchWords.toList());
+											final JsonArray res = formatSearchResult(event.right().getValue(), columnsHeader, searchWords.getList());
 											handler.handle(new Right<String, JsonArray>(res));
 										} else {
 											handler.handle(new Either.Left<String, JsonArray>(event.left().getValue()));
@@ -131,34 +131,34 @@ public class BlogSearchingEvents implements SearchingEvents {
 
 		final QueryBuilder query = new QueryBuilder().and(worldsQuery.get(), blogQuery.get(), publishedQuery.get());
 
-		JsonObject sort = new JsonObject().putNumber("modified", -1);
+		JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = new JsonObject();
-		projection.putNumber("title", 1);
-		projection.putNumber("content", 1);
-		projection.putNumber("blog.$id", 1);
-		projection.putNumber("modified", 1);
-		projection.putNumber("author.userId", 1);
-		projection.putNumber("author.username", 1);
+		projection.put("title", 1);
+		projection.put("content", 1);
+		projection.put("blog.$id", 1);
+		projection.put("modified", 1);
+		projection.put("author.userId", 1);
+		projection.put("author.username", 1);
 
 		mongo.find(Blog.POSTS_COLLECTION, MongoQueryBuilder.build(query), sort,
 				projection, skip, limit, Integer.MAX_VALUE, validResultsHandler(handler));
 	}
 
 	private JsonArray formatSearchResult(final JsonArray results, final JsonArray columnsHeader, final List<String> words) {
-		final List<String> aHeader = columnsHeader.toList();
+		final List<String> aHeader = columnsHeader.getList();
 		final JsonArray traity = new JsonArray();
 
 		for (int i=0;i<results.size();i++) {
-			final JsonObject j = results.get(i);
+			final JsonObject j = results.getJsonObject(i);
 			final JsonObject jr = new JsonObject();
 			if (j != null) {
-				final String blogId = j.getObject("blog").getString("$id");
-				jr.putString(aHeader.get(0), j.getString("title"));
-				jr.putString(aHeader.get(1), j.getString("content", ""));
-				jr.putObject(aHeader.get(2), j.getObject("modified"));
-				jr.putString(aHeader.get(3), j.getObject("author").getString("username"));
-				jr.putString(aHeader.get(4), j.getObject("author").getString("userId"));
-				jr.putString(aHeader.get(5), "/blog#/view/" + blogId + "/" + j.getString("_id"));
+				final String blogId = j.getJsonObject("blog").getString("$id");
+				jr.put(aHeader.get(0), j.getString("title"));
+				jr.put(aHeader.get(1), j.getString("content", ""));
+				jr.put(aHeader.get(2), j.getJsonObject("modified"));
+				jr.put(aHeader.get(3), j.getJsonObject("author").getString("username"));
+				jr.put(aHeader.get(4), j.getJsonObject("author").getString("userId"));
+				jr.put(aHeader.get(5), "/blog#/view/" + blogId + "/" + j.getString("_id"));
 				traity.add(jr);
 			}
 		}

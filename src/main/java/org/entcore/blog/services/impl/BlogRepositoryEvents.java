@@ -26,10 +26,10 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import org.entcore.common.service.impl.MongoDbRepositoryEvents;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
@@ -47,7 +47,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 		final String[] userIds = new String[users.size()];
 		for (int i = 0; i < users.size(); i++) {
-			JsonObject j = users.get(i);
+			JsonObject j = users.getJsonObject(i);
 			userIds[i] = j.getString("id");
 		}
 
@@ -88,15 +88,15 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 				QueryBuilder.start("shared.org-entcore-blog-controllers-BlogController|shareJson").notEquals(true)
 						.put("author.deleted").is(true));
 
-		mongo.find(collection, query, null, new JsonObject().putNumber("_id", 1), new Handler<Message<JsonObject>>() {
+		mongo.find(collection, query, null, new JsonObject().put("_id", 1), new Handler<Message<JsonObject>>() {
 					@Override
 					public void handle(Message<JsonObject> res) {
 				String status = res.body().getString("status");
-				JsonArray results = res.body().getArray("results");
+				JsonArray results = res.body().getJsonArray("results");
 				if ("ok".equals(status) && results != null && results.size() > 0) {
 					String[] blogIds = new String[results.size()];
 					for (int i = 0; i < results.size(); i++) {
-						JsonObject j = results.get(i);
+						JsonObject j = results.getJsonObject(i);
 						blogIds[i] = j.getString("_id");
 					}
 					QueryBuilder q = QueryBuilder.start("blog.$id").in(blogIds);
