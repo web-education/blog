@@ -49,14 +49,13 @@ import org.entcore.common.share.ShareService;
 import org.entcore.common.share.impl.MongoDbShareService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VoidHandler;
-import org.vertx.java.core.http.HttpServerRequest;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.platform.Container;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,13 +73,13 @@ public class BlogController extends BaseController {
 	private EventStore eventStore;
 	private enum BlogEvent { ACCESS }
 
-	public void init(Vertx vertx, Container container, RouteMatcher rm,
+	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
 					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
-		super.init(vertx, container, rm, securedActions);
+		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.blog = new DefaultBlogService(mongo, container.config().getInteger("blog-paging-size", 30), container.config().getInteger("blog-search-word-min-size", 4));
-		this.postService = new DefaultPostService(mongo, container.config().getInteger("post-search-word-min-size", 4));
-		this.timelineService = new DefaultBlogTimelineService(vertx, eb, container, new Neo(vertx, eb, log), mongo);
+		this.blog = new DefaultBlogService(mongo, config.getInteger("blog-paging-size", 30), config.getInteger("blog-search-word-min-size", 4));
+		this.postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4));
+		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		this.shareService = new MongoDbShareService(eb, mongo, "blogs", securedActions, groupedActions);
@@ -97,7 +96,7 @@ public class BlogController extends BaseController {
 	@Get("/print/blog")
 	@SecuredAction("blog.print")
 	public void print(HttpServerRequest request) {
-		renderView(request, new JsonObject().putString("printBlogId", request.params().get("blog")), "print.html", null);
+		renderView(request, new JsonObject().put("printBlogId", request.params().get("blog")), "print.html", null);
 	}
 
 	// TODO improve fields matcher and validater
@@ -138,7 +137,7 @@ public class BlogController extends BaseController {
 								renderJson(request, event.right().getValue());
 							} else {
 								JsonObject error = new JsonObject()
-										.putString("error", event.left().getValue());
+										.put("error", event.left().getValue());
 								renderJson(request, error, 400);
 							}
 						}
@@ -167,7 +166,7 @@ public class BlogController extends BaseController {
 					renderJson(request, event.right().getValue(), 204);
 				} else {
 					JsonObject error = new JsonObject()
-							.putString("error", event.left().getValue());
+							.put("error", event.left().getValue());
 					renderJson(request, error, 400);
 				}
 			}
@@ -227,10 +226,10 @@ public class BlogController extends BaseController {
 
 							countAll = countDraft + countPublished + countSubmitted;
 
-							result.putNumber("countPublished", countPublished);
-							result.putNumber("countDraft", countDraft);
-							result.putNumber("countSubmitted", countSubmitted);
-							result.putNumber("countAll", countAll);
+							result.put("countPublished", countPublished);
+							result.put("countDraft", countDraft);
+							result.put("countSubmitted", countSubmitted);
+							result.put("countAll", countAll);
 
 							Renders.renderJson(request, result);
 						}
@@ -275,8 +274,8 @@ public class BlogController extends BaseController {
 							}
 
 							final AtomicInteger countdown = new AtomicInteger(blogs.size());
-							final VoidHandler finalHandler = new VoidHandler() {
-								protected void handle() {
+							final Handler<Void> finalHandler = new Handler<Void>() {
+								public void handle(Void v) {
 									if(countdown.decrementAndGet() <= 0){
 										renderJson(request, blogs);
 									}
@@ -289,7 +288,7 @@ public class BlogController extends BaseController {
 								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 2, null, new Handler<Either<String,JsonArray>>() {
 									public void handle(Either<String, JsonArray> event) {
 										if(event.isRight()){
-											blog.putArray("fetchPosts", event.right().getValue());
+											blog.put("fetchPosts", event.right().getValue());
 										}
 										finalHandler.handle(null);
 									}
@@ -326,8 +325,8 @@ public class BlogController extends BaseController {
 							}
 
 							final AtomicInteger countdown = new AtomicInteger(blogs.size());
-							final VoidHandler finalHandler = new VoidHandler() {
-								protected void handle() {
+							final Handler<Void> finalHandler = new Handler<Void>() {
+								public void handle(Void v) {
 									if(countdown.decrementAndGet() <= 0){
 										renderJson(request, blogs);
 									}
@@ -340,7 +339,7 @@ public class BlogController extends BaseController {
 								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 0, null, new Handler<Either<String,JsonArray>>() {
 									public void handle(Either<String, JsonArray> event) {
 										if(event.isRight()){
-											blog.putArray("fetchPosts", event.right().getValue());
+											blog.put("fetchPosts", event.right().getValue());
 										}
 										finalHandler.handle(null);
 									}
@@ -385,10 +384,10 @@ public class BlogController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		request.expectMultiPart(true);
-		request.endHandler(new VoidHandler() {
+		request.setExpectMultipart(true);
+		request.endHandler(new Handler<Void>() {
 			@Override
-			protected void handle() {
+			public void handle(Void v) {
 				final List<String> actions = request.formAttributes().getAll("actions");
 				final String groupId = request.formAttributes().get("groupId");
 				final String userId = request.formAttributes().get("userId");
@@ -404,7 +403,7 @@ public class BlogController extends BaseController {
 								@Override
 								public void handle(Either<String, JsonObject> event) {
 									if (event.isRight()) {
-										JsonObject n = event.right().getValue().getObject("notify-timeline");
+										JsonObject n = event.right().getValue().getJsonObject("notify-timeline");
 										if (n != null) {
 											timelineService.notifyShare(
 												request, blogId, user, new JsonArray().add(n), getBlogUri(request, blogId));
@@ -412,7 +411,7 @@ public class BlogController extends BaseController {
 										renderJson(request, event.right().getValue());
 									} else {
 										JsonObject error = new JsonObject()
-												.putString("error", event.left().getValue());
+												.put("error", event.left().getValue());
 										renderJson(request, error, 400);
 									}
 								}
@@ -442,10 +441,10 @@ public class BlogController extends BaseController {
 			return;
 		}
 
-		request.expectMultiPart(true);
-		request.endHandler(new VoidHandler() {
+		request.setExpectMultipart(true);
+		request.endHandler(new Handler<Void>() {
 			@Override
-			protected void handle() {
+			public void handle(Void v) {
 				final List<String> actions = request.formAttributes().getAll("actions");
 				final String groupId = request.formAttributes().get("groupId");
 				final String userId = request.formAttributes().get("userId");

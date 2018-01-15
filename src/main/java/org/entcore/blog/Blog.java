@@ -38,14 +38,13 @@ public class Blog extends BaseServer {
     public static final String BLOGS_COLLECTION = "blogs";
 
     @Override
-    public void start() {
+    public void start() throws Exception {
         setResourceProvider(new BlogResourcesProvider());
         super.start();
 
         MongoDbConf.getInstance().setCollection("blogs");
 
         EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
-        eventStoreFactory.setContainer(container);
         eventStoreFactory.setVertx(vertx);
 
         setRepositoryEvents(new BlogRepositoryEvents());

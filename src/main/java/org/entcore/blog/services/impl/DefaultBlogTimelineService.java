@@ -33,16 +33,16 @@ import org.entcore.common.neo4j.Neo;
 import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.Config;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.eventbus.EventBus;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
-import org.vertx.java.platform.Container;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 
 import com.mongodb.QueryBuilder;
 
@@ -58,10 +58,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	private final MongoDb mongo;
 	private final TimelineHelper notification;
 
-	public DefaultBlogTimelineService(Vertx vertx, EventBus eb, Container container, Neo neo, MongoDb mongo) {
+	public DefaultBlogTimelineService(Vertx vertx, EventBus eb, JsonObject config, Neo neo, MongoDb mongo) {
 		this.neo = neo;
 		this.mongo = mongo;
-		this.notification = new TimelineHelper(vertx, eb, container);
+		this.notification = new TimelineHelper(vertx, eb, config);
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 			final JsonArray sharedArray, final String resourceUri) {
 		if (sharedArray != null && user != null && blogId != null && request != null && resourceUri != null) {
 			QueryBuilder query = QueryBuilder.start("_id").is(blogId);
-			JsonObject keys = new JsonObject().putNumber("title", 1);
+			JsonObject keys = new JsonObject().put("title", 1);
 			mongo.findOne("blogs", MongoQueryBuilder.build(query), keys, new Handler<Message<JsonObject>>() {
 				@Override
 				public void handle(final Message<JsonObject> event) {
@@ -82,22 +82,22 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 								@Override
 								public void handle(Message<JsonObject> res) {
 									if ("ok".equals(res.body().getString("status"))) {
-										JsonObject r = res.body().getObject("result");
+										JsonObject r = res.body().getJsonObject("result");
 										List<String> recipients = new ArrayList<>();
-										for (String attr: r.getFieldNames()) {
-											String id = r.getObject(attr).getString("id");
+										for (String attr: r.fieldNames()) {
+											String id = r.getJsonObject(attr).getString("id");
 											if (id != null) {
 												recipients.add(id);
 											}
 										}
 										String blogTitle = event.body()
-												.getObject("result", new JsonObject()).getString("title");
+												.getJsonObject("result", new JsonObject()).getString("title");
 										JsonObject p = new JsonObject()
-												.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
-												.putString("username", user.getUsername())
-												.putString("blogTitle", blogTitle)
-												.putString("resourceUri", resourceUri)
-												.putBoolean("disableAntiFlood", true);
+												.put("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+												.put("username", user.getUsername())
+												.put("blogTitle", blogTitle)
+												.put("resourceUri", resourceUri)
+												.put("disableAntiFlood", true);
 										notification.notifyTimeline(request, "blog.share", user, recipients, blogId, p);
 									}
 								}
@@ -114,19 +114,19 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
 			QueryBuilder blogQuery = QueryBuilder.start("_id").is(blogId);
-			JsonObject blogKeys = new JsonObject().putNumber("author", 1);
+			JsonObject blogKeys = new JsonObject().put("author", 1);
 			mongo.findOne("blogs", MongoQueryBuilder.build(blogQuery), blogKeys, new Handler<Message<JsonObject>>() {
 				@Override
 				public void handle(final Message<JsonObject> event) {
 					if ("ok".equals(event.body().getString("status"))) {
 						final String authorId = event.body()
-								.getObject("result", new JsonObject())
-								.getObject("author", new JsonObject())
+								.getJsonObject("result", new JsonObject())
+								.getJsonObject("author", new JsonObject())
 								.getString("userId");
 
 						final QueryBuilder query = QueryBuilder.start("_id").is(postId);
-						final JsonObject keys = new JsonObject().putNumber("title", 1).putNumber("blog", 1);
-						final JsonArray fetch = new JsonArray().addString("blog");
+						final JsonObject keys = new JsonObject().put("title", 1).put("blog", 1);
+						final JsonArray fetch = new JsonArray().add("blog");
 
 						mongo.findOne("posts", MongoQueryBuilder.build(query), keys, fetch,
 								MongoDbResult.validResultHandler(new Handler<Either<String,JsonObject>>() {
@@ -145,14 +145,14 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 
 										recipients.add(authorId);
 										JsonObject p = new JsonObject()
-												.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
-												.putString("username", user.getUsername())
-												.putString("blogTitle", post.getObject("blog", new JsonObject()).getString("title"))
-												.putString("blogUri", resourceUri)
-												.putString("postTitle", post.getString("title"))
-												.putString("postUri", resourceUri + "/" + postId)
-												.putString("resourceUri", resourceUri + "/" + postId)
-												.putBoolean("disableAntiFlood", true);
+												.put("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+												.put("username", user.getUsername())
+												.put("blogTitle", post.getJsonObject("blog", new JsonObject()).getString("title"))
+												.put("blogUri", resourceUri)
+												.put("postTitle", post.getString("title"))
+												.put("postUri", resourceUri + "/" + postId)
+												.put("resourceUri", resourceUri + "/" + postId)
+												.put("disableAntiFlood", true);
 										notification.notifyTimeline(request, "blog.submit-post", user, recipients, blogId, postId, p);
 
 									}
@@ -170,8 +170,8 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
 			QueryBuilder query = QueryBuilder.start("_id").is(postId);
-			JsonObject keys = new JsonObject().putNumber("title", 1).putNumber("blog", 1);
-			JsonArray fetch = new JsonArray().addString("blog");
+			JsonObject keys = new JsonObject().put("title", 1).put("blog", 1);
+			JsonArray fetch = new JsonArray().add("blog");
 			findRecipiants("posts", query, keys, fetch, user, new Handler<Map<String, Object>>() {
 				@Override
 				public void handle(Map<String, Object> event) {
@@ -180,14 +180,14 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						JsonObject blog = (JsonObject) event.get("blog");
 						if (recipients != null) {
 							JsonObject p = new JsonObject()
-									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
-									.putString("username", user.getUsername())
-									.putString("blogTitle", blog.getObject("blog", new JsonObject()).getString("title"))
-									.putString("blogUri", resourceUri)
-									.putString("postTitle", blog.getString("title"))
-									.putString("postUri", resourceUri + "/" + postId)
-									.putString("resourceUri", resourceUri + "/" + postId)
-									.putBoolean("disableAntiFlood", true);
+									.put("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+									.put("username", user.getUsername())
+									.put("blogTitle", blog.getJsonObject("blog", new JsonObject()).getString("title"))
+									.put("blogUri", resourceUri)
+									.put("postTitle", blog.getString("title"))
+									.put("postUri", resourceUri + "/" + postId)
+									.put("resourceUri", resourceUri + "/" + postId)
+									.put("disableAntiFlood", true);
 							notification.notifyTimeline(request, "blog.publish-post", user, recipients, blogId, postId, p);
 						}
 					}
@@ -201,16 +201,16 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
 			QueryBuilder query = QueryBuilder.start("_id").is(postId);
-			JsonObject keys = new JsonObject().putNumber("title", 1).putNumber("blog", 1);
-			JsonArray fetch = new JsonArray().addString("blog");
+			JsonObject keys = new JsonObject().put("title", 1).put("blog", 1);
+			JsonArray fetch = new JsonArray().add("blog");
 			findRecipiants("posts", query, keys, fetch, user, new Handler<Map<String, Object>>() {
 				@Override
 				public void handle(Map<String, Object> event) {
 					if (event != null) {
 						List<String> recipients = (List<String>) event.get("recipients");
 						JsonObject blog = (JsonObject) event.get("blog");
-						String ownerId = blog.getObject("blog", new JsonObject())
-								.getObject("author", new JsonObject())
+						String ownerId = blog.getJsonObject("blog", new JsonObject())
+								.getJsonObject("author", new JsonObject())
 								.getString("userId");
 						if(ownerId != null && !ownerId.equals(user.getUserId())){
 							if(recipients == null){
@@ -220,15 +220,15 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						}
 						if (recipients != null) {
 							JsonObject p = new JsonObject()
-									.putString("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
-									.putString("username", user.getUsername())
-									.putString("blogTitle", blog.getObject("blog",
+									.put("uri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType())
+									.put("username", user.getUsername())
+									.put("blogTitle", blog.getJsonObject("blog",
 											new JsonObject()).getString("title"))
-									.putString("blogUri", resourceUri)
-									.putString("postTitle", blog.getString("title"))
-									.putString("postUri", resourceUri + "/" + postId)
-									.putString("resourceUri", resourceUri + "/" + postId)
-									.putBoolean("disableAntiFlood", true);
+									.put("blogUri", resourceUri)
+									.put("postTitle", blog.getString("title"))
+									.put("postUri", resourceUri + "/" + postId)
+									.put("resourceUri", resourceUri + "/" + postId)
+									.put("disableAntiFlood", true);
 							notification.notifyTimeline(request, "blog.publish-comment", user, recipients, blogId, postId, p);
 						}
 					}
@@ -248,15 +248,15 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 			@Override
 			public void handle(Message<JsonObject> event) {
 				if ("ok".equals(event.body().getString("status"))) {
-					final JsonObject blog = event.body().getObject("result", new JsonObject());
+					final JsonObject blog = event.body().getJsonObject("result", new JsonObject());
 					JsonArray shared;
 					if (fetch == null) {
-						shared = blog.getArray("shared");
+						shared = blog.getJsonArray("shared");
 					} else {
-						shared = blog.getObject("blog", new JsonObject()).getArray("shared");
+						shared = blog.getJsonObject("blog", new JsonObject()).getJsonArray("shared");
 					}
 					if (shared != null) {
-						shared.add(blog.getObject("blog", new JsonObject()).getObject("author")); //Allows owner to get notified for contributors posts
+						shared.add(blog.getJsonObject("blog", new JsonObject()).getJsonObject("author")); //Allows owner to get notified for contributors posts
 						List<String> shareIds = getSharedIds(shared, filterRights);
 						if (!shareIds.isEmpty()) {
 							Map<String, Object> params = new HashMap<>();
@@ -265,10 +265,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 								@Override
 								public void handle(Message<JsonObject> res) {
 									if ("ok".equals(res.body().getString("status"))) {
-										JsonObject r = res.body().getObject("result");
+										JsonObject r = res.body().getJsonObject("result");
 										List<String> recipients = new ArrayList<>();
-										for (String attr: r.getFieldNames()) {
-											String id = r.getObject(attr).getString("id");
+										for (String attr: r.fieldNames()) {
+											String id = r.getJsonObject(attr).getString("id");
 											if (id != null) {
 												recipients.add(id);
 											}

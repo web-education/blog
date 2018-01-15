@@ -23,8 +23,8 @@
 package org.entcore.blog.services;
 
 import org.entcore.common.user.UserInfos;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 
 public interface BlogTimelineService {
 

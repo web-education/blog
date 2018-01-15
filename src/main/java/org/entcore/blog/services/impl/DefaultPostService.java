@@ -35,10 +35,10 @@ import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.*;
 
@@ -47,14 +47,14 @@ public class DefaultPostService implements PostService {
 	private final MongoDb mongo;
 	protected static final String POST_COLLECTION = "posts";
 	private static final JsonObject defaultKeys = new JsonObject()
-			.putNumber("author", 1)
-			.putNumber("title", 1)
-			.putNumber("content", 1)
-			.putNumber("state", 1)
-			.putNumber("created", 1)
-			.putNumber("modified", 1)
-			.putNumber("views", 1)
-			.putNumber("firstPublishDate", 1);
+			.put("author", 1)
+			.put("title", 1)
+			.put("content", 1)
+			.put("state", 1)
+			.put("created", 1)
+			.put("modified", 1)
+			.put("views", 1)
+			.put("firstPublishDate", 1);
 
 	private int searchWordMinSize;
 
@@ -68,24 +68,24 @@ public class DefaultPostService implements PostService {
 					   final Handler<Either<String, JsonObject>> result) {
 		JsonObject now = MongoDb.now();
 		JsonObject blogRef = new JsonObject()
-				.putString("$ref", "blogs")
-				.putString("$id", blogId);
+				.put("$ref", "blogs")
+				.put("$id", blogId);
 		JsonObject owner = new JsonObject()
-				.putString("userId", author.getUserId())
-				.putString("username", author.getUsername())
-				.putString("login", author.getLogin());
-		post.putObject("created", now)
-				.putObject("modified", now)
-				.putObject("author", owner)
-				.putString("state", StateType.DRAFT.name())
-				.putArray("comments", new JsonArray())
-				.putNumber("views", 0)
-				.putObject("blog", blogRef);
+				.put("userId", author.getUserId())
+				.put("username", author.getUsername())
+				.put("login", author.getLogin());
+		post.put("created", now)
+				.put("modified", now)
+				.put("author", owner)
+				.put("state", StateType.DRAFT.name())
+				.put("comments", new JsonArray())
+				.put("views", 0)
+				.put("blog", blogRef);
 		JsonObject b = Utils.validAndGet(post, FIELDS, FIELDS);
 		if (validationError(result, b)) return;
-		b.putObject("sorted", now);
-		if (b.containsField("content")) {
-			b.putString("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
+		b.put("sorted", now);
+		if (b.containsKey("content")) {
+			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 		}
 		mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
 			public void handle(Either<String, JsonObject> event) {
@@ -94,7 +94,7 @@ public class DefaultPostService implements PostService {
 					return;
 				}
 				mongo.findOne(POST_COLLECTION,
-					new JsonObject().putString("_id", event.right().getValue().getString("_id")),
+					new JsonObject().put("_id", event.right().getValue().getString("_id")),
 					MongoDbResult.validResultHandler(result));
 			}
 		}));
@@ -110,29 +110,29 @@ public class DefaultPostService implements PostService {
 					result.handle(event);
 					return;
 				} else {
-					final JsonObject postFromDb = event.right().getValue().getObject("result", new JsonObject());
+					final JsonObject postFromDb = event.right().getValue().getJsonObject("result", new JsonObject());
 					final JsonObject now = MongoDb.now();
-					post.putObject("modified", now);
+					post.put("modified", now);
 					final JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
 
 					if (validationError(result, b)) return;
-					if (b.containsField("content")) {
-						b.putString("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
+					if (b.containsKey("content")) {
+						b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 					}
 
-					if (postFromDb.getObject("firstPublishDate") != null) {
-						b.putObject("sorted", postFromDb.getObject("firstPublishDate"));
+					if (postFromDb.getJsonObject("firstPublishDate") != null) {
+						b.put("sorted", postFromDb.getJsonObject("firstPublishDate"));
 					} else {
-						b.putObject("sorted", now);
+						b.put("sorted", now);
 					}
 
 					//if user is author, draft state
-					if (user.getUserId().equals(postFromDb.getObject("author", new JsonObject()).getString("userId"))) {
-						b.putString("state", StateType.DRAFT.name());
+					if (user.getUserId().equals(postFromDb.getJsonObject("author", new JsonObject()).getString("userId"))) {
+						b.put("state", StateType.DRAFT.name());
 					}
 
 					MongoUpdateBuilder modifier = new MongoUpdateBuilder();
-					for (String attr: b.getFieldNames()) {
+					for (String attr: b.fieldNames()) {
 						modifier.set(attr, b.getValue(attr));
 					}
 					mongo.update(POST_COLLECTION, jQuery, modifier.build(),
@@ -140,7 +140,7 @@ public class DefaultPostService implements PostService {
 								@Override
 								public void handle(Message<JsonObject> event) {
 									if ("ok".equals(event.body().getString("status"))) {
-										final JsonObject r = new JsonObject().putString("state", b.getString("state", postFromDb.getString("state")));
+										final JsonObject r = new JsonObject().put("state", b.getString("state", postFromDb.getString("state")));
 										result.handle(new Either.Right<String, JsonObject>(r));
 									} else {
 										result.handle(new Either.Left<String, JsonObject>(event.body().getString("message", "")));
@@ -198,9 +198,9 @@ public class DefaultPostService implements PostService {
 		}
 
 		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
-		final JsonObject sort = new JsonObject().putNumber("modified", -1);
+		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
-		projection.removeField("content");
+		projection.remove("content");
 
 		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
 			@Override
@@ -240,7 +240,7 @@ public class DefaultPostService implements PostService {
 					} else if (page == null) {
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 					} else {
-						final JsonObject sortPag = new JsonObject().putNumber("sorted", -1);
+						final JsonObject sortPag = new JsonObject().put("sorted", -1);
 						final int skip = (0 == page) ? -1 : page * limit;
 						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 					}
@@ -255,8 +255,8 @@ public class DefaultPostService implements PostService {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId);
 		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
 		final JsonObject projection = new JsonObject();
-		projection.putNumber("state", 1);
-		projection.putNumber("_id", -1);
+		projection.put("state", 1);
+		projection.put("_id", -1);
 
 		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
 			@Override
@@ -296,9 +296,9 @@ public class DefaultPostService implements PostService {
 	public void list(String blogId, final StateType state, final UserInfos user, final Integer page, final int limit, final String search,
 				final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").is(state.name());
-		final JsonObject sort = new JsonObject().putNumber("modified", -1);
+		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
-		projection.removeField("content");
+		projection.remove("content");
 
 		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
 			@Override
@@ -318,7 +318,7 @@ public class DefaultPostService implements PostService {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 				} else {
 					final int skip = (0 == page) ? -1 : page * limit;
-					final JsonObject sortPag = new JsonObject().putNumber("sorted", -1);
+					final JsonObject sortPag = new JsonObject().put("sorted", -1);
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 				}
 			} else {
@@ -339,7 +339,7 @@ public class DefaultPostService implements PostService {
 						} else if (page == null) {
 							mongo.find(POST_COLLECTION, MongoQueryBuilder.build(listQuery), sort, projection, finalHandler);
 						} else {
-							final JsonObject sortPag = new JsonObject().putNumber("sorted", -1);
+							final JsonObject sortPag = new JsonObject().put("sorted", -1);
 							final int skip = (0 == page) ? -1 : page * limit;
 							mongo.find(POST_COLLECTION, MongoQueryBuilder.build(listQuery), sortPag, projection, skip, limit, limit, finalHandler);
 						}
@@ -372,9 +372,9 @@ public class DefaultPostService implements PostService {
 	public void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("_id").is(postId);
 		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
-		final JsonObject sort = new JsonObject().putNumber("modified", -1);
+		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
-		projection.removeField("content");
+		projection.remove("content");
 
 		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
 			@Override
@@ -430,30 +430,30 @@ public class DefaultPostService implements PostService {
 		QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId)
 				.put("state").is(StateType.DRAFT.name()).put("author.userId").is(user.getUserId());
 		final JsonObject q = MongoQueryBuilder.build(query);
-		JsonObject keys = new JsonObject().putNumber("blog", 1).putNumber("firstPublishDate", 1);
-		JsonArray fetch = new JsonArray().addString("blog");
+		JsonObject keys = new JsonObject().put("blog", 1).put("firstPublishDate", 1);
+		JsonArray fetch = new JsonArray().add("blog");
 		mongo.findOne(POST_COLLECTION, q, keys, fetch,
 				new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
-				final JsonObject res = event.body().getObject("result", new JsonObject());
+				final JsonObject res = event.body().getJsonObject("result", new JsonObject());
 				if ("ok".equals(event.body().getString("status")) && res.size() > 0) {
 					BlogService.PublishType type = Utils.stringToEnum(res
-							.getObject("blog",  new JsonObject()).getString("publish-type"),
+							.getJsonObject("blog",  new JsonObject()).getString("publish-type"),
 							BlogService.PublishType.RESTRAINT, BlogService.PublishType.class);
 					final StateType state = (BlogService.PublishType.RESTRAINT.equals(type)) ?
 							StateType.SUBMITTED : StateType.PUBLISHED;
 					MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("state", state.name());
 
 					// if IMMEDIATE published post, first publishing must define the first published date
-					if (StateType.PUBLISHED.equals(state) && res.getObject("firstPublishDate") == null) {
+					if (StateType.PUBLISHED.equals(state) && res.getJsonObject("firstPublishDate") == null) {
 						updateQuery = updateQuery.set("firstPublishDate", MongoDb.now()).set("sorted",  MongoDb.now());
 					}
 
 					mongo.update(POST_COLLECTION, q, updateQuery.build(), new Handler<Message<JsonObject>>() {
 						@Override
 						public void handle(Message<JsonObject> res) {
-							res.body().putString("state", state.name());
+							res.body().put("state", state.name());
 							result.handle(Utils.validResult(res));
 						}
 					});
@@ -511,15 +511,15 @@ public class DefaultPostService implements PostService {
 		}
 		QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId);
 		final JsonObject q = MongoQueryBuilder.build(query);
-		JsonObject keys = new JsonObject().putNumber("blog", 1);
-		JsonArray fetch = new JsonArray().addString("blog");
+		JsonObject keys = new JsonObject().put("blog", 1);
+		JsonArray fetch = new JsonArray().add("blog");
 		mongo.findOne(POST_COLLECTION, q, keys, fetch, new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
 				if ("ok".equals(event.body().getString("status")) &&
-						event.body().getObject("result", new JsonObject()).size() > 0) {
-					BlogService.CommentType type = Utils.stringToEnum(event.body().getObject("result")
-							.getObject("blog",  new JsonObject()).getString("comment-type"),
+						event.body().getJsonObject("result", new JsonObject()).size() > 0) {
+					BlogService.CommentType type = Utils.stringToEnum(event.body().getJsonObject("result")
+							.getJsonObject("blog",  new JsonObject()).getString("comment-type"),
 							BlogService.CommentType.RESTRAINT, BlogService.CommentType.class);
 					if (BlogService.CommentType.NONE.equals(type)) {
 						result.handle(new Either.Left<String, JsonObject>("Comments are disabled for this blog."));
@@ -528,15 +528,15 @@ public class DefaultPostService implements PostService {
 					StateType s = BlogService.CommentType.IMMEDIATE.equals(type) ?
 							StateType.PUBLISHED : StateType.SUBMITTED;
 					JsonObject user = new JsonObject()
-							.putString("userId", author.getUserId())
-							.putString("username", author.getUsername())
-							.putString("login", author.getLogin());
+							.put("userId", author.getUserId())
+							.put("username", author.getUsername())
+							.put("login", author.getLogin());
 					JsonObject c = new JsonObject()
-							.putString("comment", comment)
-							.putString("id", UUID.randomUUID().toString())
-							.putString("state", s.name())
-							.putObject("author", user)
-							.putObject("created", MongoDb.now());
+							.put("comment", comment)
+							.put("id", UUID.randomUUID().toString())
+							.put("state", s.name())
+							.put("author", user)
+							.put("created", MongoDb.now());
 					MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().push("comments", c);
 					mongo.update(POST_COLLECTION, q, updateQuery.build(), new Handler<Message<JsonObject>>() {
 						@Override
@@ -567,7 +567,7 @@ public class DefaultPostService implements PostService {
 				QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("comments").elemMatch(
 					tmp.get()
 				);
-				JsonObject c = new JsonObject().putString("id", commentId);
+				JsonObject c = new JsonObject().put("id", commentId);
 				MongoUpdateBuilder queryUpdate = new MongoUpdateBuilder().pull("comments", c);
 				mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), queryUpdate.build(),
 						new Handler<Message<JsonObject>>() {
@@ -584,23 +584,23 @@ public class DefaultPostService implements PostService {
 	public void listComment(String blogId, String postId, final UserInfos user,
 			final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId);
-		JsonObject keys = new JsonObject().putNumber("comments", 1).putNumber("blog", 1);
-		JsonArray fetch = new JsonArray().addString("blog");
+		JsonObject keys = new JsonObject().put("comments", 1).put("blog", 1);
+		JsonArray fetch = new JsonArray().add("blog");
 		mongo.findOne(POST_COLLECTION, MongoQueryBuilder.build(query), keys, fetch,
 			new Handler<Message<JsonObject>>() {
 				@Override
 				public void handle(Message<JsonObject> event) {
 					JsonArray comments = new JsonArray();
 					if ("ok".equals(event.body().getString("status")) &&
-							event.body().getObject("result", new JsonObject()).size() > 0) {
-						JsonObject res = event.body().getObject("result");
-						boolean userIsManager = userIsManager(user, res.getObject("blog"));
-						for (Object o: res.getArray("comments", new JsonArray())) {
+							event.body().getJsonObject("result", new JsonObject()).size() > 0) {
+						JsonObject res = event.body().getJsonObject("result");
+						boolean userIsManager = userIsManager(user, res.getJsonObject("blog"));
+						for (Object o: res.getJsonArray("comments", new JsonArray())) {
 							if (!(o instanceof JsonObject)) continue;
 							JsonObject j = (JsonObject) o;
 							if (userIsManager || StateType.PUBLISHED.name().equals(j.getString("state")) ||
 									user.getUserId().equals(
-											j.getObject("author", new JsonObject()).getString("userId"))) {
+											j.getJsonObject("author", new JsonObject()).getString("userId"))) {
 								comments.add(j);
 							}
 						}
@@ -611,8 +611,8 @@ public class DefaultPostService implements PostService {
 	}
 
 	private boolean userIsManager(UserInfos user, JsonObject res) {
-		if (res != null  && res.getArray("shared") != null) {
-			for (Object o: res.getArray("shared")) {
+		if (res != null  && res.getJsonArray("shared") != null) {
+			for (Object o: res.getJsonArray("shared")) {
 				if (!(o instanceof JsonObject)) continue;
 				JsonObject json = (JsonObject) o;
 				return json != null && json.getBoolean("manager", false) &&
