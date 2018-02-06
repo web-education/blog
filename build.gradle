@@ -100,14 +100,17 @@ publishing {
   publications {
     maven(MavenPublication) {
       groupId "${modowner}"
+      artifactId "${modname}"
       artifact("build/libs/${modowner}~${modname}~$version-fat.jar") { classifier "fat" }
     }
     maven(MavenPublication) {
       groupId "${modowner}"
+      artifactId "${modname}"
       artifact("build/libs/${modname}-$version-deployment.jar") { classifier "deployment" }
     }
     maven(MavenPublication) {
       groupId "${modowner}"
+      artifactId "${modname}"
       artifact("build/libs/${modname}-$version-tests.jar") { classifier "tests" }
     }
   }
@@ -125,11 +128,13 @@ test {
 
 task testJar(type: Jar) {
   classifier = 'tests'
+  baseName = "${modname}"
   from sourceSets.test.output
 }
 
 task deploymentJar(type: Jar) {
   classifier = 'deployment'
+  baseName = "${modname}"
   from 'deployment'
 }
 
@@ -137,67 +142,4 @@ artifacts {
   archives testJar
   archives deploymentJar
 }
-
-/*
-repositories{
-    mavenLocal()
-		maven {
-			credentials {
-				username 'admin'
-				password 'We_1234'
-			}
-			url "http://maven.web-education.net/nexus/content/groups/public"
-		}
-}
-
-def configurePom(def pom) {
-	pom.project {
-		description 'Blog'
-		inceptionYear '2013'
-		packaging 'zip'
-		url 'http://code.web-education.net/projects/blog'
-
-		scm {
-			url 'git@code.web-education.net:wse/blog.git'
-		}
-
-		licenses {
-			license {
-				name 'GNU Affero General Public License, Version 2.0'
-				url 'https://www.gnu.org/licenses/agpl.txt'
-				distribution 'repo'
-			}
-		}
-
-		properties {
-			setProperty('project.build.sourceEncoding', 'UTF8')
-		}
-	}
-}
-
-def generateMissingI18n() {
-  JsonSlurper jsonSlurper = new JsonSlurper()
-    File rootDir = new File(".")
-    rootDir.eachFileRecurse {
-      if (it.isDirectory() && ("i18n".equals(it.getName()) || ("timeline".equals(it.getName()) && it.getParent().endsWith("i18n")))) {
-        Map i18n = [:]
-          it.eachFileMatch(~/.+.json/) { file ->
-            def t = file.text
-              i18n.put(file.getName(), (Map) jsonSlurper.parseText((t != null && !t.empty) ? t : "{}"))
-          }
-        Map fr = i18n.remove("fr.json")
-          new File(it, "fr.json").withWriter{ it << JsonOutput.prettyPrint(JsonOutput.toJson(fr.sort())) }
-        i18n.each { key, lang ->
-          Map out = fr.findAll({true})
-            out.putAll(lang)
-            new File(it, key).withWriter{ it << JsonOutput.prettyPrint(JsonOutput.toJson(out.sort())) }
-        }
-      }
-    }
-}
-
-task generateI18n(description:'Generate missing keys in i18n files') << {
-  generateMissingI18n()
-}
-*/
 
