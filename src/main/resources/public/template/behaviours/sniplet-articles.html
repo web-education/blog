@@ -61,7 +61,7 @@
 				</button>
 			</resource-right>
 			<resource-right class="cell" name="removePost" resource="blog">
-				<button type="button" ng-click="removePost(post)" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
+				<button type="button" ng-click="post.showConfirmRemove = true" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
 					<i18n>remove</i18n>
 				</button>
 			</resource-right>
@@ -84,4 +84,12 @@
 	<div class="row" ng-if="!post.edit && post.slided">
 		<div bind-html="post.content"></div>
 	</div>
+	<lightbox show="post.showConfirmRemove" on-close="post.showConfirmRemove = false">
+		<h2><i18n>remove</i18n></h2>
+		<p><i18n>confirm.remove.post</i18n></p>
+		<div class="row">
+			<button class="right-magnet" ng-click="removePost(post); post.showConfirmRemove = false;"><i18n>remove</i18n></button>
+			<button type="button" class="right-magnet cancel" ng-click="post.showConfirmRemove = false;"><i18n>cancel</i18n></button>
+		</div>
+	</lightbox>
 </article>
