@@ -84,6 +84,9 @@ export let blogModel: any = {
 								jsonParam["states"] = filterValues;
 							}
 						}
+						else{
+							jsonParam["states"] = "";
+						}
 					}
 
 					oldHttp().get('/blog/post/list/all/' + that._id, jsonParam).done(function(posts){

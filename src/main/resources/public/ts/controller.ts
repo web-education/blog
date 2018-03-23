@@ -308,16 +308,11 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		for(let filter in $scope.display.filters){
 			$scope.display.filters.all = $scope.display.filters[filter] && $scope.display.filters.all;
 		}
-
-		if (!$scope.display.filters.all && ($scope.display.filters.submitted || $scope.display.filters.draft || $scope.display.filters.published)) {
 			$scope.blog.posts.syncPosts(function () {
 				$scope.blog.posts.forEach(function (post) {
 					post.comments.sync();
 				});
 			}, false, $scope.display.postSearch, $scope.display.filters);
-		} else {
-			$scope.blog.posts.all = [];
-		}
 	};
 
 	$scope.showEditPost = function(blog, post){
