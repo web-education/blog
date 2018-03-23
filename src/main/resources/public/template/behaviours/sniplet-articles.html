@@ -7,7 +7,7 @@
 		<form data-ng-submit="addPost()">
 			<div class="twelve cell">
 				<div class="row">
-					<input type="text" class="twelve cell" ng-model="newPost.title" required ng-placeholder="title" />
+					<input type="text" class="twelve cell" ng-model="newPost.title" i18n-placeholder="post.title.placeholder" required />
 				</div>
 				<div class="row">
 					<editor ng-model="newPost.content"></editor>
