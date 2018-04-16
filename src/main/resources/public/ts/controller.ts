@@ -275,8 +275,8 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.saveBlog = function(){
 		$scope.blog.save(function(){
 			model.blogs.syncPag();
+			history.back();
 		});
-		history.back();
 	}
 
 	$scope.cancel = function(){
