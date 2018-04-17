@@ -13,7 +13,10 @@
 					<editor ng-model="newPost.content"></editor>
 				</div>
 				<div class="row">
-					<button class="right-magnet"><i18n>publish</i18n></button>
+					<button class="right-magnet">
+						<i18n ng-if="blog.myRights.publishPost">publish</i18n>
+						<i18n ng-if="!blog.myRights.publishPost">blog.submitPost</i18n>
+					</button>
 					<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="cancelNewPost()" />
 				</div>
 			</div>
@@ -76,7 +79,10 @@
 				<editor ng-model="post.content"></editor>
 			</div>
 			<div class="row">
-				<button class="right-magnet cell"><i18n>save</i18n></button>
+				<button class="right-magnet cell">
+					<i18n ng-if="blog.myRights.publishPost">publish</i18n>
+					<i18n ng-if="!blog.myRights.publishPost">blog.submitPost</i18n>
+				</button>
 				<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="cancelEditing(post)"/>
 			</div>
 		</form>
