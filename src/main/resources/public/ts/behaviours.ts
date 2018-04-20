@@ -299,9 +299,9 @@ export let blogModel: any = {
 				}.bind(this));
 			}
 
-			this.Post.prototype.publish = function(callback){
+			this.Post.prototype.publish = function(callback, selfPost?){
 				this.state = 'PUBLISHED';
-				if(this['publish-type'] === 'IMMEDIATE'){
+				if(this['publish-type'] === 'IMMEDIATE' && selfPost){
 				    oldHttp().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
 				        if (typeof callback === 'function') {
 				            callback();

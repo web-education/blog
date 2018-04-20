@@ -391,7 +391,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.publishPost = function(post) {
 		post.publish(function() {
 			initPostCounter(post.blogId);
-		});
+		}, post.author.userId == model.me.userId);
 	};
 
 	function initMaxResults(){

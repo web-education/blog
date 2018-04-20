@@ -19,7 +19,7 @@
 					<i18n>filters.drafts</i18n>
 				</label>
 			</li>
-			<li ng-if="blog['publish-type'] === 'RESTRAINT'">
+			<li ng-if="blog['publish-type'] === 'RESTRAINT' || display.countSubmitted > 0">
 				<label class="checkbox cell"><input type="checkbox" ng-model="display.filters.submitted" ng-change="checkAll()" />
 					<i18n>filters.submitted</i18n>
 				</label>
