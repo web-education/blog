@@ -18,6 +18,20 @@ case `uname -s` in
     fi
 esac
 
+# options
+SPRINGBOARD="recette"
+for i in "$@"
+do
+  case $i in
+    -s=*|--springboard=*)
+    SPRINGBOARD="${i#*=}"
+    shift
+    ;;
+    *)
+    ;;
+  esac
+done
+
 clean () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
 }
@@ -34,6 +48,10 @@ buildNode () {
 
 buildGradle () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle shadowJar install publishToMavenLocal
+}
+
+watch () {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js watch --springboard=/home/node/$SPRINGBOARD"
 }
 
 publish () {
@@ -58,6 +76,9 @@ do
       ;;
     buildGradle)
       buildGradle
+      ;;
+    watch)
+      watch
       ;;
     install)
       buildNode && buildGradle
