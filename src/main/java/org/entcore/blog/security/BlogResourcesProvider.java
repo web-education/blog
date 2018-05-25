@@ -56,6 +56,7 @@ public class BlogResourcesProvider implements ResourcesProvider {
 				case "update":
 				case "delete":
 				case "get":
+				case "shareResource":
 				case "shareJson":
 				case "shareJsonSubmit":
 				case "removeShare":

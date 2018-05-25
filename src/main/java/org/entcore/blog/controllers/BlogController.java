@@ -459,6 +459,37 @@ public class BlogController extends BaseController {
 		});
 	}
 
+
+	@Put("/share/resource/:blogId")
+	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
+	public void shareResource(final HttpServerRequest request) {
+		final String blogId = request.params().get("blogId");
+		getUserInfos(eb, request, new Handler<UserInfos>() {
+			@Override
+			public void handle(final UserInfos user) {
+				if (user != null) {
+					RequestUtils.bodyToJson(request, share -> {
+						shareService.share(user.getUserId(), blogId, share, r -> {
+							if (r.isRight()) {
+								JsonArray nta = r.right().getValue().getJsonArray("notify-timeline-array");
+								if (nta != null) {
+									timelineService.notifyShare(
+											request, blogId, user, nta, getBlogUri(request, blogId));
+								}
+								renderJson(request, r.right().getValue());
+							} else {
+								JsonObject error = new JsonObject().put("error", r.left().getValue());
+								renderJson(request, error, 400);
+							}
+						});
+					});
+				} else {
+					unauthorized(request);
+				}
+			}
+		});
+	}
+
 	private List<String> loadManagerActions(Collection<fr.wseduc.webutils.security.SecuredAction> actions) {
 		List<String> managerActions = new ArrayList<>();
 		if (actions != null) {
