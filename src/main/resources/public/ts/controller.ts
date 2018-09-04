@@ -1,4 +1,4 @@
-import { Behaviours, routes, template, idiom, http, notify, ng } from 'entcore'
+import { Behaviours, routes, template, idiom, http, notify, ng, angular } from 'entcore'
 
 export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', ($scope, route, model, $location) => {
 	$scope.template = template;
@@ -487,4 +487,9 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			window.open(`/blog/print/blog#/print/${$scope.blog._id}?comments=${printComments}`, '_blank');
 		}
 	}
+	$scope.isCloseConfirmLoaded = function(){
+		return angular.element('share-panel .share').scope() 
+			&& angular.element('share-panel .share').scope().display.showCloseConfirmation;
+	}
+
 }]);
