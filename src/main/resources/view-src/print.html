@@ -34,6 +34,25 @@
 						<div class="twelve cell" bind-html="post.content"></div>
 					</div>
 
+					<div ng-if="showComments && post.comments.all.length > 0">
+						<hr style="padding: 0px; border-style: inset; border-width: 1px">
+						<h4 class="upper-title">Commentaires : </h4>
+						<div ng-repeat="comment in post.comments.all">
+							<article style="box-shadow: 0 1px 3px rgba(0,0,0,0.26); border-radius: 2px; width: 95%; margin-left: 5%">
+								<div class="row">
+									<div class="six cell">
+										<strong class="subtitle">
+											[[comment.author.username]] [[formatDate(comment.created.fromNow())]]
+										</strong>
+									</div>
+								</div>
+								<div class="row">
+									<div class="twelve cell">[[comment.comment]]</div>
+								</div>
+							</article>
+						</div>
+					</div>
+
 				</article>
 			</div>
 		</section>

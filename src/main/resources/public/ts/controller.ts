@@ -65,11 +65,12 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			};
 		},
 		print: function(params){
-			var data = {_id:params.blogId}
+			let data = {_id:params.blogId}
 			$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(data);
+			if (params.comments === 'true')
+				$scope.showComments = true;
 			$scope.blog.open(function() {
 				$scope.blog.posts.syncAllPosts(function () {
-
 					let countDown = $scope.blog.posts.length();
 					let onFinish = function () {
 						if (--countDown <= 0) {
@@ -79,11 +80,12 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 							}, 1000);
 						}
 					};
-
 					if (countDown === 0) {
 						onFinish();
 					}
-					$scope.blog.posts.forEach(function (post) {
+					$scope.blog.posts.forEach(async function (post) {
+						if (params.comments)
+							await post.comments.sync();
 						post.open(function () {
 							onFinish();
 						})
@@ -475,4 +477,14 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		return parseInt(discriminator + '' + blog.modified.$date);
 	}
 
+	$scope.display.showPrintComments = false;
+
+	$scope.print = function(printComments){
+		if ($scope.blog.posts.some(post => post.comments.all.length > 0 ) && !$scope.display.showPrintComments)
+			$scope.display.showPrintComments = true;
+		else{
+			$scope.display.showPrintComments = false;
+			window.open(`/blog/print/blog#/print/${$scope.blog._id}?comments=${printComments}`, '_blank');
+		}
+	}
 }]);

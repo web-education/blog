@@ -38,10 +38,24 @@
 			</div>
 			<hr class="row zero-mobile" />
 			<div class="row action-row zero-mobile centered-text">
-				<a class="button text-flow" target="_blank" ng-href="/blog/print/blog#/print/[[blog._id]]">
+				<a class="button text-flow" ng-click="print()">
 					<i18n>blog.print</i18n>
 				</a>
 			</div>
+			
+			<lightbox show="display.showPrintComments" on-close="display.showPrintComments = false">
+				<h2><i18n>print.option</i18n></h2>
+				<p><i18n>print.include.comments</i18n></p>
+				<div class="row">
+					<button ng-click="print(true)" class="right-magnet">
+						<i18n>yes</i18n>
+					</button>
+					<button type="button" ng-click="print(false)" class="right-magnet cancel">
+						<i18n>no</i18n>
+					</button>
+				</div>
+			</lightbox>
+			
 		</nav>
 
 		<h2 class="float-title zero-mobile"><i18n>blog.posts.list</i18n> ([[blog.posts.length()]]/[[display.countAll]])</h2>
