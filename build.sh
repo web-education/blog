@@ -18,6 +18,20 @@ case `uname -s` in
     fi
 esac
 
+# options
+SPRINGBOARD="recette"
+for i in "$@"
+do
+case $i in
+    -s=*|--springboard=*)
+    SPRINGBOARD="${i#*=}"
+    shift
+    ;;
+    *)
+    ;;
+esac
+done
+
 clean () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
 }
@@ -47,6 +61,10 @@ publish () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
 }
 
+watch () {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js watch --springboard=/home/node/$SPRINGBOARD"
+}
+
 for param in "$@"
 do
   case $param in
@@ -61,6 +79,9 @@ do
       ;;
     install)
       buildNode && buildGradle
+      ;;
+    watch)
+      watch
       ;;
     publish)
       publish

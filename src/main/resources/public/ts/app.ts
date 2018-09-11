@@ -17,7 +17,10 @@ routes.define(function($routeProvider){
 			action: 'list'
 		})
 		.when('/view/:blogId/:postId', {
-			action: 'viewPost'
+			action: 'viewPostModal'
+		})
+		.when('/detail/:blogId/:postId', {
+			action: 'viewPostInline'
 		})
 		.when('/print/:blogId', {
 			action: 'print'

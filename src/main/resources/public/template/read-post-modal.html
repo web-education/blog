@@ -1,0 +1,48 @@
+<h2>
+	<span ng-if="post.state !== 'PUBLISHED'" class="warning-text">[[lang.translate(post.state.toLowerCase())]]</span>
+	[[post.title]]
+	<strong class="subtitle"><i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a> <i18n>blog.on.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]</strong>
+</h2> 
+<div bind-html="post.content"> </div>
+
+
+<div class="row">
+	<div class="cell twelve-mobile">
+		<a ng-click="post.showComments = !post.showComments;" class="cell comment" ng-if="post.state === 'PUBLISHED'">
+            <i18n>blog.comments</i18n> ([[post.comments.length()]])
+		</a>
+	</div>
+	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED' && blog.myRights.comment">
+		<i18n>comment</i18n>
+	</button>
+	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && (blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE')">
+		<i18n>publish</i18n>
+	</button>
+	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state === 'DRAFT' && !blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'">
+		<i18n>submit</i18n>
+	</button>
+</div>
+<div class="row" ng-if="post.showComments">
+	<form ng-submit="postComment(comment, post)">
+		<div class="row" ng-if="blog.myRights.comment">
+			<textarea ng-model="comment.comment" required></textarea>
+			<button class="right-magnet">
+				<i18n>save</i18n>
+			</button>
+		</div>
+	</form>
+
+	<article class="comment" ng-repeat="comment in post.comments.all">
+		<div class="row">
+			<div class="cell">
+				<em><a href="/userbook/annuaire#/user-view/[[comment.author.userId]]">[[comment.author.username]]</a>, [[comment.created.fromNow()]]</em>
+			</div>
+			<div class="cell right-magnet" ng-if="comment.author.userId === me.userId || blog.myRights.removeComment">
+				<a ng-click="post.comments.remove(comment)"><i18n>remove</i18n></a>
+			</div>
+		</div>
+		<div class="row">
+			[[comment.comment]]
+		</div>
+	</article>
+</div>
