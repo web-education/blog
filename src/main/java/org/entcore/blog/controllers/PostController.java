@@ -22,6 +22,25 @@
 
 package org.entcore.blog.controllers;
 
+import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
+import static org.entcore.common.user.UserUtils.getUserInfos;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.entcore.blog.security.BlogResourcesProvider;
+import org.entcore.blog.services.BlogTimelineService;
+import org.entcore.blog.services.PostService;
+import org.entcore.blog.services.impl.DefaultBlogTimelineService;
+import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.common.neo4j.Neo;
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
+import org.entcore.common.utils.StringUtils;
+import org.vertx.java.core.http.RouteMatcher;
+
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.rs.Delete;
 import fr.wseduc.rs.Get;
@@ -32,41 +51,23 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.BaseController;
 import fr.wseduc.webutils.request.RequestUtils;
-import org.entcore.blog.security.BlogResourcesProvider;
-import org.entcore.blog.services.BlogTimelineService;
-import org.entcore.blog.services.PostService;
-import org.entcore.blog.services.impl.DefaultBlogTimelineService;
-import org.entcore.blog.services.impl.DefaultPostService;
-import org.entcore.common.neo4j.Neo;
-import org.entcore.common.user.UserInfos;
-import org.entcore.common.user.UserUtils;
-import org.entcore.common.utils.StringUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
-import org.vertx.java.core.http.RouteMatcher;
 import io.vertx.core.json.JsonObject;
 
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
-import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
-import static org.entcore.common.user.UserUtils.getUserInfos;
-
 public class PostController extends BaseController {
-
+	public static final String LIST_ACTION = "org-entcore-blog-controllers-PostController|list";
+	public static final String SUBMIT_ACTION = "org-entcore-blog-controllers-PostController|submit";
 	private PostService post;
 	private BlogTimelineService timelineService;
 	private int pagingSize;
 
 	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
-					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
+			Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.post = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4));
+		this.post = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), LIST_ACTION);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		this.pagingSize = config.getInteger("post-paging-size", 20);
 	}
@@ -135,8 +136,7 @@ public class PostController extends BaseController {
 				if (event.isRight()) {
 					renderJson(request, event.right().getValue(), 204);
 				} else {
-					JsonObject error = new JsonObject()
-							.put("error", event.left().getValue());
+					JsonObject error = new JsonObject().put("error", event.left().getValue());
 					renderJson(request, error, 400);
 				}
 			}
@@ -148,8 +148,7 @@ public class PostController extends BaseController {
 	public void get(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
-		if (blogId == null || blogId.trim().isEmpty() ||
-				postId == null || postId.trim().isEmpty()) {
+		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
@@ -165,12 +164,12 @@ public class PostController extends BaseController {
 			return;
 		}
 
-		final String postId =  request.params().get("postId");
+		final String postId = request.params().get("postId");
 		final Integer page;
 
 		try {
-			page =  (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page")) : null;
-		}catch (NumberFormatException e) {
+			page = (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page")) : null;
+		} catch (NumberFormatException e) {
 			badRequest(request, e.getMessage());
 			return;
 		}
@@ -185,7 +184,7 @@ public class PostController extends BaseController {
 				if (user != null) {
 					if (!StringUtils.isEmpty(postId)) {
 						post.listOne(blogId, postId, user, arrayResponseHandler(request));
-					} else if(request.params().get("state") == null){
+					} else if (request.params().get("state") == null) {
 						final String statesParam = request.params().get("states");
 						final Set<String> states = new HashSet<String>();
 						if (!StringUtils.isEmpty(statesParam)) {
@@ -194,8 +193,8 @@ public class PostController extends BaseController {
 
 						post.list(blogId, user, page, pagingSize, search, states, arrayResponseHandler(request));
 					} else {
-						post.list(blogId, BlogResourcesProvider.getStateType(request),
-							user, page, pagingSize, search, arrayResponseHandler(request));
+						post.list(blogId, BlogResourcesProvider.getStateType(request), user, page, pagingSize, search,
+								arrayResponseHandler(request));
 					}
 				} else {
 					unauthorized(request);
@@ -209,8 +208,7 @@ public class PostController extends BaseController {
 	public void submit(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
-		if (blogId == null || blogId.trim().isEmpty() ||
-				postId == null || postId.trim().isEmpty()) {
+		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
@@ -225,15 +223,13 @@ public class PostController extends BaseController {
 								if ("PUBLISHED".equals(event.right().getValue().getString("state"))) {
 									timelineService.notifyPublishPost(request, blogId, postId, user,
 											pathPrefix + "#/view/" + blogId);
-								}
-								else if ("SUBMITTED".equals(event.right().getValue().getString("state"))) {
+								} else if ("SUBMITTED".equals(event.right().getValue().getString("state"))) {
 									timelineService.notifySubmitPost(request, blogId, postId, user,
 											pathPrefix + "#/view/" + blogId);
 								}
 								renderJson(request, event.right().getValue());
 							} else {
-								JsonObject error = new JsonObject()
-										.put("error", event.left().getValue());
+								JsonObject error = new JsonObject().put("error", event.left().getValue());
 								renderJson(request, error, 400);
 							}
 						}
@@ -250,8 +246,7 @@ public class PostController extends BaseController {
 	public void publish(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
-		if (blogId == null || blogId.trim().isEmpty() ||
-				postId == null || postId.trim().isEmpty()) {
+		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
@@ -268,8 +263,7 @@ public class PostController extends BaseController {
 					});
 					renderJson(request, event.right().getValue());
 				} else {
-					JsonObject error = new JsonObject()
-							.put("error", event.left().getValue());
+					JsonObject error = new JsonObject().put("error", event.left().getValue());
 					renderJson(request, error, 400);
 				}
 			}
@@ -292,8 +286,7 @@ public class PostController extends BaseController {
 	public void comment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
-		if (blogId == null || blogId.trim().isEmpty() ||
-				postId == null || postId.trim().isEmpty()) {
+		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
@@ -331,8 +324,7 @@ public class PostController extends BaseController {
 	public void deleteComment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String commentId = request.params().get("commentId");
-		if (blogId == null || blogId.trim().isEmpty() ||
-				commentId == null || commentId.trim().isEmpty()) {
+		if (blogId == null || blogId.trim().isEmpty() || commentId == null || commentId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
@@ -341,8 +333,7 @@ public class PostController extends BaseController {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					post.deleteComment(blogId, commentId, user,
-							defaultResponseHandler(request));
+					post.deleteComment(blogId, commentId, user, defaultResponseHandler(request));
 				} else {
 					unauthorized(request);
 				}
@@ -355,8 +346,7 @@ public class PostController extends BaseController {
 	public void comments(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
-		if (blogId == null || blogId.trim().isEmpty() ||
-				postId == null || postId.trim().isEmpty()) {
+		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
@@ -365,8 +355,7 @@ public class PostController extends BaseController {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					post.listComment(blogId, postId, user,
-							arrayResponseHandler(request));
+					post.listComment(blogId, postId, user, arrayResponseHandler(request));
 				} else {
 					unauthorized(request);
 				}
@@ -379,8 +368,7 @@ public class PostController extends BaseController {
 	public void publishComment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String commentId = request.params().get("commentId");
-		if (blogId == null || blogId.trim().isEmpty() ||
-				commentId == null || commentId.trim().isEmpty()) {
+		if (blogId == null || blogId.trim().isEmpty() || commentId == null || commentId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}

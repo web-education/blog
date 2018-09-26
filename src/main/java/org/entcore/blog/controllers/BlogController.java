@@ -22,18 +22,17 @@
 
 package org.entcore.blog.controllers;
 
-import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.rs.Delete;
-import fr.wseduc.rs.Get;
-import fr.wseduc.rs.Post;
-import fr.wseduc.rs.Put;
-import fr.wseduc.security.ActionType;
-import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
-import fr.wseduc.webutils.I18n;
-import fr.wseduc.webutils.http.BaseController;
-import fr.wseduc.webutils.http.Renders;
-import fr.wseduc.webutils.request.RequestUtils;
+import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
+import static org.entcore.common.user.UserUtils.getUserInfos;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.entcore.blog.Blog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
@@ -49,20 +48,25 @@ import org.entcore.common.share.ShareService;
 import org.entcore.common.share.impl.MongoDbShareService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
+import org.vertx.java.core.http.RouteMatcher;
+
+import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
+import fr.wseduc.security.ActionType;
+import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.http.BaseController;
+import fr.wseduc.webutils.http.Renders;
+import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
-import org.vertx.java.core.http.RouteMatcher;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
-import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
-import static org.entcore.common.user.UserUtils.getUserInfos;
 
 public class BlogController extends BaseController {
 
@@ -71,14 +75,18 @@ public class BlogController extends BaseController {
 	private BlogTimelineService timelineService;
 	private ShareService shareService;
 	private EventStore eventStore;
-	private enum BlogEvent { ACCESS }
+
+	private enum BlogEvent {
+		ACCESS
+	}
 
 	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
-					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
+			Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.blog = new DefaultBlogService(mongo, config.getInteger("blog-paging-size", 30), config.getInteger("blog-search-word-min-size", 4));
-		this.postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4));
+		this.blog = new DefaultBlogService(mongo, config.getInteger("blog-paging-size", 30),
+				config.getInteger("blog-search-word-min-size", 4));
+		this.postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
@@ -129,19 +137,17 @@ public class BlogController extends BaseController {
 		}
 		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
 			public void handle(JsonObject data) {
-				blog.update(blogId, data,
-					new Handler<Either<String, JsonObject>>() {
-						@Override
-						public void handle(Either<String, JsonObject> event) {
-							if (event.isRight()) {
-								renderJson(request, event.right().getValue());
-							} else {
-								JsonObject error = new JsonObject()
-										.put("error", event.left().getValue());
-								renderJson(request, error, 400);
-							}
+				blog.update(blogId, data, new Handler<Either<String, JsonObject>>() {
+					@Override
+					public void handle(Either<String, JsonObject> event) {
+						if (event.isRight()) {
+							renderJson(request, event.right().getValue());
+						} else {
+							JsonObject error = new JsonObject().put("error", event.left().getValue());
+							renderJson(request, error, 400);
 						}
-					});
+					}
+				});
 			}
 		});
 	}
@@ -165,8 +171,7 @@ public class BlogController extends BaseController {
 				if (event.isRight()) {
 					renderJson(request, event.right().getValue(), 204);
 				} else {
-					JsonObject error = new JsonObject()
-							.put("error", event.left().getValue());
+					JsonObject error = new JsonObject().put("error", event.left().getValue());
 					renderJson(request, error, 400);
 				}
 			}
@@ -185,7 +190,7 @@ public class BlogController extends BaseController {
 	}
 
 	@Get("/counter/:blogId")
-	@SecuredAction(value="blog.posts.counter", type=ActionType.AUTHENTICATED)
+	@SecuredAction(value = "blog.posts.counter", type = ActionType.AUTHENTICATED)
 	public void postCounter(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		if (StringUtils.isEmpty(blogId)) {
@@ -197,10 +202,11 @@ public class BlogController extends BaseController {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					postService.counter(blogId, user, new Handler<Either<String,JsonArray>>() {
+					postService.counter(blogId, user, new Handler<Either<String, JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
-							if(event.isLeft()){
-								arrayResponseHandler(request).handle(event);;
+							if (event.isLeft()) {
+								arrayResponseHandler(request).handle(event);
+								;
 								return;
 							}
 
@@ -213,7 +219,7 @@ public class BlogController extends BaseController {
 
 							final JsonObject result = new JsonObject();
 
-							for(Object blogObj : blogs){
+							for (Object blogObj : blogs) {
 								final String blogState = ((JsonObject) blogObj).getString("state");
 								if (PostService.StateType.DRAFT.name().equals(blogState)) {
 									countDraft++;
@@ -251,24 +257,26 @@ public class BlogController extends BaseController {
 					final Integer page;
 
 					try {
-						page =  (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page")) : null;
-					}catch (NumberFormatException e) {
+						page = (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page"))
+								: null;
+					} catch (NumberFormatException e) {
 						badRequest(request, e.getMessage());
 						return;
 					}
 
 					final String search = request.params().get("search");
 
-					blog.list(user, page, search, new Handler<Either<String,JsonArray>>() {
+					blog.list(user, page, search, new Handler<Either<String, JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
-							if(event.isLeft()){
-								arrayResponseHandler(request).handle(event);;
+							if (event.isLeft()) {
+								arrayResponseHandler(request).handle(event);
+								;
 								return;
 							}
 
 							final JsonArray blogs = event.right().getValue();
 
-							if(blogs.size() < 1){
+							if (blogs.size() < 1) {
 								renderJson(request, new JsonArray());
 								return;
 							}
@@ -276,23 +284,24 @@ public class BlogController extends BaseController {
 							final AtomicInteger countdown = new AtomicInteger(blogs.size());
 							final Handler<Void> finalHandler = new Handler<Void>() {
 								public void handle(Void v) {
-									if(countdown.decrementAndGet() <= 0){
+									if (countdown.decrementAndGet() <= 0) {
 										renderJson(request, blogs);
 									}
 								}
 							};
 
-							for(Object blogObj : blogs){
+							for (Object blogObj : blogs) {
 								final JsonObject blog = (JsonObject) blogObj;
 
-								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 2, null, new Handler<Either<String,JsonArray>>() {
-									public void handle(Either<String, JsonArray> event) {
-										if(event.isRight()){
-											blog.put("fetchPosts", event.right().getValue());
-										}
-										finalHandler.handle(null);
-									}
-								});
+								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 2,
+										null, new Handler<Either<String, JsonArray>>() {
+											public void handle(Either<String, JsonArray> event) {
+												if (event.isRight()) {
+													blog.put("fetchPosts", event.right().getValue());
+												}
+												finalHandler.handle(null);
+											}
+										});
 							}
 
 						}
@@ -310,16 +319,16 @@ public class BlogController extends BaseController {
 			@Override
 			public void handle(final UserInfos user) {
 				if (user != null) {
-					blog.list(user, null, null, new Handler<Either<String,JsonArray>>() {
+					blog.list(user, null, null, new Handler<Either<String, JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
-							if(event.isLeft()){
+							if (event.isLeft()) {
 								arrayResponseHandler(request).handle(event);
 								return;
 							}
 
 							final JsonArray blogs = event.right().getValue();
 
-							if(blogs.size() < 1){
+							if (blogs.size() < 1) {
 								renderJson(request, new JsonArray());
 								return;
 							}
@@ -327,23 +336,24 @@ public class BlogController extends BaseController {
 							final AtomicInteger countdown = new AtomicInteger(blogs.size());
 							final Handler<Void> finalHandler = new Handler<Void>() {
 								public void handle(Void v) {
-									if(countdown.decrementAndGet() <= 0){
+									if (countdown.decrementAndGet() <= 0) {
 										renderJson(request, blogs);
 									}
 								}
 							};
 
-							for(Object blogObj : blogs){
+							for (Object blogObj : blogs) {
 								final JsonObject blog = (JsonObject) blogObj;
 
-								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 0, null, new Handler<Either<String,JsonArray>>() {
-									public void handle(Either<String, JsonArray> event) {
-										if(event.isRight()){
-											blog.put("fetchPosts", event.right().getValue());
-										}
-										finalHandler.handle(null);
-									}
-								});
+								postService.list(blog.getString("_id"), PostService.StateType.PUBLISHED, user, null, 0,
+										null, new Handler<Either<String, JsonArray>>() {
+											public void handle(Either<String, JsonArray> event) {
+												if (event.isRight()) {
+													blog.put("fetchPosts", event.right().getValue());
+												}
+												finalHandler.handle(null);
+											}
+										});
 							}
 
 						}
@@ -367,8 +377,8 @@ public class BlogController extends BaseController {
 			@Override
 			public void handle(UserInfos user) {
 				if (user != null) {
-					shareService.shareInfos(user.getUserId(), blogId,
-							I18n.acceptLanguage(request), request.params().get("search"), defaultResponseHandler(request));
+					shareService.shareInfos(user.getUserId(), blogId, I18n.acceptLanguage(request),
+							request.params().get("search"), defaultResponseHandler(request));
 				} else {
 					unauthorized(request);
 				}
@@ -405,13 +415,12 @@ public class BlogController extends BaseController {
 									if (event.isRight()) {
 										JsonObject n = event.right().getValue().getJsonObject("notify-timeline");
 										if (n != null) {
-											timelineService.notifyShare(
-												request, blogId, user, new JsonArray().add(n), getBlogUri(request, blogId));
+											timelineService.notifyShare(request, blogId, user, new JsonArray().add(n),
+													getBlogUri(request, blogId));
 										}
 										renderJson(request, event.right().getValue());
 									} else {
-										JsonObject error = new JsonObject()
-												.put("error", event.left().getValue());
+										JsonObject error = new JsonObject().put("error", event.left().getValue());
 										renderJson(request, error, 400);
 									}
 								}
@@ -459,7 +468,6 @@ public class BlogController extends BaseController {
 		});
 	}
 
-
 	@Put("/share/resource/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void shareResource(final HttpServerRequest request) {
@@ -473,8 +481,8 @@ public class BlogController extends BaseController {
 							if (r.isRight()) {
 								JsonArray nta = r.right().getValue().getJsonArray("notify-timeline-array");
 								if (nta != null) {
-									timelineService.notifyShare(
-											request, blogId, user, nta, getBlogUri(request, blogId));
+									timelineService.notifyShare(request, blogId, user, nta,
+											getBlogUri(request, blogId));
 								}
 								renderJson(request, r.right().getValue());
 							} else {
@@ -493,16 +501,15 @@ public class BlogController extends BaseController {
 	private List<String> loadManagerActions(Collection<fr.wseduc.webutils.security.SecuredAction> actions) {
 		List<String> managerActions = new ArrayList<>();
 		if (actions != null) {
-			for (fr.wseduc.webutils.security.SecuredAction a: actions) {
-				if (a.getName() != null && "RESOURCE".equals(a.getType()) &&
-						"blog.manager".equals(a.getDisplayName())) {
+			for (fr.wseduc.webutils.security.SecuredAction a : actions) {
+				if (a.getName() != null && "RESOURCE".equals(a.getType())
+						&& "blog.manager".equals(a.getDisplayName())) {
 					managerActions.add(a.getName().replaceAll("\\.", "-"));
 				}
 			}
 		}
-		return  managerActions;
+		return managerActions;
 	}
-
 
 	@Get("/blog/availables-workflow-actions")
 	@SecuredAction(value = "blog.habilitation", type = ActionType.AUTHENTICATED)

@@ -43,7 +43,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 
 public class DefaultPostService implements PostService {
-
+	private final String listPostAction;
 	private final MongoDb mongo;
 	protected static final String POST_COLLECTION = "posts";
 	private static final JsonObject defaultKeys = new JsonObject()
@@ -58,8 +58,9 @@ public class DefaultPostService implements PostService {
 
 	private int searchWordMinSize;
 
-	public DefaultPostService(MongoDb mongo, int searchWordMinSize) {
+	public DefaultPostService(MongoDb mongo, int searchWordMinSize,String listPostAction) {
 		this.mongo = mongo;
+		this.listPostAction = listPostAction;
 		this.searchWordMinSize = searchWordMinSize;
 	}
 
@@ -197,7 +198,7 @@ public class DefaultPostService implements PostService {
 			accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").in(states);
 		}
 
-		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user);
 		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
 		projection.remove("content");
@@ -253,7 +254,7 @@ public class DefaultPostService implements PostService {
 	public void counter(final String blogId, final UserInfos user,
 	                    final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId);
-		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user);
 		final JsonObject projection = new JsonObject();
 		projection.put("state", 1);
 		projection.put("_id", -1);
@@ -322,7 +323,7 @@ public class DefaultPostService implements PostService {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 				}
 			} else {
-				QueryBuilder query2 = getDefautQueryBuilder(blogId, user);
+				QueryBuilder query2 = getDefautQueryBuilderForList(blogId, user);
 				mongo.count("blogs", MongoQueryBuilder.build(query2), new Handler<Message<JsonObject>>() {
 					@Override
 					public void handle(Message<JsonObject> event) {
@@ -371,7 +372,7 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("_id").is(postId);
-		final QueryBuilder isManagerQuery = getDefautQueryBuilder(blogId, user);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user);
 		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
 		projection.remove("content");
@@ -410,13 +411,13 @@ public class DefaultPostService implements PostService {
 		});
 	}
 
-	private QueryBuilder getDefautQueryBuilder(String blogId, UserInfos user) {
+	private QueryBuilder getDefautQueryBuilderForList(String blogId, UserInfos user) {
 		List<DBObject> groups = new ArrayList<>();
 		groups.add(QueryBuilder.start("userId").is(user.getUserId())
-				.put("manager").is(true).get());
-		for (String gpId: user.getProfilGroupsIds()) {
+				.put(this.listPostAction).is(true).get());
+		for (String gpId: user.getGroupsIds()) {
 			groups.add(QueryBuilder.start("groupId").is(gpId)
-					.put("manager").is(true).get());
+					.put(this.listPostAction).is(true).get());
 		}
 		return QueryBuilder.start("_id").is(blogId).or(
 				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
@@ -554,7 +555,7 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void deleteComment(final String blogId, final String commentId, final UserInfos user,
 			final Handler<Either<String, JsonObject>> result) {
-		QueryBuilder query2 = getDefautQueryBuilder(blogId, user);
+		QueryBuilder query2 = getDefautQueryBuilderForList(blogId, user);
 		mongo.count("blogs", MongoQueryBuilder.build(query2), new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
@@ -617,7 +618,7 @@ public class DefaultPostService implements PostService {
 				JsonObject json = (JsonObject) o;
 				return json != null && json.getBoolean("manager", false) &&
 						(user.getUserId().equals(json.getString("userId")) ||
-								user.getProfilGroupsIds().contains(json.getString("groupId")));
+								user.getGroupsIds().contains(json.getString("groupId")));
 			}
 		}
 		return false;
