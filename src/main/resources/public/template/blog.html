@@ -18,9 +18,10 @@
 </div>
 
 <lightbox show="display.postRead" on-close="display.postRead = false;">
-    <div ng-if="!display.postNotFound" class="row">
+	<div class="spacer-medium"></div>
+    <article ng-if="!display.postNotFound" class="row">
         <container template="read-post" class="hash-magnet row"></container>
-    </div>
+	</article>
     <div ng-if="display.postNotFound" class="row">
         <container template="e404"></container>
     </div>
