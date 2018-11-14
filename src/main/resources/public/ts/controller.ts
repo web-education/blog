@@ -170,6 +170,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 				$scope.showComments = true;
 			$scope.blog.open(function () {
 				$scope.blog.posts.syncAllPosts(function () {
+					$scope.blog.posts.all = $scope.blog.posts.all.filter(a => a.state != "DRAFT");
 					let countDown = $scope.blog.posts.length();
 					let onFinish = function () {
 						if (--countDown <= 0) {
@@ -191,6 +192,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 					})
 
 				});
+
 			}, function () {
 				template.open('main', 'e404');
 			});
