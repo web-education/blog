@@ -44,6 +44,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			var openPost = function (post) {
 				$scope.post = post;
 				$scope.post.open(function () {
+					post.comments.sync();
 					openLightbox(post);
 					initPostCounter(params.blogId);
 				}, function () {
@@ -64,7 +65,6 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 					$scope.blog.posts.syncOnePost(function () {
 						if ($scope.blog.posts.length() > 0) {
 							$scope.blog.posts.forEach(function (post) {
-								post.comments.sync();
 								openPost(post);
 							})
 						} else {
