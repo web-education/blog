@@ -198,7 +198,7 @@ public class DefaultPostService implements PostService {
 			accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").in(states);
 		}
 
-		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
 		projection.remove("content");
@@ -254,7 +254,7 @@ public class DefaultPostService implements PostService {
 	public void counter(final String blogId, final UserInfos user,
 	                    final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId);
-		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject projection = new JsonObject();
 		projection.put("state", 1);
 		projection.put("_id", -1);
@@ -323,7 +323,7 @@ public class DefaultPostService implements PostService {
 					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sortPag, projection, skip, limit, limit, finalHandler);
 				}
 			} else {
-				QueryBuilder query2 = getDefautQueryBuilderForList(blogId, user);
+				QueryBuilder query2 = getDefautQueryBuilderForList(blogId, user,true);
 				mongo.count("blogs", MongoQueryBuilder.build(query2), new Handler<Message<JsonObject>>() {
 					@Override
 					public void handle(Message<JsonObject> event) {
@@ -372,7 +372,7 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("_id").is(postId);
-		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user);
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
 		projection.remove("content");
@@ -411,13 +411,23 @@ public class DefaultPostService implements PostService {
 		});
 	}
 
-	private QueryBuilder getDefautQueryBuilderForList(String blogId, UserInfos user) {
+	private QueryBuilder getDefautQueryBuilderForList(String blogId, UserInfos user,boolean manager) {
 		List<DBObject> groups = new ArrayList<>();
-		groups.add(QueryBuilder.start("userId").is(user.getUserId())
-				.put(this.listPostAction).is(true).get());
-		for (String gpId: user.getGroupsIds()) {
-			groups.add(QueryBuilder.start("groupId").is(gpId)
+		if(manager) {
+			groups.add(QueryBuilder.start("userId").is(user.getUserId())
+					.put("manager").is(true).get());
+		}else {
+			groups.add(QueryBuilder.start("userId").is(user.getUserId())
 					.put(this.listPostAction).is(true).get());
+		}
+		for (String gpId: user.getGroupsIds()) {
+			if(manager) {
+				groups.add(QueryBuilder.start("groupId").is(gpId)
+						.put("manager").is(true).get());
+			}else {
+				groups.add(QueryBuilder.start("groupId").is(gpId)
+						.put(this.listPostAction).is(true).get());
+			}
 		}
 		return QueryBuilder.start("_id").is(blogId).or(
 				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
@@ -555,7 +565,7 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void deleteComment(final String blogId, final String commentId, final UserInfos user,
 			final Handler<Either<String, JsonObject>> result) {
-		QueryBuilder query2 = getDefautQueryBuilderForList(blogId, user);
+		QueryBuilder query2 = getDefautQueryBuilderForList(blogId, user,false);
 		mongo.count("blogs", MongoQueryBuilder.build(query2), new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
