@@ -188,10 +188,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									.put("postTitle", blog.getString("title"))
 									.put("postUri", resourceUri + "/" + postId)
 									.put("resourceUri", resourceUri + "/" + postId)
-									.put("disableAntiFlood", true)
-									.put("preview", NotificationUtils.htmlContentToPreview(blog.getString("content")))
 									.put("pushNotif", new JsonObject().put("title", "push.notif.blog.published.post").put("body", user.getUsername()+ " : "+ blog.getJsonObject("blog", new JsonObject()).getString("title")));
-							notification.notifyTimeline(request, "blog.publish-post", user, recipients, blogId, postId, p);
+							notification.notifyTimeline(request, "blog.publish-post", user, recipients,
+									blogId, postId, p, true,
+									NotificationUtils.htmlContentToPreview(blog.getString("content")));
 						}
 					}
 				}
