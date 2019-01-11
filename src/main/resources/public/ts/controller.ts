@@ -29,7 +29,8 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 
 			var openLightbox = function (post) {
 				if (post) {
-					modal && template.open('read-post', 'read-post-modal');
+					modal && template.open('read-post-modal', 'read-post-modal');
+					template.open('read-post', 'read-post');
 					$scope.post.slided = true;
 					$scope.currPost = $scope.post._id;
 					$scope.display.postNotFound = false;
