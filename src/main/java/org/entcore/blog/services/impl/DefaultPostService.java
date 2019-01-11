@@ -44,6 +44,8 @@ import java.util.*;
 
 public class DefaultPostService implements PostService {
 	private final String listPostAction;
+	private static final String MANAGER_ACTION = "org-entcore-blog-controllers-BlogController|shareResource";
+
 	private final MongoDb mongo;
 	protected static final String POST_COLLECTION = "posts";
 	private static final JsonObject defaultKeys = new JsonObject()
@@ -415,7 +417,7 @@ public class DefaultPostService implements PostService {
 		List<DBObject> groups = new ArrayList<>();
 		if(manager) {
 			groups.add(QueryBuilder.start("userId").is(user.getUserId())
-					.put("manager").is(true).get());
+					.put(MANAGER_ACTION).is(true).get());
 		}else {
 			groups.add(QueryBuilder.start("userId").is(user.getUserId())
 					.put(this.listPostAction).is(true).get());
@@ -423,7 +425,7 @@ public class DefaultPostService implements PostService {
 		for (String gpId: user.getGroupsIds()) {
 			if(manager) {
 				groups.add(QueryBuilder.start("groupId").is(gpId)
-						.put("manager").is(true).get());
+						.put(MANAGER_ACTION).is(true).get());
 			}else {
 				groups.add(QueryBuilder.start("groupId").is(gpId)
 						.put(this.listPostAction).is(true).get());
@@ -626,7 +628,7 @@ public class DefaultPostService implements PostService {
 			for (Object o: res.getJsonArray("shared")) {
 				if (!(o instanceof JsonObject)) continue;
 				JsonObject json = (JsonObject) o;
-				return json != null && json.getBoolean("manager", false) &&
+				return json != null && json.getBoolean(MANAGER_ACTION, false) &&
 						(user.getUserId().equals(json.getString("userId")) ||
 								user.getGroupsIds().contains(json.getString("groupId")));
 			}
