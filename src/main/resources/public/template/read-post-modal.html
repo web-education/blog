@@ -15,12 +15,6 @@
 	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED' && blog.myRights.comment">
 		<i18n>comment</i18n>
 	</button>
-	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && (blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE')">
-		<i18n>publish</i18n>
-	</button>
-	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state === 'DRAFT' && !blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'">
-		<i18n>submit</i18n>
-	</button>
 </div>
 <div class="row" ng-if="post.showComments">
 	<form ng-submit="postComment(comment, post)">
@@ -35,14 +29,33 @@
 	<article class="comment" ng-repeat="comment in post.comments.all">
 		<div class="row">
 			<div class="cell">
-				<em><a href="/userbook/annuaire#/user-view/[[comment.author.userId]]">[[comment.author.username]]</a>, [[comment.created.fromNow()]]</em>
+				<em><a href="/userbook/annuaire#/user-view/[[comment.author.userId]]">[[comment.author.username]]</a>, [[comment.created.fromNow()]]
+					<span ng-if="comment.modified">
+						, <i18n>blog.comment.update.date</i18n> [[comment.modified.format('dddd DD MMMM YYYY HH:mm')]]
+					</span>
+					<span ng-if="comment.coauthor && comment.author.userId !== comment.coauthor.userId">
+                        , <i18n>blog.comment.update.by</i18n> <a href="/userbook/annuaire#/user-view/[[comment.coauthor.userId]]">[[comment.coauthor.username]]</a>
+                     </span>
+				</em>
 			</div>
 			<div class="cell right-magnet" ng-if="comment.author.userId === me.userId || blog.myRights.removeComment">
+				<a ng-click="comment.editing=true"><i18n>edit</i18n></a>
 				<a ng-click="post.comments.remove(comment)"><i18n>remove</i18n></a>
 			</div>
 		</div>
-		<div class="row">
+		<div class="row" ng-if="!comment.editing">
 			[[comment.comment]]
 		</div>
+		<form ng-submit="updateComment(comment, post)">
+			<div class="row" ng-if="comment.editing">
+				<textarea ng-model="comment.comment" required></textarea>
+				<button ng-click="comment.editing=false" class="right-magnet">
+					<i18n>cancel</i18n>
+				</button>
+				<button class="right-magnet">
+					<i18n>save</i18n>
+				</button>
+			</div>
+		</form>
 	</article>
 </div>

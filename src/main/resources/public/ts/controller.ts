@@ -66,7 +66,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 					$scope.blog.posts.syncOnePost(function () {
 						if ($scope.blog.posts.length() > 0) {
 							$scope.blog.posts.forEach(function (post) {
-								openPost(post);
+								if (post._id === params.postId) openPost(post);
 							})
 						} else {
 							template.open('main', 'e404');
@@ -307,11 +307,15 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	}
 
 	$scope.openFirstPost = function (blog, post) {
-		post.slided = true;
-		post.open(function () {
-			$scope.$apply();
-		})
-		$scope.currPost = post._id;
+		//if a post is already slided, do nothing
+		var found = $scope.blog.posts.all.filter(p => p.slided === true);
+		if (!found || found.length === 0) {
+			post.slided = true;
+			post.open(function () {
+				$scope.$apply();
+			})
+			$scope.currPost = post._id;
+		}
 	}
 
 	$scope.display = {
@@ -518,6 +522,10 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.postComment = function (comment, post) {
 		post.comment(comment);
 		$scope.comment = new Behaviours.applicationsBehaviours.blog.model.Comment();
+	}
+
+	$scope.updateComment = function (comment, post) {
+		post.updateComment(comment);
 	}
 
 	$scope.orderBlogs = function (blog) {

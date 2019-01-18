@@ -565,6 +565,31 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
+	public void updateComment(String postId, final String commentId, final String comment, final UserInfos coauthor,
+						   final Handler<Either<String, JsonObject>> result) {
+		if (comment == null || comment.trim().isEmpty()) {
+			result.handle(new Either.Left<String, JsonObject>("Validation error : invalid comment."));
+			return;
+		}
+		QueryBuilder query = QueryBuilder.start("_id").is(postId).put("comments").elemMatch(
+				QueryBuilder.start("id").is(commentId).get());
+
+		final JsonObject user = new JsonObject()
+				.put("userId", coauthor.getUserId())
+				.put("username", coauthor.getUsername())
+				.put("login", coauthor.getLogin());
+
+		MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("comments.$.comment", comment);
+		updateQuery = updateQuery.set("comments.$.coauthor", user).set("comments.$.modified", MongoDb.now());
+		mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), updateQuery.build(), new Handler<Message<JsonObject>>() {
+			@Override
+			public void handle(Message<JsonObject> res) {
+							result.handle(Utils.validResult(res));
+						}
+		});
+	}
+
+	@Override
 	public void deleteComment(final String blogId, final String commentId, final UserInfos user,
 			final Handler<Either<String, JsonObject>> result) {
 		QueryBuilder query2 = getDefautQueryBuilderForList(blogId, user,false);
