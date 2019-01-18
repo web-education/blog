@@ -62,6 +62,9 @@ public interface PostService {
 	void addComment(String blogId, String postId, String comment, UserInfos author,
 			Handler<Either<String, JsonObject>> result);
 
+	void updateComment(String postId, final String commentId, final String comment, final UserInfos coauthor,
+				  final Handler<Either<String, JsonObject>> result);
+
 	void deleteComment(String blogId, String commentId, UserInfos author, Handler<Either<String, JsonObject>> result);
 
 	void listComment(String blogId, String postId, UserInfos author, Handler<Either<String, JsonArray>> result);

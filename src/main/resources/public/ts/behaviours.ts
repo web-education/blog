@@ -7,6 +7,10 @@ export let blogModel: any = {
 		Comment: function(data){
 			if(data && data.created){
 				this.created = moment(this.created.$date);
+				this.editing = false;
+				if (data.modified){
+					this.modified = moment(this.modified.$date);
+				}
 			}
 		},
 		Post: function(data){
@@ -98,6 +102,12 @@ export let blogModel: any = {
 								item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
 								return item;
 							});
+
+							//check if a post isn't already loaded by notification access
+							this.all.forEach(function(post) {
+								posts = _.reject(posts, function(p){ return p._id === post._id; });
+							});
+
 							this.addRange(posts);
 							this.page++;
 						}else{
@@ -143,7 +153,7 @@ export let blogModel: any = {
 								item['firstPublishDate'] = item['firstPublishDate'] || item['modified'];
 								return item;
 							});
-							this.load(posts);
+							this.addRange(posts);
 						}
 						
 						if (typeof cb === 'function')
@@ -374,6 +384,12 @@ export let blogModel: any = {
 
 			this.Post.prototype.comment = function(comment){
 				oldHttp().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
+					this.comments.sync();
+				}.bind(this));
+			}
+
+			this.Post.prototype.updateComment = function(comment){
+				oldHttp().putJson('/blog/comment/' + this.blogId + '/' + this._id + '/' + comment.id, comment).done(function(){
 					this.comments.sync();
 				}.bind(this));
 			}

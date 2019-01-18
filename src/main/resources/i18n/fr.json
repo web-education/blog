@@ -32,6 +32,8 @@
   "comment.placeholder": "Entrez votre commentaire",
   "comments.hide": "Masquer les commentaires ([[post.comments.length()]])",
   "comments.show": "Afficher les commentaires ([[post.comments.length()]])",
+  "blog.comment.update.date": "modifié le",
+  "blog.comment.update.by": "par",
   "confirm.remove.blog": "Voulez-vous vraiment supprimer ce blog?",
   "confirm.remove.post": "Voulez-vous vraiment supprimer ce billet?",
   "draft": "(Brouillon)",

@@ -319,6 +319,32 @@ public class PostController extends BaseController {
 		});
 	}
 
+	@Put("/comment/:blogId/:postId/:commentId")
+	@SecuredAction(value = "blog.comment", type = ActionType.RESOURCE)
+	public void updateComment(final HttpServerRequest request) {
+		final String postId = request.params().get("postId");
+		final String commentId = request.params().get("commentId");
+		if (postId == null || postId.trim().isEmpty() || commentId == null || commentId.trim().isEmpty()) {
+			badRequest(request);
+			return;
+		}
+
+		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+			@Override
+			public void handle(final UserInfos user) {
+				if (user != null) {
+					RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+						public void handle(final JsonObject data) {
+							post.updateComment(postId, commentId, data.getString("comment"), user, defaultResponseHandler(request));
+						}
+					});
+				} else {
+					unauthorized(request);
+				}
+			}
+		});
+	}
+
 	@Delete("/comment/:blogId/:postId/:commentId")
 	@SecuredAction(value = "blog.comment", type = ActionType.RESOURCE)
 	public void deleteComment(final HttpServerRequest request) {
