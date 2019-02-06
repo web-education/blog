@@ -47,7 +47,7 @@ public class Blog extends BaseServer {
         EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
         eventStoreFactory.setVertx(vertx);
 
-        setRepositoryEvents(new BlogRepositoryEvents());
+        setRepositoryEvents(new BlogRepositoryEvents(vertx));
 
         if (config.getBoolean("searching-event", true)) {
             setSearchingEvents(new BlogSearchingEvents());
