@@ -8,6 +8,7 @@
       "ssl" : $ssl,
       "app-name" : "Blog",
       "app-address" : "/blog",
+      "app-type" : "END_USER",
       "host": "${host}",
       "userbook-host": "${host}",
       "mode": "${mode}",
