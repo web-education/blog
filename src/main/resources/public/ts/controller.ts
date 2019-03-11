@@ -175,7 +175,6 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 					let countDown = $scope.blog.posts.length();
 					let onFinish = function () {
 						if (--countDown <= 0) {
-							$scope.$apply();
 							setTimeout(function () {
 								window.print()
 							}, 1000);
