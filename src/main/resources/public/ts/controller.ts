@@ -451,6 +451,12 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		}, post.author.userId == model.me.userId);
 	};
 
+	$scope.republish = function (blog, post) {
+		post.republish(function () {
+			blog.posts.syncAllPosts(function () {});
+		});
+	}
+
 	function initMaxResults() {
 		$scope.maxResults = 3;
 	}

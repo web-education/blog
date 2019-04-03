@@ -373,6 +373,16 @@ export let blogModel: any = {
 				}
 			}
 
+			this.Post.prototype.republish = function(callback) {
+				oldHttp().putJson('/blog/post/' + this.blogId + '/' + this._id, {
+					sorted: true
+				}).done(function(rep){
+					if(typeof  callback === 'function'){
+						callback(rep.state);
+					}
+				});
+			}
+
 			this.Post.prototype.remove = function(callback){
 				oldHttp().delete('/blog/post/' + this.blogId + '/' + this._id)
 					.done(function(){

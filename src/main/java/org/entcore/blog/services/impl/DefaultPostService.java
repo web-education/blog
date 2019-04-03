@@ -129,8 +129,14 @@ public class DefaultPostService implements PostService {
 						b.put("sorted", now);
 					}
 
-					//if user is author, draft state
-					if (user.getUserId().equals(postFromDb.getJsonObject("author", new JsonObject()).getString("userId"))) {
+					//republish post to make it go up
+					final boolean sorting = post.containsKey("sorted") && post.getBoolean("sorted", false);
+					if (sorting) {
+						b.put("sorted", now);
+					}
+
+					//if user is author and is not sorting the post, draft state
+					if (!sorting && user.getUserId().equals(postFromDb.getJsonObject("author", new JsonObject()).getString("userId"))) {
 						b.put("state", StateType.DRAFT.name());
 					}
 
