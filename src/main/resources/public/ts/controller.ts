@@ -165,13 +165,23 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			};
 		},
 		print: function (params) {
-			let data = { _id: params.blogId }
+			let data = { 
+				_id: params.blogId,
+			}
+			let postId;
+			if (params.postId) {
+				postId = params.postId;
+			}
 			$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(data);
 			if (params.comments === 'true')
 				$scope.showComments = true;
 			$scope.blog.open(function () {
 				$scope.blog.posts.syncAllPosts(function () {
-					$scope.blog.posts.all = $scope.blog.posts.all.filter(p => p.state == "PUBLISHED");
+					if (!postId) {
+						$scope.blog.posts.all = $scope.blog.posts.all.filter(p => p.state == "PUBLISHED");
+					} else {
+						$scope.blog.posts.all = $scope.blog.posts.all.filter(p => p._id === postId);
+					}
 					let countDown = $scope.blog.posts.length();
 					let onFinish = function () {
 						if (--countDown <= 0) {
@@ -545,11 +555,26 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.display.showPrintComments = false;
 
 	$scope.print = function (printComments) {
-		if ($scope.blog.posts.some(post => post.comments.all.length > 0) && !$scope.display.showPrintComments)
+		if ($scope.blog.posts.some(post => post.comments.all.length > 0) && !$scope.display.showPrintComments) {
 			$scope.display.showPrintComments = true;
+			$scope.display.printPost = false;
+		}
 		else {
 			$scope.display.showPrintComments = false;
 			window.open(`/blog/print/blog#/print/${$scope.blog._id}?comments=${printComments}`, '_blank');
+		}
+	}
+	$scope.printPost = function (post, printComments) {
+		if (post) {
+			$scope.postToPrint = post;
+		}
+		if ($scope.postToPrint.comments.all.length > 0 && !$scope.display.showPrintComments) {
+			$scope.display.printPost = true;
+			$scope.display.showPrintComments = true;
+		}
+		else {
+			$scope.display.showPrintComments = false;
+			window.open(`/blog/print/blog#/print/${$scope.blog._id}/post/${$scope.postToPrint._id}?comments=${printComments}`, '_blank');
 		}
 	}
 	$scope.isCloseConfirmLoaded = function () {

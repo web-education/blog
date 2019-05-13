@@ -25,6 +25,9 @@ routes.define(function($routeProvider){
 		.when('/print/:blogId', {
 			action: 'print'
 		})
+		.when('/print/:blogId/post/:postId', {
+			action: 'print'
+		})
 		.otherwise({
 			redirectTo: '/list-blogs'
 		})
