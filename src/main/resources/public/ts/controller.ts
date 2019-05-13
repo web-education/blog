@@ -1,4 +1,4 @@
-import { Behaviours, routes, template, idiom, http, notify, ng, angular } from 'entcore'
+import { Behaviours, routes, template, idiom, http, notify, ng, angular, skin } from 'entcore'
 import { LibraryDelegate, LibraryControllerScope } from './controllers/library';
 import { PostModel, BlogModel, CommentModel, ComentsModel, PostsModel, State } from './controllers/commons';
 import { Blog, Folders } from './models';
@@ -66,7 +66,8 @@ interface BlogControllerScope extends LibraryControllerScope {
 	openFirstPost(blog: BlogModel, post: PostModel): void
 	openClosePost(blog: BlogModel, post: PostModel): void
 	launchSearchingPost(search: string, event?: any): void;
-	isContainerEmpty(name: string): boolean
+	isContainerEmpty(name: string): boolean;
+	replaceAudioVideo(s: string): string;
 	//blog view
 	trashOneBlog(blog: BlogModel): void;
 	moveOneBlog(blog: BlogModel): void;
@@ -242,7 +243,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			};
 		},
 		print: function (params) {
-			let data = {
+			let data = { 
 				_id: params.blogId,
 			}
 			let postId;
@@ -254,7 +255,11 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 				$scope.showComments = true;
 			$scope.blog.open(function () {
 				$scope.blog.posts.syncAllPosts(function () {
-					$scope.blog.posts.all = $scope.blog.posts.all.filter(p => p.state == "PUBLISHED");
+					if (!postId) {
+						$scope.blog.posts.all = $scope.blog.posts.all.filter(p => p.state == "PUBLISHED");
+					} else {
+						$scope.blog.posts.all = $scope.blog.posts.all.filter(p => p._id === postId);
+					}
 					let countDown = $scope.blog.posts.length();
 					let onFinish = function () {
 						if (--countDown <= 0) {
@@ -597,11 +602,26 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.display.showPrintComments = false;
 
 	$scope.print = function (printComments) {
-		if ($scope.blog.posts.some(post => post.comments.all.length > 0) && !$scope.display.showPrintComments)
+		if ($scope.blog.posts.some(post => post.comments.all.length > 0) && !$scope.display.showPrintComments) {
 			$scope.display.showPrintComments = true;
+			$scope.display.printPost = false;
+		}
 		else {
 			$scope.display.showPrintComments = false;
 			window.open(`/blog/print/blog#/print/${$scope.blog._id}?comments=${printComments}`, '_blank');
+		}
+	}
+	$scope.printPost = function (post, printComments) {
+		if (post) {
+			$scope.postToPrint = post;
+		}
+		if ($scope.postToPrint.comments.all.length > 0 && !$scope.display.showPrintComments) {
+			$scope.display.printPost = true;
+			$scope.display.showPrintComments = true;
+		}
+		else {
+			$scope.display.showPrintComments = false;
+			window.open(`/blog/print/blog#/print/${$scope.blog._id}/post/${$scope.postToPrint._id}?comments=${printComments}`, '_blank');
 		}
 	}
 	$scope.isCloseConfirmLoaded = function () {
@@ -642,5 +662,13 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		Folders.root.sync();
 		$scope.$apply();
 	}
+
+	$scope.replaceAudioVideo = function (s: string) {
+		return s &&
+		// Audio
+		s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>")
+		// Video
+		.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
+    }
 
 }]);

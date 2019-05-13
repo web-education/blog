@@ -60,28 +60,20 @@
 			</div>
 
 			<lightbox show="display.showPrintComments" on-close="display.showPrintComments = false">
-				<h2>
-					<i18n>print.option</i18n>
-				</h2>
-				<p ng-if="!display.printPost">
-					<i18n>print.include.comments</i18n>
-				</p>
-				<p ng-if="display.printPost">
-					<i18n>post.print.include.comments</i18n>
-				</p>
+				<h2><i18n>print.option</i18n></h2>
+				<p ng-if="!display.printPost"><i18n>print.include.comments</i18n></p>
+				<p ng-if="display.printPost"><i18n>post.print.include.comments</i18n></p>
 				<div class="row">
-					<button ng-click="print(true)" class="right-magnet">
+					<button ng-if="!display.printPost" ng-click="print(true)" class="right-magnet">
 						<i18n>yes</i18n>
 					</button>
-					<button ng-if="!display.printPost" type="button" ng-click="print(false)"
-						class="right-magnet cancel">
+					<button ng-if="!display.printPost" type="button" ng-click="print(false)" class="right-magnet cancel">
 						<i18n>no</i18n>
 					</button>
 					<button ng-if="display.printPost" ng-click="printPost(undefined,true)" class="right-magnet">
 						<i18n>yes</i18n>
 					</button>
-					<button ng-if="display.printPost" type="button" ng-click="printPost(undefined,false)"
-						class="right-magnet cancel">
+					<button ng-if="display.printPost" type="button" ng-click="printPost(undefined,false)" class="right-magnet cancel">
 						<i18n>no</i18n>
 					</button>
 				</div>
