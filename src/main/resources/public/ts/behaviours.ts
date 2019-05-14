@@ -487,6 +487,7 @@ Behaviours.register('blog', {
 			}
 		},
 		workflow: {
+			createFolder: 'org.entcore.blog.controllers.FoldersController|add',
 			create: 'org.entcore.blog.controllers.BlogController|create',
 			print: 'org.entcore.blog.controllers.BlogController|print'
 		}

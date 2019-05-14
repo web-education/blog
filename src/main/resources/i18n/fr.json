@@ -110,5 +110,15 @@
   "sniplet.blog.desc":	"Vos actualités seront ajoutées dans un nouveau blog automatiquement créé.",
   "sniplet.blog.choose": "Choisir un blog existant",
   "sniplet.blog.search":	"Recherchez le blog dans lequel vous postez les articles que vous souhaitez afficher.",
-  "sniplet.blog.create":	"Créer le blog"
+  "sniplet.blog.create":	"Créer le blog",
+  "projects.root": "Mes projets",
+  "folder.new": "Nouveau dossier",
+  "folder.trash": "Corbeille",
+  "filters.privateBlogs": "Blogs internes",
+  "modified.on": "Modifié le [[blog.lastModified]]",
+  "open": "Ouvrir",
+  "rename": "Renommer",
+  "move": "Déplacer",
+  "filters.mine": "Mes projets",
+  "filters.publicBlogs": "Blogs publics"
 }

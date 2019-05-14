@@ -1,4 +1,5 @@
 import { Behaviours, routes, template, idiom, http, notify, ng, angular } from 'entcore'
+import { LibraryDelegate } from './controllers/library';
 
 function safeApply(that) {
 	return new Promise((resolve, reject) => {
@@ -11,7 +12,8 @@ function safeApply(that) {
 		}
 	});
 }
-export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', ($scope, route, model, $location) => {
+export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope, route, model, $location, $rootScope) => {
+	LibraryDelegate($scope,$rootScope, $location)
 	$scope.template = template;
 	template.open('filters', 'filters');
 	template.open('edit-post', 'edit-post');

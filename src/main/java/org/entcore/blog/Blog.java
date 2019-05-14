@@ -24,6 +24,7 @@
 package org.entcore.blog;
 
 import org.entcore.blog.controllers.BlogController;
+import org.entcore.blog.controllers.FoldersController;
 import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.security.BlogResourcesProvider;
@@ -59,7 +60,7 @@ public class Blog extends BaseServer {
 
         addController(new BlogController());
         addController(new PostController());
-
+        addController(new FoldersController("blogsFolders"));
     }
 
 }

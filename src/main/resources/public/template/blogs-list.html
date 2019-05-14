@@ -1,128 +1,160 @@
+<script type="text/ng-template" id="folder-tree">
+    <div ng-if="folder.contains(currentFolder)">
+        <li data-ng-repeat="folder in folder.children.all">
+            <a ng-class="{ selected: currentFolder === folder, opened: folder.contains(currentFolder) }"
+               ng-click="openFolder(folder)"
+               class="folder-list-item"
+               dragdrop="dropTo(folder, $originalEvent)">
+                <i class="arrow" ng-if="folder.children.length"></i> [[folder.name]]
+            </a>
+            <!-- ng-if="folder.contains(currentFolder)"-->
+            <ul ng-class="{ selected: folder.contains(currentFolder), closed: !folder.contains(currentFolder) }"
+                ng-include="'folder-tree'"></ul>
+        </li>
+    </div>
+</script>
+<!--TITLE-->
 <div class="row">
 	<a class="button right-magnet" ng-href="#/edit/new" workflow="blog.create" class="right-magnet cell">
 		<i18n>blog.create.blog</i18n>
 	</a>
 	<app-title>
-		<h1><a href="#/list-blogs"><i class="blog"></i><i18n>blog.title</i18n></a></h1>
+		<h1><a href="#/list-blogs"><i class="blog"></i>
+				<i18n>blog.title</i18n>
+			</a></h1>
 	</app-title>
 </div>
-
+<!--TREE AND CONTENT-->
 <div class="row rigid-grid">
 	<section class="four cell">
 		<div class="margin-two row">
-			<input type="search" class="eleven cell" i18n-placeholder="search" ng-model="display.search" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) : resetSearching()" />
+			<input type="search" class="eleven cell" i18n-placeholder="search" ng-model="displayLib.searchBlogs" />
 		</div>
 		<nav class="vertical" side-nav>
 			<ul>
 				<li>
-					<a>
-						<i class="arrow"></i>
+					<a ng-class="{ selected: currentFolder.name === 'root', opened: root.contains(currentFolder) }"
+						ng-click="openRoot()" dragdrop="dropTo('root', $originalEvent)">
+						<i class="arrow" ng-if="root.children.length"></i>
 						<i18n>projects.root</i18n>
 					</a>
 					<ul>
 						<div ng-if="root.contains(currentFolder)">
 							<li ng-repeat="folder in root.children.all">
-								<a><i class="arrow" ng-if="folder.children.length"></i>[[folder.name]]</a>
+								<a ng-click="openFolder(folder)"
+									ng-class="{ selected: currentFolder === folder, opened: folder.contains(currentFolder) }"
+									dragdrop="dropTo(folder, $originalEvent)"><i class="arrow"
+										ng-if="folder.children.length"></i>[[folder.name]]</a>
 								<ul ng-include="'folder-tree'"></ul>
 							</li>
 						</div>
 					</ul>
 				</li>
 				<li ng-click="openTrash()">
-					<a><i18n>folder.trash</i18n></a>
+					<a ng-class="{ selected: currentFolder.name === 'trash' }"
+						dragdrop="dropTo('trash', $originalEvent)">
+						<i18n>folder.trash</i18n>
+					</a>
 				</li>
 			</ul>
-			<a class="classic-link"><i18n>folder.new</i18n></a>
+			<a class="classic-link" ng-click="lightbox('newFolder')" workflow="blog.createFolder">
+				<i18n>folder.new</i18n>
+			</a>
 		</nav>
 	</section>
 	<section class="margin-four">
 		<div class="twelve cell chips">
-			<label class="chip">
+			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
+				ng-class="{ selected: filters.protected }">
 				<i class="mine" tooltip="filters.mine"></i>
-				<i18n>filters.privateSites</i18n>
+				<i18n>filters.privateBlogs</i18n>
 				<input type="checkbox" ng-model="filters.protected" />
 			</label>
-			<label class="chip">
-				<i class="public" tooltip="filters.publicSites"></i>
-				<i18n>filters.publicSites</i18n>
+			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
+				ng-class="{ selected: filters.public }">
+				<i class="public" tooltip="filters.publicBlogs"></i>
+				<i18n>filters.publicBlogs</i18n>
 				<input type="checkbox" ng-model="filters.public" />
 			</label>
-		</div>
-		<div class="fallen dominos">
-			<!-- Vu pour les dossiers -->
-			<!-- <div ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/' + blog._id)" bottom-scroll="loadBlogs()">
-				<explorer ng-model="folder.selected" on-open="openFolder(folder)" class="folder item">
-					<section class="domino" dragstart ng-model="folder._id" dragdrop="dropTo(folder, $originalEvent)">
-						<div class="top">
-							<img skin-src="[[blog.icon]]" class="absolute" />
-						</div>
-						<div class="bottom">
-							<div class="content">
-								<strong>[[blog.shortenedTitle]]</strong>
-							</div>
-						</div>
-					</section>
-				</explorer>
-			</div> -->
-			<div ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/' + blog._id)" bottom-scroll="loadBlogs()">
-				<explorer ng-model="folder.selected" on-open="openFolder(folder)" class="item">
-					<section class="domino" dragstart ng-model="website._id">
-						<div class="top">
-							<!-- Il faut mettre la bonne condition dans le ng-if -->
-							<!-- <img skin-src="/img/illustrations/pages-default.png" alt="thumbnail" ng-if="!website.icon" class="absolute">
-							<img ng-src="[[blog.icon]]" alt="thumbnail" ng-if="website.icon" class="absolute" /> -->
-							<img skin-src="[[blog.icon]]" class="absolute" />
-						</div>
-						<div class="bottom">
-							<div class="content">
-								<strong class="block overflow-hd" ng-click="displayBlog(blog)">[[blog.shortenedTitle]]</strong>
-								<span class="cell-ellipsis block">[[blog.author.username]]</span>
-								<em class="smaller-text block"><i18n>modified.on</i18n></em>
-								<br />
-								<div class="icons">
-									<!-- Il faut revoir les conditions du ng-if -->
-									<i class="shared inline" ng-if="website.shared.length > 0" tooltip="tooltip.shared"></i>
-									<i class="public" ng-if="website.visibility === 'PUBLIC'" tooltip="tooltip.public"></i>
-									<i class="manage" ng-if="website.myRights.manager" tooltip="tooltip.manager"></i>
-									<i class="edit" ng-if="!website.myRights.manager && website.myRights.update" tooltip="tooltip.update"></i>
-									<i class="view" ng-if="!website.myRights.update" tooltip="tooltip.read"></i>
-								</div>
-							</div>
-						</div>
-					</section>
-				</explorer>
-			</div>
+			<container template="library/folder-content"></container>
 		</div>
 	</section>
 </div>
+<!--###############LIGHTBOX AND CONFIRMATION###################-->
+<!--RENAME LIGHTBOX-->
+<lightbox show="displayLib.lightbox.renameFolder" on-close="lightbox('renameFolder')">
+	<h2>
+		<i18n>rename</i18n>
+	</h2>
+	<input type="text" class="twelve cell" ng-model="currentFolder.selection[0].name" i18n-placeholder="name" />
+	<div class="row">
+		<button class="right-magnet" ng-click="currentFolder.selection[0].save(); lightbox('renameFolder')">
+			<i18n>save</i18n>
+		</button>
+		<button class="cancel right-magnet" ng-click="lightbox('renameFolder')">
+			<i18n>cancel</i18n>
+		</button>
 
-<lightbox show="display.showShare" on-close="display.showShare = false">
+	</div>
+</lightbox>
+<!--SHARE LIGHTBOX-->
+<lightbox show="displayLib.showShare" on-close="displayLib.showShare = false">
 	<container template="share"></container>
 </lightbox>
-
-<lightbox show="display.confirmRemoveBlog" on-close="display.confirmRemoveBlog = false">
-	<h2><i18n>remove</i18n></h2>
-	<p><i18n>confirm.remove.blog</i18n></p>
+<!--REMOVE LIGHTBOX-->
+<lightbox show="displayLib.lightbox.confirmRemove" on-close="closeLightbox('confirmRemove')">
+	<h2>
+		<i18n>remove</i18n>
+	</h2>
+	<p>
+		<i18n>confirm.remove.blog</i18n>
+	</p>
 	<div class="row">
-		<button ng-click="removeBlogs(); display.confirmRemoveBlog = false" class="right-magnet">
+		<button ng-click="removeBlogs(); closeLightbox('confirmRemove')" class="right-magnet">
 			<i18n>remove</i18n>
 		</button>
-		<button type="button" ng-click="display.confirmRemoveBlog = false" class="right-magnet cancel">
+		<button type="button" ng-click="closeLightbox('confirmRemove')" class="right-magnet cancel">
 			<i18n>cancel</i18n>
 		</button>
 	</div>
 </lightbox>
-
+<!--??? LIGHTBOX-->
 <div class="toggle-buttons" ng-class="{ hide: blogs.selection().length < 1 }">
 	<div class="row toggle">
-		<a class="button" ng-href="#/edit/[[blogs.selection()[0]._id]]" ng-if="blogs.selection().length === 1" authorize="editBlog" resource="blogs.selection()">
+		<a class="button" ng-href="#/edit/[[blogs.selection()[0]._id]]" ng-if="blogs.selection().length === 1"
+			authorize="editBlog" resource="blogs.selection()">
 			<i18n>properties</i18n>
 		</a>
 		<button ng-click="shareBlog()" authorize="share" resource="blogs.selection()">
 			<i18n>share</i18n>
 		</button>
-		<button ng-click="display.confirmRemoveBlog = true" authorize="removeBlog" resource="blogs.selection()">
+		<button ng-click="displayLib.confirmRemove = true" authorize="removeBlog" resource="blogs.selection()">
 			<i18n>remove</i18n>
 		</button>
 	</div>
 </div>
+<!--NEW FOLDER LIGHTBOX-->
+<lightbox show="displayLib.lightbox.newFolder" on-close="lightbox('newFolder')">
+	<form ng-submit="createFolder()">
+		<h2>
+			<i18n>folder.new</i18n>
+		</h2>
+		<div class="row">
+			<input type="text" ng-model="folder.name" i18n-placeholder="name" required autofocus class="twelve cell" />
+		</div>
+		<div class="row">
+			<button class="right-magnet" ng-disabled="!folder.name.trim()">
+				<i18n>create</i18n>
+			</button>
+			<button type="button" class="cancel right-magnet" ng-click="lightbox('newFolder')">
+				<i18n>cancel</i18n>
+			</button>
+		</div>
+	</form>
+</lightbox>
+<!--MOVE LIGHTBOX-->
+<lightbox show="displayLib.lightbox.move" on-close="lightbox('move')">
+	<div ng-if="displayLib.lightbox.move">
+		<container template="library/move"></container>
+	</div>
+</lightbox>
