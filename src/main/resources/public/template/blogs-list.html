@@ -7,45 +7,93 @@
 	</app-title>
 </div>
 
-<hr class="row zero block-mobile" />
-
-<div class="search-pagination flex-row justify-start mobile-justify-center horizontal-spacing-twice">
-	<div class="cell six twelve-mobile vertical-spacing">
-		<input type="text" class="twelve" ng-model="display.search" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) :  resetSearching()"  />
-		<i class="search align-center justify-center" ng-click="searching();"></i>
-	</div>
-</div>
-
-<hr class="row" />
-
-<div class="cards-list rigid-grid">
-	<div class="card four height-two" ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/' + blog._id)" bottom-scroll="loadBlogs()">
-		<div class="row">
-			<div class="illustration">
-				<img skin-src="[[blog.icon]]" class="absolute" />
-			</div>
-			<div>
-				<h3 ng-click="displayBlog(blog)"><a href="#/view/[[blog._id]]">[[blog.shortenedTitle]]</a></h3>
-				<strong class="cell-ellipsis"><i18n>blog.by</i18n> [[blog.author.username]]</strong>
+<div class="row rigid-grid">
+	<section class="four cell">
+		<div class="margin-two row">
+			<input type="search" class="eleven cell" i18n-placeholder="search" ng-model="display.search" ng-keyup="$event.keyCode == 13 ? launchSearching(display.search, $event) : resetSearching()" />
+		</div>
+		<nav class="vertical" side-nav>
+			<ul>
+				<li>
+					<a>
+						<i class="arrow"></i>
+						<i18n>projects.root</i18n>
+					</a>
+					<ul>
+						<div ng-if="root.contains(currentFolder)">
+							<li ng-repeat="folder in root.children.all">
+								<a><i class="arrow" ng-if="folder.children.length"></i>[[folder.name]]</a>
+								<ul ng-include="'folder-tree'"></ul>
+							</li>
+						</div>
+					</ul>
+				</li>
+				<li ng-click="openTrash()">
+					<a><i18n>folder.trash</i18n></a>
+				</li>
+			</ul>
+			<a class="classic-link"><i18n>folder.new</i18n></a>
+		</nav>
+	</section>
+	<section class="margin-four">
+		<div class="twelve cell chips">
+			<label class="chip">
+				<i class="mine" tooltip="filters.mine"></i>
+				<i18n>filters.privateSites</i18n>
+				<input type="checkbox" ng-model="filters.protected" />
+			</label>
+			<label class="chip">
+				<i class="public" tooltip="filters.publicSites"></i>
+				<i18n>filters.publicSites</i18n>
+				<input type="checkbox" ng-model="filters.public" />
+			</label>
+		</div>
+		<div class="fallen dominos">
+			<!-- Vu pour les dossiers -->
+			<!-- <div ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/' + blog._id)" bottom-scroll="loadBlogs()">
+				<explorer ng-model="folder.selected" on-open="openFolder(folder)" class="folder item">
+					<section class="domino" dragstart ng-model="folder._id" dragdrop="dropTo(folder, $originalEvent)">
+						<div class="top">
+							<img skin-src="[[blog.icon]]" class="absolute" />
+						</div>
+						<div class="bottom">
+							<div class="content">
+								<strong>[[blog.shortenedTitle]]</strong>
+							</div>
+						</div>
+					</section>
+				</explorer>
+			</div> -->
+			<div ng-repeat="blog in blogs.all | orderBy:orderBlogs:true" ng-click="redirect('/view/' + blog._id)" bottom-scroll="loadBlogs()">
+				<explorer ng-model="folder.selected" on-open="openFolder(folder)" class="item">
+					<section class="domino" dragstart ng-model="website._id">
+						<div class="top">
+							<!-- Il faut mettre la bonne condition dans le ng-if -->
+							<!-- <img skin-src="/img/illustrations/pages-default.png" alt="thumbnail" ng-if="!website.icon" class="absolute">
+							<img ng-src="[[blog.icon]]" alt="thumbnail" ng-if="website.icon" class="absolute" /> -->
+							<img skin-src="[[blog.icon]]" class="absolute" />
+						</div>
+						<div class="bottom">
+							<div class="content">
+								<strong class="block overflow-hd" ng-click="displayBlog(blog)">[[blog.shortenedTitle]]</strong>
+								<span class="cell-ellipsis block">[[blog.author.username]]</span>
+								<em class="smaller-text block"><i18n>modified.on</i18n></em>
+								<br />
+								<div class="icons">
+									<!-- Il faut revoir les conditions du ng-if -->
+									<i class="shared inline" ng-if="website.shared.length > 0" tooltip="tooltip.shared"></i>
+									<i class="public" ng-if="website.visibility === 'PUBLIC'" tooltip="tooltip.public"></i>
+									<i class="manage" ng-if="website.myRights.manager" tooltip="tooltip.manager"></i>
+									<i class="edit" ng-if="!website.myRights.manager && website.myRights.update" tooltip="tooltip.update"></i>
+									<i class="view" ng-if="!website.myRights.update" tooltip="tooltip.read"></i>
+								</div>
+							</div>
+						</div>
+					</section>
+				</explorer>
 			</div>
 		</div>
-		<div class="row">
-			<div class="cell-ellipsis" ng-repeat="post in blog.fetchPosts | limitTo:2">
-				<em>[[post.title]]</em> <em class="low-importance">[[post.created.fromNow()]]</em>
-			</div>
-			<div class="reduce-block-eight" ng-if="!blog.fetchPosts.length">
-				<em><i18n>blog.empty</i18n></em>
-			</div>
-		</div>
-		<resource-right name="share" resource="blog" >
-			<check-tool ng-model="blog.selected" ng-click="$event.stopPropagation()" ></check-tool>
-		</resource-right>
-	</div>
-	<div ng-show="blogs.all.length == 0 && display.search  && !display.searching">
-		<div class="row">
-			<div class="info"><i18n>blog.search.internal.empty</i18n></div>
-		</div>
-	</div>
+	</section>
 </div>
 
 <lightbox show="display.showShare" on-close="display.showShare = false">
