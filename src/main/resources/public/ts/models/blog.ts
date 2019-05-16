@@ -57,10 +57,11 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
     }
     async save() {
         if (this._id) {
-            await this.update(this.toJSON());
+            await this.update(this.toJSON() as any);
         }
         else {
-            const res = await this.create(this.toJSON());
+            const {trashed,...others}={...this.toJSON()}
+            const res = await this.create(others as any);
             //refresh
             this._id = res.data._id;
             this.owner ={
@@ -113,7 +114,7 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         return Mix.castAs(Blog, data);
     }
 
-    toJSON(): any {
+    toJSON() {
         const { trashed } = this;
         return {
             trashed,
