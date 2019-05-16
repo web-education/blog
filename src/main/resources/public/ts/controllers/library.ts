@@ -10,6 +10,7 @@ export interface LibraryControllerScope {
     filters: typeof Filters
     displayLib: {
         data: any
+        showShare: boolean
         targetFolder: Folder
         searchBlogs: string
         lightbox: {
@@ -17,7 +18,7 @@ export interface LibraryControllerScope {
             properties: boolean
         }
     }
-    addBlog(): void;
+    shareBlog(): void
     restore(): void;
     move(): void;
     open(blog: Blog): void;
@@ -33,21 +34,23 @@ export interface LibraryControllerScope {
     openPublish(): void;
     createFolder(): void;
     manageBlogsView(blog: Blog): void
+    trashSelection(): void;
     removeSelection(): void;
-    removeBlogs(): void;
     duplicateBlogs(): void;
-    closeManageBlogs(): void;
     createBlogView(): void;
     viewBlog(blog: Blog): void;
     openFolder(folder: Folder): void;
     selectionContains(folder: Folder): boolean;
     dropTo(targetItem: string | Folder, $originalEvent): void;
+    removeBlog(): void;
     //
     $apply: any
+    display: any
 }
 export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $location) {
     $scope.displayLib = {
         data: undefined,
+        showShare: false,
         lightbox: {
             manageBlogs: false,
             properties: false
@@ -96,17 +99,30 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
 
     $scope.can = (right: string) => {
         let folder: Folder | Root = $scope.currentFolder;
-        return _.find(folder.ressources.sel.selected, (w: Blog) => !w.myRights[right]) === undefined;
+        return folder.ressources.sel.selected.find((w: Blog) => !w.myRights[right]) === undefined;
     };
 
-    $scope.saveProperties = () => {
+    $scope.saveProperties = async () => {
         $scope.lightbox('properties');
-        $scope.blog.save();
+        //adapt old model to new
+        const blog = Folders.root.findRessource($scope.blog._id) || new Blog();
+        blog.fromJSON($scope.blog.toJSON());
+        await blog.save();
+        $location.path("/list-blogs");
+        $scope.$apply();
+    }
+
+    $scope.removeBlog = async function () {
+        const blog = Folders.root.findRessource($scope.blog._id);
+        if (blog) {
+            await blog.remove();
+        }
+        $location.path('/list-blogs');
     }
 
     $scope.editBlogProperties = () => {
-        $scope.blog = $scope.currentFolder.selection[0] as Blog;
-        $scope.lightbox('properties');
+        const blog = $scope.currentFolder.selection[0] as Blog;
+        $location.path('/edit/' + blog._id);
     };
 
     $scope.openFolder = (folder) => {
@@ -128,21 +144,20 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.folder = new Folder();
     };
 
-    $scope.removeSelection = async () => {
-        $scope.lightbox('confirmRemove');
-        await $scope.currentFolder.removeSelection();
+    $scope.trashSelection = async () => {
+        $scope.closeLightbox('confirmRemove');
+        await $scope.currentFolder.trashSelection();
         $scope.$apply();
+        notify.info('blog.selection.trashed');
     }
 
+    $scope.removeSelection = async () => {
+        $scope.closeLightbox('confirmRemove');
+        await $scope.currentFolder.removeSelection();
+        $scope.$apply();
+        notify.info('blog.selection.removed');
+    }
 
-    $scope.removeBlogs = () => {
-        $scope.currentFolder.selection.forEach(function (blog) {
-            blog.remove();
-        });
-        $scope.currentFolder.removeSelection();
-        notify.info('blog.removed');
-        $scope.closeLightbox('confirmRemovePage');
-    };
     $scope.openTrash = () => {
         template.open('library/folder-content', 'library/trash');
         $scope.currentFolder = Folders.trash;
@@ -244,4 +259,20 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.displayLib.data = data;
         $scope.displayLib.lightbox[lightboxName] = false;
     };
+
+    $scope.shareBlog = function () {
+        $scope.displayLib.showShare = true;
+        let same = true;
+        const selected = $scope.currentFolder.selection;
+        let publishType = selected[0]['publish-type'];
+        selected.forEach((blog) => {
+            same = same && (blog['publish-type'] === publishType);
+        });
+        if (same) {
+            $scope.display.publishType = publishType;
+        }
+        else {
+            $scope.display.publishType = undefined;
+        }
+    }
 }

@@ -1,16 +1,20 @@
 import { Selectable, Model, Selection, Eventer, Mix } from 'entcore-toolkit';
 import http from "axios";
-import { Shareable, Rights, notify, moment } from 'entcore';
+import { Shareable, Rights, notify, moment, model } from 'entcore';
 import { Folders, Folder, Filters } from './folder';
-
+type BlogData = { _id: string, author: { userId: string, username: string }, title: string, thumbnail: string };
 export class Blog extends Model<Blog> implements Selectable, Shareable {
     static eventer = new Eventer();
     _id: string;
+    'comment-type': "RESTRAINT" | "IMMEDIATE" = "IMMEDIATE";
+    'publish-type': "RESTRAINT" | "IMMEDIATE" = "RESTRAINT";
     selected: boolean;
+    thumbnail: string;
+    description: string;
     rights: Rights<Blog> = new Rights(this);
     owner: { userId: string, displayName: string };
     shared: any;
-    trashed: boolean;
+    trashed: boolean = false;
     title: string;
     shortenedTitle: string;
     visibility: 'PUBLIC' | 'PRIVATE';
@@ -21,46 +25,61 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
     created: {
         $date: number
     };
-
+    author: { userId: string, username: string }
     get lastModified(): string {
         return moment(this.modified.$date).format('DD/MM/YYYY');
     }
-    constructor(data?: { _id: string, author: any, title: string, thumbnail: string }) {
+    constructor(data?: BlogData) {
         super({
+            create: '/blog',
             update: '/blog/:_id',
             sync: '/blog/:_id'
         });
         this.fromJSON(data);
-        this.rights.fromBehaviours();
     }
-    fromJSON(data) {
-        if (data && data._id) {
+    async fromJSON(data: BlogData) {
+        if (data) {
             for (let i in data) {
                 this[i] = data[i];
             }
             this._id = data._id;
-            this.owner = data.author;
+            this.owner = data.author as any;
             this.shortenedTitle = data.title || '';
             if (this.shortenedTitle.length > 40) {
                 this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
             }
-            if (data.thumbnail) {
-                this.icon = data.thumbnail + '?thumbnail=290x290';
-            }
-            else {
-                this.icon = '/img/illustrations/blog.png';
-            }
+            this.icon = data.thumbnail ? data.thumbnail + '?thumbnail=290x290' : '';
         }
+        this.rights.fromBehaviours();
     }
     get myRights() {
         return this.rights.myRights;
     }
     async save() {
         if (this._id) {
-            await this.update();
+            await this.update(this.toJSON());
         }
         else {
-            await this.create();
+            const res = await this.create(this.toJSON());
+            //refresh
+            this._id = res.data._id;
+            this.owner ={
+                userId:model.me.userId,
+                displayName: model.me.username
+            }
+            this.modified={
+                $date: new Date().getTime()
+            }
+            this.author ={
+                userId:model.me.userId,
+                username: model.me.username
+            }
+            this.rights.fromBehaviours();
+            //update root
+            Folders.provideRessource(this);
+            Folders.root.ressources.all.push(this);
+            Folders.root.ressources.refreshFilters();
+            Folder.eventer.trigger('refresh');
         }
         Blog.eventer.trigger('save');
     }
@@ -72,7 +91,6 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         this.trashed = true;
         await this.save();
         Folders.trash.sync();
-        await this.save();
     }
     async moveTo(target: Folder | string) {
         await Folders.toRoot(this);
@@ -93,6 +111,19 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         data.published = undefined;
         data.title = "Copie_" + data.title;
         return Mix.castAs(Blog, data);
+    }
+
+    toJSON(): any {
+        const { trashed } = this;
+        return {
+            trashed,
+            _id: this._id,
+            title: this.title,
+            thumbnail: this.thumbnail || '',
+            'comment-type': this['comment-type'] || 'IMMEDIATE',
+            'publish-type': this['publish-type'] || 'RESTRAINT',
+            description: this.description || ''
+        };
     }
 }
 

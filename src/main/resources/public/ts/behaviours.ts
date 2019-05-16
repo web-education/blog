@@ -473,6 +473,9 @@ Behaviours.register('blog', {
 			share: {
 				right: 'org-entcore-blog-controllers-BlogController|shareJson'
 			},
+			manager: {
+				right: 'org-entcore-blog-controllers-BlogController|delete'
+			},
 			removeBlog: {
 				right: 'org-entcore-blog-controllers-BlogController|delete'
 			},

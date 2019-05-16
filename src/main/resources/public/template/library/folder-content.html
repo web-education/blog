@@ -13,11 +13,12 @@
             </section>
         </explorer>
     </div>
-    <div ng-repeat="blog in currentFolder.ressources.filtered | filter:searchBlog" bottom-scroll="loadBlogs()">
+    <div ng-repeat="blog in currentFolder.ressources.filtered | filter:searchBlog">
         <explorer ng-model="blog.selected" on-open="viewBlog(blog)" class="item">
             <section class="domino" dragstart ng-model="blog._id">
                 <div class="top">
-                    <img ng-src="[[blog.icon]]" class="absolute" />
+                    <img skin-src="/img/illustrations/blog.png" ng-if="!blog.icon" class="absolute">
+                    <img ng-src="[[blog.icon]]" ng-if="blog.icon" class="absolute" />
                 </div>
                 <div class="bottom">
                     <div class="content">

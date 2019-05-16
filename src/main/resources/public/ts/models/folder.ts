@@ -17,6 +17,9 @@ export class BaseFolder implements Selectable {
         }
         return this._ressources;
     }
+    findRessource(id: string): Blog | undefined {
+        return this._ressources && this._ressources.all.find(r => r._id == id);
+    }
 }
 
 class HierarchicalFolder extends BaseFolder {
@@ -111,7 +114,7 @@ class HierarchicalFolder extends BaseFolder {
         return _.find(this.selection, (e) => !(e instanceof Folder)) === undefined;
     }
 
-    async removeSelection(): Promise<any> {
+    async trashSelection(): Promise<any> {
         for (let item of this.selection) {
             await item.toTrash();
         }
@@ -119,6 +122,30 @@ class HierarchicalFolder extends BaseFolder {
         this.children.deselectAll();
         this.ressources.deselectAll();
         await this.sync();
+    }
+
+    async removeSelection(): Promise<any> {
+        for (let item of this.selection) {
+            await item.remove();
+        }
+        await Folders.root.sync();
+        this.children.deselectAll();
+        this.ressources.deselectAll();
+        await this.sync();
+    }
+
+    findRessource(id: string): Blog | undefined {
+        const founded = super.findRessource(id);
+        if (founded) {
+            return founded;
+        }
+        for (let c of this.children.all) {
+            const founded = c.findRessource(id);
+            if (founded) {
+                return founded;
+            }
+        }
+        return undefined;
     }
 }
 
@@ -296,6 +323,8 @@ export class Folders {
     }
     static async ressources(): Promise<Blog[]> {
         let ressources: Blog[];
+        //wait for behaviours before loading blogs
+        await new Blog().rights.fromBehaviours();
         if (model.me) {
             ressources = await this.ressourceProvider.data();
         }

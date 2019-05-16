@@ -1,0 +1,72 @@
+﻿<div class="row">
+    <div class="fallen dominos">
+        <div ng-repeat="folder in currentFolder.children.all | filter:searchFolder">
+            <explorer ng-model="folder.selected" class="folder item">
+                <section class="domino" dragstart ng-model="folder._id">
+                    <div class="top">
+                        <i class="folder-large"></i>
+                    </div>
+                    <div class="bottom">
+                        <div class="content">
+                            <strong>[[folder.shortenedName]]</strong>
+                        </div>
+
+                    </div>
+                </section>
+            </explorer>
+        </div>
+        <div ng-repeat="blog in currentFolder.ressources.filtered | filter:searchBlog">
+            <explorer ng-model="blog.selected" class="item">
+                <section class="domino" dragstart ng-model="blog._id">
+                    <div class="top">
+                        <img skin-src="/img/illustrations/blog.png" ng-if="!blog.icon" class="absolute">
+                        <img ng-src="[[blog.icon]]" ng-if="blog.icon" class="absolute" />
+                    </div>
+                    <div class="bottom">
+                        <div class="content">
+                            <strong class="block overflow-hd">[[blog.shortenedTitle]]</strong>
+                            <span class="cell-ellipsis block">
+                                <i18n>modified.on</i18n>
+                            </span>
+                            <br />
+                            <div class="right-magnet">
+                                <i ng-if="blog.visibility === 'PUBLIC'" class="public"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </explorer>
+        </div>
+    </div>
+</div>
+<!--TOASTER-->
+<div class="toggle-buttons" ng-class="{ hide: currentFolder.selectedLength < 1 }">
+    <div class="row toggle">
+        <div>
+            <!-- Both-->
+            <button ng-click="restore()" ng-if="can('removeBlog')">
+                <i18n>restore</i18n>
+            </button>
+            <button ng-click="lightbox('confirmRemove')" ng-if="can('removeBlog')">
+                <i18n>remove</i18n>
+            </button>
+        </div>
+    </div>
+</div>
+<!--REMOVE LIGHTBOX-->
+<lightbox show="displayLib.lightbox.confirmRemove" on-close="closeLightbox('confirmRemove')">
+	<h2>
+		<i18n>remove</i18n>
+	</h2>
+	<p>
+		<i18n>confirm.remove.elements</i18n>
+	</p>
+	<div class="row">
+		<button ng-click="removeSelection()" class="right-magnet">
+			<i18n>remove</i18n>
+		</button>
+		<button type="button" ng-click="closeLightbox('confirmRemove')" class="right-magnet cancel">
+			<i18n>cancel</i18n>
+		</button>
+	</div>
+</lightbox>

@@ -39,10 +39,10 @@ public interface BlogService {
 	enum PublishType { IMMEDIATE, RESTRAINT };
 
 	List<String> FIELDS = Arrays.asList("author", "title", "description",
-			"thumbnail", "comment-type", "created", "modified", "shared", "publish-type");
+			"thumbnail", "comment-type", "created", "modified", "shared", "publish-type", "trashed");
 
 	List<String> UPDATABLE_FIELDS = Arrays.asList("title", "description",
-			"thumbnail", "comment-type", "modified", "publish-type");
+			"thumbnail", "comment-type", "modified", "publish-type", "trashed");
 
 	void create(JsonObject blog, UserInfos author, Handler<Either<String, JsonObject>> result);
 

@@ -113,6 +113,7 @@
   "sniplet.blog.create":	"Créer le blog",
   "projects.root": "Mes projets",
   "folder.new": "Nouveau dossier",
+  "folder.create.new": "Nouveau dossier",
   "folder.trash": "Corbeille",
   "filters.privateBlogs": "Blogs internes",
   "modified.on": "Modifié le [[blog.lastModified]]",
@@ -120,5 +121,8 @@
   "rename": "Renommer",
   "move": "Déplacer",
   "filters.mine": "Mes projets",
-  "filters.publicBlogs": "Blogs publics"
+  "filters.publicBlogs": "Blogs publics",
+  "confirm.remove.elements": "Voulez-vous vraiment supprimer les élèments sélectionnés ?",
+  "blog.selection.trashed": "Les élements ont été déplacés vers la corbeille",
+  "blog.selection.removed": "Les élements ont été supprimés"
 }

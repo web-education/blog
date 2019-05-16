@@ -101,23 +101,6 @@
 <lightbox show="displayLib.showShare" on-close="displayLib.showShare = false">
 	<container template="share"></container>
 </lightbox>
-<!--REMOVE LIGHTBOX-->
-<lightbox show="displayLib.lightbox.confirmRemove" on-close="closeLightbox('confirmRemove')">
-	<h2>
-		<i18n>remove</i18n>
-	</h2>
-	<p>
-		<i18n>confirm.remove.blog</i18n>
-	</p>
-	<div class="row">
-		<button ng-click="removeBlogs(); closeLightbox('confirmRemove')" class="right-magnet">
-			<i18n>remove</i18n>
-		</button>
-		<button type="button" ng-click="closeLightbox('confirmRemove')" class="right-magnet cancel">
-			<i18n>cancel</i18n>
-		</button>
-	</div>
-</lightbox>
 <!--??? LIGHTBOX-->
 <div class="toggle-buttons" ng-class="{ hide: blogs.selection().length < 1 }">
 	<div class="row toggle">
