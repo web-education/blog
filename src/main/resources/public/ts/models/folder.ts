@@ -311,7 +311,7 @@ export class Folders {
     private static _folderProvider: Provider<Folder>;
     static get ressourceProvider() {
         if (Folders._ressourceProvider == null) {
-            Folders._ressourceProvider = new Provider<Blog>('/blog/list/all', Blog);
+            Folders._ressourceProvider = new Provider<Blog>('/blog/list/all?excludePost=true', Blog);
         }
         return Folders._ressourceProvider;
     }
