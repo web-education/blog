@@ -66,7 +66,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     $scope.blog = new Blog();
     $scope.blog.visibility = 'PRIVATE';
     $scope.filters = Filters;
-    $scope.filters.protected = true;
+    $scope.filters.mine = true;
 
     template.open('library/create-blog', 'library/create-blog');
     template.open('library/toaster', 'library/toaster');
@@ -106,7 +106,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.lightbox('properties');
         //adapt old model to new
         const blog = Folders.root.findRessource($scope.blog._id) || new Blog();
-        blog.fromJSON($scope.blog.toJSON());
+        blog.fromJSON($scope.blog.toJSON() as any);
         await blog.save();
         $location.path("/list-blogs");
         $scope.$apply();

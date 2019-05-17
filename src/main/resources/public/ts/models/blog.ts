@@ -56,23 +56,24 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         return this.rights.myRights;
     }
     async save() {
+        const json = this.toJSON();
         if (this._id) {
-            await this.update(this.toJSON() as any);
+            await this.update(json as any);
         }
         else {
-            const {trashed,...others}={...this.toJSON()}
+            const { trashed, ...others } = json
             const res = await this.create(others as any);
             //refresh
             this._id = res.data._id;
-            this.owner ={
-                userId:model.me.userId,
+            this.owner = {
+                userId: model.me.userId,
                 displayName: model.me.username
             }
-            this.modified={
+            this.modified = {
                 $date: new Date().getTime()
             }
-            this.author ={
-                userId:model.me.userId,
+            this.author = {
+                userId: model.me.userId,
                 username: model.me.username
             }
             this.rights.fromBehaviours();
@@ -185,7 +186,13 @@ export class Blogs {
 
     refreshFilters() {
         this.filtered = this.all.filter(
-            w => (w.visibility === 'PUBLIC' && Filters.public) || (w.visibility !== 'PUBLIC' && Filters.protected)
+            w => {
+                if (Filters.shared) {
+                    return w.author.userId != model.me.userId;
+                } else {
+                    return w.author.userId == model.me.userId;
+                }
+            }
         );
     }
 

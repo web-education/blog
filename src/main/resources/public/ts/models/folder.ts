@@ -374,6 +374,20 @@ export class Folders {
 }
 
 export class Filters {
-    static public: boolean;
-    static protected: boolean;
+    private static _mine: boolean;
+    private static _shared: boolean;
+    private static reset() {
+        Filters._mine = false;
+        Filters._shared = false;
+    }
+    static get mine(): boolean { return Filters._mine; }
+    static set mine(a) {
+        Filters.reset();
+        Filters._mine = a;
+    }
+    static get shared(): boolean { return Filters._shared; }
+    static set shared(a) {
+        Filters.reset();
+        Filters._shared = a;
+    }
 }

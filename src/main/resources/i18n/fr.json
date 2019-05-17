@@ -120,8 +120,9 @@
   "open": "Ouvrir",
   "rename": "Renommer",
   "move": "Déplacer",
-  "filters.mine": "Mes projets",
+  "filters.mine": "Mes blogs",
   "filters.publicBlogs": "Blogs publics",
+  "filters.sharedBlogs": "Les blogs partagés avec moi",
   "confirm.remove.elements": "Voulez-vous vraiment supprimer les élèments sélectionnés ?",
   "blog.selection.trashed": "Les élements ont été déplacés vers la corbeille",
   "blog.selection.removed": "Les élements ont été supprimés"
