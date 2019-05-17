@@ -18,7 +18,7 @@
             <section class="domino" dragstart ng-model="blog._id">
                 <div class="top">
                     <img skin-src="/img/illustrations/blog.png" ng-if="!blog.icon" class="absolute">
-                    <img ng-src="[[blog.icon]]" ng-if="blog.icon" class="absolute" />
+                    <img image-lazy-load="blog.icon" ng-if="blog.icon" class="absolute" />
                 </div>
                 <div class="bottom">
                     <div class="content">

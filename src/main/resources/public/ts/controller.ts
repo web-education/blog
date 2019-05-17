@@ -1,6 +1,50 @@
 import { Behaviours, routes, template, idiom, http, notify, ng, angular } from 'entcore'
-import { LibraryDelegate } from './controllers/library';
+import { LibraryDelegate, LibraryControllerScope } from './controllers/library';
+import { PostModel,BlogModel,CommentModel,ComentsModel,PostsModel,State } from './controllers/commons';
+//=== Types
 
+interface BlogControllerScope extends LibraryControllerScope{
+	template: typeof template;
+	me: any;
+	postToPrint:PostModel;
+	lang: typeof idiom;
+	blog: BlogModel
+	blogs: BlogModel[]
+	comment: CommentModel
+	post: PostModel
+	currPost: string;
+	showComments: boolean
+	maxResults:number;
+	isCloseConfirmLoaded():boolean;
+	printPost(post:PostModel, printComments:boolean):void;
+	print(printComments:boolean):void;
+	orderBlogs(blog:BlogModel):void;
+	updateComment(comment:Comment, post:PostModel):void;
+	postComment(comment:Comment, post:PostModel):void;
+	addResults():void;
+	loadPosts():void
+	removePost(post:PostModel):void
+	updatePublishType():void;
+	publishPost(post:PostModel):void
+	republish(blog:BlogModel, post:PostModel):void
+	saveModifications(post:PostModel):void
+	saveOrCreates(post:PostModel):void
+	redirect(url:string):void
+	resetSearching():void;
+	searchingPost(): void;
+	cancel(): void;
+	switchAll(): void;
+	checkAll():void;
+	count(state:State):number;
+	saveDraft():void;
+	savePublishedPost():void;
+	cancelEditing(post:PostModel&{data:PostModel}):void
+	showEditPost(blog: BlogModel, post:PostModel):void
+	openFirstPost(blog: BlogModel, post:PostModel):void
+	openClosePost(blog: BlogModel, post:PostModel):void
+	launchSearchingPost(search:string, event?:any): void;
+}
+//=== Utils
 function safeApply(that) {
 	return new Promise((resolve, reject) => {
 		let phase = that.$root.$$phase;
@@ -12,7 +56,8 @@ function safeApply(that) {
 		}
 	});
 }
-export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope, route, model, $location, $rootScope) => {
+//=== Controller
+export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope:BlogControllerScope, route, model, $location, $rootScope) => {
 	LibraryDelegate($scope,$rootScope, $location)
 	$scope.template = template;
 	template.open('filters', 'filters');
@@ -463,7 +508,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	}
 
 	$scope.updatePublishType = function () {
-		model.blogs.selection().forEach(function (blog) {
+		$scope.currentFolder.ressources.sel.selected.forEach(function (blog) {
 			blog['publish-type'] = $scope.display.publishType;
 			blog.save();
 		})

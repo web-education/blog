@@ -57,7 +57,7 @@
 					</a>
 				</li>
 			</ul>
-			<a class="classic-link" ng-click="lightbox('newFolder')" workflow="blog.createFolder">
+			<a class="classic-link" ng-click="lightbox('newFolder')" workflow="blog.folders.add">
 				<i18n>folder.new</i18n>
 			</a>
 		</nav>
@@ -65,16 +65,16 @@
 	<section class="margin-four">
 		<div class="twelve cell chips">
 			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
-				ng-class="{ selected: filters.protected }">
+				ng-class="{ selected: filters.mine }">
 				<i class="mine" tooltip="filters.mine"></i>
-				<i18n>filters.privateBlogs</i18n>
-				<input type="checkbox" ng-model="filters.protected" />
+				<i18n>filters.mine</i18n>
+				<input type="checkbox" ng-model="filters.mine" />
 			</label>
 			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
-				ng-class="{ selected: filters.public }">
-				<i class="public" tooltip="filters.publicBlogs"></i>
-				<i18n>filters.publicBlogs</i18n>
-				<input type="checkbox" ng-model="filters.public" />
+				ng-class="{ selected: filters.shared }">
+				<i class="shared" tooltip="filters.shared"></i>
+				<i18n>filters.sharedBlogs</i18n>
+				<input type="checkbox" ng-model="filters.shared" />
 			</label>
 			<container template="library/folder-content"></container>
 		</div>

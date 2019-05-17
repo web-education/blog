@@ -265,6 +265,7 @@ public class BlogController extends BaseController {
 					}
 
 					final String search = request.params().get("search");
+					final String excludePost = request.params().get("excludePost");
 
 					blog.list(user, page, search, new Handler<Either<String, JsonArray>>() {
 						public void handle(Either<String, JsonArray> event) {
@@ -289,6 +290,10 @@ public class BlogController extends BaseController {
 									}
 								}
 							};
+							if("true".equals(excludePost)){
+								renderJson(request, blogs);
+								return;
+							}
 
 							for (Object blogObj : blogs) {
 								final JsonObject blog = (JsonObject) blogObj;
