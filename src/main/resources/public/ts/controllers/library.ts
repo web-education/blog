@@ -1,10 +1,11 @@
 import { ng, template, idiom, notify } from 'entcore';
 import { Folders, Folder, Blog, Filters, BaseFolder, Root } from '../models';
 import { _ } from 'entcore';
+import { BlogModel } from './commons';
 
 export interface LibraryControllerScope {
     root: Root
-    blog: Blog
+    blog: BlogModel
     folder: Folder
     currentFolder: Folder | Root
     filters: typeof Filters
@@ -31,9 +32,7 @@ export interface LibraryControllerScope {
     can(right: string): boolean
     searchBlog(blog: Blog): void;
     searchFolder(folder: Folder): void;
-    openPublish(): void;
     createFolder(): void;
-    manageBlogsView(blog: Blog): void
     trashSelection(): void;
     removeSelection(): void;
     duplicateBlogs(): void;
@@ -63,8 +62,6 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     $scope.currentFolder.sync();
     $scope.root = Folders.root;
     $scope.folder = new Folder();
-    $scope.blog = new Blog();
-    $scope.blog.visibility = 'PRIVATE';
     $scope.filters = Filters;
     $scope.filters.mine = true;
 
@@ -131,11 +128,6 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.currentFolder.sync();
     };
 
-    $scope.openPublish = async () => {
-        $scope.lightbox('showPublish');
-        $scope.blog = $scope.currentFolder.selection[0] as Blog;
-    };
-
     $scope.createFolder = async () => {
         $scope.folder.parentId = $scope.currentFolder._id;
         $scope.displayLib.lightbox['newFolder'] = false;
@@ -168,12 +160,6 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         template.open('library/folder-content', 'library/folder-content');
         $scope.currentFolder = Folders.root;
         Folders.root.sync();
-    };
-
-    $scope.createBlogView = () => {
-        $scope.blog = new Blog();
-        $scope.blog.visibility = 'PRIVATE';
-        $scope.lightbox('newBlog');
     };
 
     $scope.viewBlog = (blog: Blog) => {
@@ -232,11 +218,6 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         await $scope.currentFolder.sync();
         await $scope.displayLib.targetFolder.sync();
         $scope.$apply();
-    };
-
-    $scope.manageBlogsView = (blog: Blog) => {
-        $scope.lightbox('managePages');
-        $scope.blog = blog;
     };
 
     $scope.duplicateBlogs = async () => {
