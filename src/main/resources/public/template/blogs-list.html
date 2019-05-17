@@ -5,7 +5,7 @@
                ng-click="openFolder(folder)"
                class="folder-list-item"
                dragdrop="dropTo(folder, $originalEvent)">
-                <i class="arrow" ng-if="folder.children.length"></i> [[folder.name]]
+                <i class="arrow" ng-if="folder.children.all.length"></i> [[folder.name]]
             </a>
             <!-- ng-if="folder.contains(currentFolder)"-->
             <ul ng-class="{ selected: folder.contains(currentFolder), closed: !folder.contains(currentFolder) }"
@@ -44,7 +44,7 @@
 								<a ng-click="openFolder(folder)"
 									ng-class="{ selected: currentFolder === folder, opened: folder.contains(currentFolder) }"
 									dragdrop="dropTo(folder, $originalEvent)"><i class="arrow"
-										ng-if="folder.children.length"></i>[[folder.name]]</a>
+										ng-if="folder.children.all.length"></i>[[folder.name]]</a>
 								<ul ng-include="'folder-tree'"></ul>
 							</li>
 						</div>
