@@ -64,6 +64,9 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     $scope.folder = new Folder();
     $scope.filters = Filters;
     $scope.filters.mine = true;
+    $scope.display = {
+        publishType: undefined
+    };
 
     template.open('library/create-blog', 'library/create-blog');
     template.open('library/toaster', 'library/toaster');

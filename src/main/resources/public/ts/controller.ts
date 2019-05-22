@@ -518,7 +518,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	}
 
 	$scope.updatePublishType = function () {
-		model.blogs.selection().forEach(function (blog) {
+		$scope.currentFolder.ressources.sel.selected.forEach(function (blog) {
 			blog['publish-type'] = $scope.display.publishType;
 			blog.save();
 		})
