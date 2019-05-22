@@ -187,11 +187,8 @@ export class Blogs {
     refreshFilters() {
         this.filtered = this.all.filter(
             w => {
-                if (Filters.shared) {
-                    return w.author.userId != model.me.userId;
-                } else {
-                    return w.author.userId == model.me.userId;
-                }
+                return Filters.shared && w.author.userId != model.me.userId
+                    || Filters.mine   && w.author.userId == model.me.userId;
             }
         );
     }

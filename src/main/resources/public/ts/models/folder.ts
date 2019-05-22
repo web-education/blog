@@ -382,12 +382,12 @@ export class Filters {
     }
     static get mine(): boolean { return Filters._mine; }
     static set mine(a) {
-        Filters.reset();
+        // Filters.reset();
         Filters._mine = a;
     }
     static get shared(): boolean { return Filters._shared; }
     static set shared(a) {
-        Filters.reset();
+        // Filters.reset();
         Filters._shared = a;
     }
 }
