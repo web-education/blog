@@ -34,7 +34,7 @@ public class FoldersController extends MongoDbControllerHelper {
 
 	@Post("folder")
 	@ApiDoc("Add folder.")
-	@SecuredAction("blog.folders.add")
+	@SecuredAction("blog.createFolder")
 	public void add(HttpServerRequest request) {
 		create(request);
 	}

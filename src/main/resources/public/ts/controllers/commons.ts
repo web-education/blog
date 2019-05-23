@@ -2,7 +2,8 @@ export type BlogModel = {
 	_id:string;
 	posts: PostsModel
 	myRights:any;
-    modified:{$date:number}
+	modified:{$date:number}
+    'publish-type': "RESTRAINT" | "IMMEDIATE";
     toJSON():any;
 	open(success:()=>void, err?:()=>void): void;
 }

@@ -34,6 +34,11 @@ class HierarchicalFolder extends BaseFolder {
         this.ressourceIds = [];
     }
 
+    deselectAll(){
+        this.children.deselectAll();
+        this.ressources.deselectAll();
+    }
+
     get displayName(): string {
         if (this.name === "root") {
             return idiom.translate("projects.root");
@@ -46,8 +51,8 @@ class HierarchicalFolder extends BaseFolder {
         if (shortenedName === "root") {
             shortenedName = idiom.translate("projects.root");
         }
-        if (shortenedName.length > 38) {
-            shortenedName = shortenedName.substr(0, 35) + '...';
+        if (shortenedName.length > 35) {
+            shortenedName = shortenedName.substr(0, 33) + '...';
         }
         return shortenedName;
     }
@@ -146,6 +151,20 @@ class HierarchicalFolder extends BaseFolder {
             }
         }
         return undefined;
+    }
+
+    hasAttachedRessource(id: string): boolean {
+        return this.ressourceIds.filter(r => r == id).length > 0;
+    }
+
+    attachRessource(id: string) {
+        //add uniq
+        this.detachRessource(id);
+        this.ressourceIds.push(id);
+    }
+
+    detachRessource(id: string) {
+        this.ressourceIds = this.ressourceIds.filter(r => r != id);
     }
 }
 
@@ -252,6 +271,13 @@ export class Root extends HierarchicalFolder {
         this.children.all = folders.filter(
             f => (f.parentId === this.name || !f.parentId) && !f.trashed
         );
+        //sort before affect
+        this.children.all.sort((a,b)=>{
+            const nameA = a.name || "";
+            const nameB = b.name || "";
+            return nameA.localeCompare(nameB);
+        })
+        //
         this.children.all.forEach((c) => {
             c.children.all = folders.filter(f => f.parentId === c._id && !f.trashed);
         });
@@ -311,7 +337,7 @@ export class Folders {
     private static _folderProvider: Provider<Folder>;
     static get ressourceProvider() {
         if (Folders._ressourceProvider == null) {
-            Folders._ressourceProvider = new Provider<Blog>('/blog/list/all?excludePost=true', Blog);
+            Folders._ressourceProvider = new Provider<Blog>('/blog/list/all', Blog);
         }
         return Folders._ressourceProvider;
     }
@@ -333,7 +359,11 @@ export class Folders {
             //ressources = await this.publicRessourceProvider.data();
             ressources = await this.ressourceProvider.data();
         }
-
+        //sort by real last modified
+        ressources = ressources.sort((a,b)=>{
+            return b.realLastModified - a.realLastModified;
+        })
+        //
         return ressources;
     }
 
@@ -359,14 +389,12 @@ export class Folders {
         }
     }
 
-    static async toRoot(ressource: Blog) {
+    static async findFoldersContaining(ressource: Blog): Promise<Folder[]> {
         let folders = await this.folders();
-        folders.forEach((f) => {
-            let index = f.ressourceIds.indexOf(ressource._id);
-            if (index !== -1) {
-                f.ressourceIds.splice(index, 1);
-            }
+        const founded = folders.filter((f) => {
+            return f.hasAttachedRessource(ressource._id);
         });
+        return founded;
     }
 
     static root: Root = new Root();
@@ -376,9 +404,9 @@ export class Folders {
 export class Filters {
     private static _mine: boolean;
     private static _shared: boolean;
-    private static reset() {
-        Filters._mine = false;
-        Filters._shared = false;
+    public static reset() {
+        Filters._mine = true;
+        Filters._shared = true;
     }
     static get mine(): boolean { return Filters._mine; }
     static set mine(a) {
@@ -391,3 +419,4 @@ export class Filters {
         Filters._shared = a;
     }
 }
+Filters.reset();

@@ -1,5 +1,5 @@
 import { ng, template, idiom, notify } from 'entcore';
-import { Folders, Folder, Blog, Filters, BaseFolder, Root } from '../models';
+import { Folders, Folder, Blog, Filters, BaseFolder, Root, Trash } from '../models';
 import { _ } from 'entcore';
 import { BlogModel } from './commons';
 
@@ -37,14 +37,18 @@ export interface LibraryControllerScope {
     removeSelection(): void;
     duplicateBlogs(): void;
     createBlogView(): void;
-    viewBlog(blog: Blog): void;
+    viewBlog(blog: Blog, ev?: Event): void;
     openFolder(folder: Folder): void;
     selectionContains(folder: Folder): boolean;
     dropTo(targetItem: string | Folder, $originalEvent): void;
     removeBlog(): void;
+    isTrashFolder():boolean
     //
     $apply: any
-    display: any
+    display: {
+        publishType?: 'IMMEDIATE'|'RESTRAINT'
+        confirmRemoveBlog?:boolean
+    }
 }
 export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $location) {
     $scope.displayLib = {
@@ -73,6 +77,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     template.open('library/publish', 'library/publish');
     template.open('library/properties', 'library/properties');
     template.open('library/move', 'library/move');
+	template.open('library/share', "library/share");
 
     BaseFolder.eventer.on('refresh', () => $scope.$apply());
     Blog.eventer.on('save', () => $scope.$apply());
@@ -84,13 +89,19 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
 
         $scope.$apply();
     });
-
+    //=== Private methods
+    const resetSelection=()=>{
+        $scope.currentFolder.deselectAll();
+    }
+    //=== Public methods
     $scope.searchBlog = (item: Blog) => {
         return !$scope.displayLib.searchBlogs || idiom.removeAccents(item.title.toLowerCase()).indexOf(
             idiom.removeAccents($scope.displayLib.searchBlogs).toLowerCase()
         ) !== -1;
     };
-
+    $scope.isTrashFolder = ()=>{
+        return $scope.currentFolder instanceof Trash;
+    }
     $scope.searchFolder = (item: Folder) => {
         return !$scope.displayLib.searchBlogs || idiom.removeAccents(item.name.toLowerCase()).indexOf(
             idiom.removeAccents($scope.displayLib.searchBlogs).toLowerCase()
@@ -106,9 +117,16 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.lightbox('properties');
         //adapt old model to new
         const blog = Folders.root.findRessource($scope.blog._id) || new Blog();
+        const isNew = !blog._id;
         blog.fromJSON($scope.blog.toJSON() as any);
         await blog.save();
+        if(isNew && $scope.currentFolder && $scope.currentFolder._id){
+           await blog.moveTo($scope.currentFolder as Folder);
+        }
         $location.path("/list-blogs");
+        if($scope.currentFolder){
+            await $scope.currentFolder.sync();
+        }
         $scope.$apply();
     }
 
@@ -126,6 +144,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     };
 
     $scope.openFolder = (folder) => {
+        resetSelection();
         template.open('library/folder-content', 'library/folder-content');
         $scope.currentFolder = folder;
         $scope.currentFolder.sync();
@@ -154,22 +173,27 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     }
 
     $scope.openTrash = () => {
+        resetSelection();
         template.open('library/folder-content', 'library/trash');
         $scope.currentFolder = Folders.trash;
         Folders.trash.sync();
     };
 
     $scope.openRoot = () => {
+        resetSelection();
         template.open('library/folder-content', 'library/folder-content');
         $scope.currentFolder = Folders.root;
         Folders.root.sync();
     };
 
-    $scope.viewBlog = (blog: Blog) => {
+    $scope.viewBlog = (blog: Blog, ev) => {
+        resetSelection();
+        ev && ev.stopPropagation();
         $location.path('/view/' + blog._id);
     };
 
     $scope.open = (item: Blog | Folder) => {
+        resetSelection();
         if (item instanceof Blog) {
             $scope.viewBlog(item);
         }

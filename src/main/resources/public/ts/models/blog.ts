@@ -2,7 +2,11 @@ import { Selectable, Model, Selection, Eventer, Mix } from 'entcore-toolkit';
 import http from "axios";
 import { Shareable, Rights, notify, moment, model } from 'entcore';
 import { Folders, Folder, Filters } from './folder';
-type BlogData = { _id: string, author: { userId: string, username: string }, title: string, thumbnail: string };
+type MongoDate = {
+    $date: number
+};
+type PostData = { _id: string, created: MongoDate, modified: MongoDate, firstPublishDate: MongoDate, title: string }
+type BlogData = { _id: string, author: { userId: string, username: string }, title: string, thumbnail: string, created: MongoDate, modified: MongoDate };
 export class Blog extends Model<Blog> implements Selectable, Shareable {
     static eventer = new Eventer();
     _id: string;
@@ -19,6 +23,7 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
     shortenedTitle: string;
     visibility: 'PUBLIC' | 'PRIVATE';
     icon: string;
+    fetchPosts: Array<PostData>
     modified: {
         $date: number
     };
@@ -26,6 +31,10 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         $date: number
     };
     author: { userId: string, username: string }
+    realLastModified: number;
+    get realLastModifiedFormat() {
+        return moment(this.realLastModified).format('DD/MM/YYYY');
+    }
     get lastModified(): string {
         return moment(this.modified.$date).format('DD/MM/YYYY');
     }
@@ -45,10 +54,19 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
             this._id = data._id;
             this.owner = data.author as any;
             this.shortenedTitle = data.title || '';
-            if (this.shortenedTitle.length > 40) {
-                this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
+            if (this.shortenedTitle.length > 35) {
+                this.shortenedTitle = this.shortenedTitle.substr(0, 33) + '...';
             }
             this.icon = data.thumbnail ? data.thumbnail + '?thumbnail=290x290' : '';
+            this.realLastModified = data.modified ? data.modified.$date :
+                data.created ? data.created.$date : 0;
+            if (this.fetchPosts) {
+                this.fetchPosts.forEach(p => {
+                    if (p.modified && this.realLastModified < p.modified.$date) {
+                        this.realLastModified = p.modified.$date;
+                    }
+                })
+            }
         }
         this.rights.fromBehaviours();
     }
@@ -95,10 +113,16 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         Folders.trash.sync();
     }
     async moveTo(target: Folder | string) {
-        await Folders.toRoot(this);
+        const origins = await Folders.findFoldersContaining(this);
+        const promises = origins.map(async origin => {
+            origin.detachRessource(this._id);
+            await origin.save();
+        });
+        await Promise.all(promises);
         if (target instanceof Folder && target._id) {
-            target.ressourceIds.push(this._id);
-            await target.sync();
+            target.attachRessource(this._id);
+            await target.save();
+            await Folders.root.sync();
         }
         else {
             await Folders.root.sync();
@@ -106,7 +130,6 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
                 await this.toTrash();
             }
         }
-        await this.save();
     }
     copy(): Blog {
         let data = JSON.parse(JSON.stringify(this));
@@ -188,7 +211,7 @@ export class Blogs {
         this.filtered = this.all.filter(
             w => {
                 return Filters.shared && w.author.userId != model.me.userId
-                    || Filters.mine   && w.author.userId == model.me.userId;
+                    || Filters.mine && w.author.userId == model.me.userId;
             }
         );
     }
