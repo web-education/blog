@@ -1,10 +1,13 @@
 <div class="row">
 	<side-panel class="zero-mobile">
 		<nav class="vertical">
-			<h2><i18n>blog.list.title</i18n></h2>
+			<h2>
+				<i18n>blog.list.title</i18n>
+			</h2>
 			<ul>
 				<li ng-repeat="currBlog in blogs.all">
-					<a ng-class="{'selected': currBlog._id === blog._id}" ng-href="#/view/[[currBlog._id]]">[[currBlog.title]]</a>
+					<a ng-class="{'selected': currBlog._id === blog._id}"
+						ng-href="#/view/[[currBlog._id]]">[[currBlog.title]]</a>
 				</li>
 			</ul>
 		</nav>
@@ -12,19 +15,21 @@
 	<app-title>
 		<h1>
 			<i class="blog"></i>
-			<span ng-click="redirect('/list-blogs')"><i18n>blog.title</i18n></span> / <span subtitle ng-click="redirect('/view/' + blog._id)">[[blog.title]]</span>
+			<span ng-click="redirect('/list-blogs')">
+				<i18n>blog.title</i18n>
+			</span> / <span subtitle ng-click="redirect('/view/' + blog._id)">[[blog.title]]</span>
 		</h1>
 	</app-title>
 </div>
 
 <lightbox show="display.postRead" on-close="display.postRead = false;">
 	<div class="spacer-medium"></div>
-    <article ng-if="!display.postNotFound" class="row">
-        <container template="read-post-modal" class="hash-magnet row"></container>
+	<article ng-if="!display.postNotFound" class="row">
+		<container template="read-post-modal" class="hash-magnet row"></container>
 	</article>
-    <div ng-if="display.postNotFound" class="row">
-        <container template="e404"></container>
-    </div>
+	<div ng-if="display.postNotFound" class="row">
+		<container template="e404"></container>
+	</div>
 </lightbox>
 
 <div class="row rigid-grid">
@@ -37,14 +42,15 @@
 				<div class="illustration">
 					<img skin-src="[[blog.icon]]" />
 				</div>
-				<resource-right name="share" resource="blog" >
-					<check-tool ng-model="blog.selected"></check-tool>
+				<resource-right name="share" resource="blog">
+					<check-tool ng-model="blog.selected" ng-change="onBlog()"></check-tool>
 				</resource-right>
 
 			</div>
 
 			<div class="row centered-text block-container">
-                <i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
+				<i18n>blog.by</i18n> <a
+					ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
 			</div>
 			<hr class="row zero-mobile" />
 			<div class="row action-row zero-mobile centered-text">
@@ -52,34 +58,44 @@
 					<i18n>blog.print</i18n>
 				</a>
 			</div>
-			
+
 			<lightbox show="display.showPrintComments" on-close="display.showPrintComments = false">
-				<h2><i18n>print.option</i18n></h2>
-				<p ng-if="!display.printPost"><i18n>print.include.comments</i18n></p>
-				<p ng-if="display.printPost"><i18n>post.print.include.comments</i18n></p>
+				<h2>
+					<i18n>print.option</i18n>
+				</h2>
+				<p ng-if="!display.printPost">
+					<i18n>print.include.comments</i18n>
+				</p>
+				<p ng-if="display.printPost">
+					<i18n>post.print.include.comments</i18n>
+				</p>
 				<div class="row">
 					<button ng-if="!display.printPost" ng-click="print(true)" class="right-magnet">
 						<i18n>yes</i18n>
 					</button>
-					<button ng-if="!display.printPost" type="button" ng-click="print(false)" class="right-magnet cancel">
+					<button ng-if="!display.printPost" type="button" ng-click="print(false)"
+						class="right-magnet cancel">
 						<i18n>no</i18n>
 					</button>
 					<button ng-if="display.printPost" ng-click="printPost(undefined,true)" class="right-magnet">
 						<i18n>yes</i18n>
 					</button>
-					<button ng-if="display.printPost" type="button" ng-click="printPost(undefined,false)" class="right-magnet cancel">
+					<button ng-if="display.printPost" type="button" ng-click="printPost(undefined,false)"
+						class="right-magnet cancel">
 						<i18n>no</i18n>
 					</button>
 				</div>
 			</lightbox>
-			
+
 		</nav>
 
-		<h2 class="float-title zero-mobile"><i18n>blog.posts.list</i18n> ([[blog.posts.length()]]/[[display.countAll]])</h2>
+		<h2 class="float-title zero-mobile">
+			<i18n>blog.posts.list</i18n> ([[blog.posts.length()]]/[[display.countAll]])
+		</h2>
 		<floating-navigation tooltip="blog.posts.list" class="zero-mobile" ng-if="blog.posts.length() != 0">
 			<ul>
 				<li ng-repeat="post in blog.posts.all" ng-init="$first ? openFirstPost(blog, post) : ''">
-					<a ng-class="{'selected': post._id === currPost}"  ng-click="openClosePost(blog, post)" >
+					<a ng-class="{'selected': post._id === currPost}" ng-click="openClosePost(blog, post)">
 						[[post.title]]
 					</a>
 				</li>
@@ -90,7 +106,8 @@
 	<div class="margin-three option-row six-mobile">
 
 		<div class="content-line overflow-hd">
-			<a ng-href="#/new-article/[[blog._id]]" class="button cell right-magnet" authorize="createPost" resource="blog">
+			<a ng-href="#/new-article/[[blog._id]]" class="button cell right-magnet" authorize="createPost"
+				resource="blog">
 				<i18n>blog.create.post</i18n>
 			</a>
 		</div>
@@ -112,7 +129,9 @@
 
 			<div class="search-pagination flex-row justify-start mobile-justify-center vertical-spacing-twice">
 				<div class="row twelve vertical-spacing">
-					<input type="text" class="twelve" ng-model="display.postSearch" i18n-placeholder="blog.search.internal" ng-keyup="$event.keyCode == 13 ? launchSearchingPost(display.postSearch, $event) : resetSearching()"  />
+					<input type="text" class="twelve" ng-model="display.postSearch"
+						i18n-placeholder="blog.search.internal"
+						ng-keyup="$event.keyCode == 13 ? launchSearchingPost(display.postSearch, $event) : resetSearching()" />
 					<i class="search align-center justify-center" ng-click="searchingPost();"></i>
 				</div>
 			</div>
@@ -120,25 +139,29 @@
 			<div class="row" ng-if="!isContainerEmpty('create-post')">
 				<container template="create-post"></container>
 			</div>
-			<div class="hash-magnet twelve cell" ng-repeat="post in blog.posts.all" id="/detail/[[blog._id]]/[[post._id]]" bottom-scroll="loadPosts()">
+			<div class="hash-magnet twelve cell" ng-repeat="post in blog.posts.all"
+				id="/detail/[[blog._id]]/[[post._id]]" bottom-scroll="loadPosts()">
 				<article ng-if="post.editing">
 					<container template="edit-post"></container>
 				</article>
 
-				<article class="twelve cell" ng-if="!post.editing" ng-class="{ slided: post.slided, unpublished: (post.state !== 'PUBLISHED') }">
+				<article class="twelve cell" ng-if="!post.editing"
+					ng-class="{ slided: post.slided, unpublished: (post.state !== 'PUBLISHED') }">
 					<container template="read-post"></container>
 				</article>
 
 			</div>
-			<div class="row" ng-if="blog.posts.length() === 0 && !display.searching && !display.postSearch && display.filters.all">
+			<div class="row"
+				ng-if="blog.posts.length() === 0 && !display.searching && !display.postSearch && display.filters.all">
 				<article>
-                    <i18n>blog.empty</i18n>
+					<i18n>blog.empty</i18n>
 					<br /><a authorize="createPost" resource="blog" ng-href="#/new-article/[[blog._id]]">
-                    <i18n>blog.starthere</i18n>
+						<i18n>blog.starthere</i18n>
 					</a>
 				</article>
 			</div>
-			<div class="row" ng-if="blog.posts.length() === 0 && !display.searching && (display.postSearch || !display.filters.all)">
+			<div class="row"
+				ng-if="blog.posts.length() === 0 && !display.searching && (display.postSearch || !display.filters.all)">
 				<article>
 					<i18n>post.search.internal.empty</i18n>
 				</article>
@@ -147,16 +170,19 @@
 
 	</div>
 </div>
-
-<lightbox show="display.showShare" on-close="display.showShare = false">
-	<container template="share"></container>
+<!--LIGHTBOXES-->
+<lightbox ng-if="display.showShare" show="display.showShare" on-close="display.showShare = false">
+	<container template="blog/share"></container>
 </lightbox>
-
 <lightbox show="display.confirmRemoveBlog" on-close="display.confirmRemoveBlog = false">
-	<h2><i18n>remove</i18n></h2>
-	<p><i18n>confirm.remove.blog</i18n></p>
+	<h2>
+		<i18n>remove</i18n>
+	</h2>
+	<p>
+		<i18n>confirm.remove.blog</i18n>
+	</p>
 	<div class="row">
-		<button ng-click="removeBlog(); display.confirmRemoveBlog = false" class="right-magnet">
+		<button ng-click="trashOneBlog(blog); display.confirmRemoveBlog = false" class="right-magnet">
 			<i18n>remove</i18n>
 		</button>
 		<button type="button" ng-click="display.confirmRemoveBlog = false" class="right-magnet cancel">
@@ -164,3 +190,25 @@
 		</button>
 	</div>
 </lightbox>
+<lightbox ng-if="display.showMove" show="display.showMove" on-close="display.showMove = false">
+	<container template="blog/move"></container>
+</lightbox>
+<!--TOASTER-->
+<div class="toggle-buttons" ng-class="{ hide: !blog.selected }">
+	<div class="row toggle">
+		<a class="button" ng-href="#/edit/[[blog._id]]" authorize="editBlog" resource="blog">
+			<i18n>properties</i18n>
+		</a>
+		<button ng-click="display.showShare = true" authorize="share" resource="blog">
+			<i18n>share</i18n>
+		</button>
+		<div style="display: none">
+			<button ng-click="display.showMove = true" workflow="blog.createFolder">
+				<i18n>move</i18n>
+			</button>
+		</div>
+		<button ng-click="trashOneBlog(blog)" authorize="removeBlog" resource="blog">
+			<i18n>remove</i18n>
+		</button>
+	</div>
+</div>

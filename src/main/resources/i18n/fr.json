@@ -126,6 +126,7 @@
   "confirm.remove.elements": "Voulez-vous vraiment supprimer les élèments sélectionnés ?",
   "blog.selection.trashed": "Les élements ont été déplacés vers la corbeille",
   "blog.selection.removed": "Les élements ont été supprimés",
+  "blog.selection.trashed.one": "Le blog a été déplacé vers la corbeille",
   "tooltip.shared": "Blog partagé",
   "tooltip.manager": "Gestionnaire",
   "tooltip.update": "Contributeur",

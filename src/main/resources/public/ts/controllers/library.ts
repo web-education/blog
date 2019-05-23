@@ -44,7 +44,10 @@ export interface LibraryControllerScope {
     removeBlog(): void;
     //
     $apply: any
-    display: any
+    display: {
+        publishType?: 'IMMEDIATE'|'RESTRAINT'
+        confirmRemoveBlog?:boolean
+    }
 }
 export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $location) {
     $scope.displayLib = {
@@ -73,6 +76,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     template.open('library/publish', 'library/publish');
     template.open('library/properties', 'library/properties');
     template.open('library/move', 'library/move');
+	template.open('library/share', "library/share");
 
     BaseFolder.eventer.on('refresh', () => $scope.$apply());
     Blog.eventer.on('save', () => $scope.$apply());

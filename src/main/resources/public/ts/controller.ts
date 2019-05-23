@@ -1,12 +1,13 @@
 import { Behaviours, routes, template, idiom, http, notify, ng, angular } from 'entcore'
 import { LibraryDelegate, LibraryControllerScope } from './controllers/library';
-import { PostModel,BlogModel,CommentModel,ComentsModel,PostsModel,State } from './controllers/commons';
+import { PostModel, BlogModel, CommentModel, ComentsModel, PostsModel, State } from './controllers/commons';
+import { Blog, Folders } from './models';
 //=== Types
 
-interface BlogControllerScope extends LibraryControllerScope{
+interface BlogControllerScope extends LibraryControllerScope {
 	template: typeof template;
 	me: any;
-	postToPrint:PostModel;
+	postToPrint: PostModel;
 	lang: typeof idiom;
 	blog: BlogModel
 	blogs: BlogModel[]
@@ -14,36 +15,61 @@ interface BlogControllerScope extends LibraryControllerScope{
 	post: PostModel
 	currPost: string;
 	showComments: boolean
-	maxResults:number;
-	isCloseConfirmLoaded():boolean;
-	printPost(post:PostModel, printComments:boolean):void;
-	print(printComments:boolean):void;
-	orderBlogs(blog:BlogModel):void;
-	updateComment(comment:Comment, post:PostModel):void;
-	postComment(comment:Comment, post:PostModel):void;
-	addResults():void;
-	loadPosts():void
-	removePost(post:PostModel):void
-	updatePublishType():void;
-	publishPost(post:PostModel):void
-	republish(blog:BlogModel, post:PostModel):void
-	saveModifications(post:PostModel):void
-	saveOrCreates(post:PostModel):void
-	redirect(url:string):void
-	resetSearching():void;
+	maxResults: number;
+	display: {
+		showMove?: boolean
+		showPrintComments?: boolean
+		printPost?: boolean
+		searching?: boolean
+		postNotFound?: boolean
+		postRead?: boolean
+		publishType?: 'IMMEDIATE' | 'RESTRAINT'
+		confirmRemoveBlog?: boolean
+		filters?: {
+			submitted?: boolean
+			draft?: boolean
+			published?: boolean
+			all?: boolean
+		}
+		postSearch?: string
+		countPublished?: number
+		countDraft?: number
+		countSubmitted?: number
+		countAll?: number
+	}
+	isCloseConfirmLoaded(): boolean;
+	printPost(post: PostModel, printComments: boolean): void;
+	print(printComments: boolean): void;
+	orderBlogs(blog: BlogModel): void;
+	updateComment(comment: Comment, post: PostModel): void;
+	postComment(comment: Comment, post: PostModel): void;
+	addResults(): void;
+	loadPosts(): void
+	removePost(post: PostModel): void
+	updatePublishType(): void;
+	publishPost(post: PostModel): void
+	republish(blog: BlogModel, post: PostModel): void
+	saveModifications(post: PostModel): void
+	saveOrCreates(post: PostModel): void
+	redirect(url: string): void
+	resetSearching(): void;
 	searchingPost(): void;
 	cancel(): void;
 	switchAll(): void;
-	checkAll():void;
-	count(state:State):number;
-	saveDraft():void;
-	savePublishedPost():void;
-	cancelEditing(post:PostModel&{data:PostModel}):void
-	showEditPost(blog: BlogModel, post:PostModel):void
-	openFirstPost(blog: BlogModel, post:PostModel):void
-	openClosePost(blog: BlogModel, post:PostModel):void
-	launchSearchingPost(search:string, event?:any): void;
-	isContainerEmpty(name:string):boolean
+	checkAll(): void;
+	count(state: State): number;
+	saveDraft(): void;
+	savePublishedPost(): void;
+	cancelEditing(post: PostModel & { data: PostModel }): void
+	showEditPost(blog: BlogModel, post: PostModel): void
+	openFirstPost(blog: BlogModel, post: PostModel): void
+	openClosePost(blog: BlogModel, post: PostModel): void
+	launchSearchingPost(search: string, event?: any): void;
+	isContainerEmpty(name: string): boolean
+	//blog view
+	trashOneBlog(blog: BlogModel): void;
+	moveOneBlog(blog: BlogModel): void;
+	updateOnePublishType(blog: BlogModel): void;
 }
 //=== Utils
 function safeApply(that) {
@@ -58,13 +84,14 @@ function safeApply(that) {
 	});
 }
 //=== Controller
-export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope:BlogControllerScope, route, model, $location, $rootScope) => {
-	LibraryDelegate($scope,$rootScope, $location)
+export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope: BlogControllerScope, route, model, $location, $rootScope) => {
+	LibraryDelegate($scope, $rootScope, $location)
 	$scope.template = template;
 	template.open('filters', 'filters');
 	template.open('edit-post', 'edit-post');
 	template.open('read-post', 'read-post');
-	template.open('share', "share");
+	template.open('blog/share', "blog/share");
+	template.open('blog/move', "blog/move");
 
 	$scope.me = model.me;
 	$scope.blogs = model.blogs;
@@ -213,7 +240,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			};
 		},
 		print: function (params) {
-			let data = { 
+			let data = {
 				_id: params.blogId,
 			}
 			let postId;
@@ -281,7 +308,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		},
 		editBlog: function (params) {
 			$scope.blog = model.blogs.findWhere({ _id: params.blogId });
-			const callback = ()=>{
+			const callback = () => {
 				if ($scope.blog) {
 					template.open('main', 'edit-blog');
 				}
@@ -290,14 +317,14 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 					template.open('main', 'edit-blog');
 				}
 			}
-			if(params.blogId=="new"){
+			if (params.blogId == "new") {
 				callback();
-			}else if($scope.blog){
+			} else if ($scope.blog) {
 				callback();
-			}else{
+			} else {
 				const data = { _id: params.blogId };
 				$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(data);
-				$scope.blog.open(()=>{
+				$scope.blog.open(() => {
 					callback();
 				})
 			}
@@ -327,7 +354,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		});
 	}
 
-	$scope.isContainerEmpty = (name)=>{
+	$scope.isContainerEmpty = (name) => {
 		return template.isEmpty(name);
 	}
 	$scope.resetSearching = function () {
@@ -509,7 +536,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 
 	$scope.republish = function (blog, post) {
 		post.republish(function () {
-			blog.posts.syncAllPosts(function () {});
+			blog.posts.syncAllPosts(function () { });
 		});
 	}
 
@@ -597,6 +624,39 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.isCloseConfirmLoaded = function () {
 		return angular.element('share-panel .share').scope()
 			&& angular.element('share-panel .share').scope().display.showCloseConfirmation;
+	}
+	//
+	$scope.trashOneBlog = async (blog: BlogModel) => {
+		let _blog = Folders.root.findRessource(blog._id);
+		if (!_blog) {
+			_blog = new Blog({ _id: blog._id } as any);
+			await _blog.sync();
+		}
+		await _blog.toTrash();
+		$scope.display.confirmRemoveBlog = false;
+		if ($scope.currentFolder)
+			await $scope.currentFolder.sync();
+		await Folders.trash.sync();
+		$scope.$apply();
+		notify.info('blog.selection.trashed.one');
+	}
+	$scope.moveOneBlog = async (blog: BlogModel) => {
+		const _blog = Folders.root.findRessource(blog._id) || new Blog({ _id: blog._id } as any);
+		await _blog.moveTo($scope.displayLib.targetFolder);
+		$scope.display.showMove = false;
+		Folders.root.sync();
+		$scope.$apply();
+	}
+	$scope.updateOnePublishType = async (blog: BlogModel) => {
+		let _blog = Folders.root.findRessource(blog._id);
+		if (!_blog) {
+			_blog = new Blog({ _id: blog._id } as any);
+			await _blog.sync();
+		}
+		_blog["publish-type"] = $scope.display.publishType;
+		await _blog.update();
+		Folders.root.sync();
+		$scope.$apply();
 	}
 
 }]);
