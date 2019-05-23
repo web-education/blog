@@ -271,6 +271,13 @@ export class Root extends HierarchicalFolder {
         this.children.all = folders.filter(
             f => (f.parentId === this.name || !f.parentId) && !f.trashed
         );
+        //sort before affect
+        this.children.all.sort((a,b)=>{
+            const nameA = a.name || "";
+            const nameB = b.name || "";
+            return nameA.localeCompare(nameB);
+        })
+        //
         this.children.all.forEach((c) => {
             c.children.all = folders.filter(f => f.parentId === c._id && !f.trashed);
         });
