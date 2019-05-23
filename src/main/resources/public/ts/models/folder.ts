@@ -34,6 +34,11 @@ class HierarchicalFolder extends BaseFolder {
         this.ressourceIds = [];
     }
 
+    deselectAll(){
+        this.children.deselectAll();
+        this.ressources.deselectAll();
+    }
+
     get displayName(): string {
         if (this.name === "root") {
             return idiom.translate("projects.root");

@@ -84,7 +84,11 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
 
         $scope.$apply();
     });
-
+    //=== Private methods
+    const resetSelection=()=>{
+        $scope.currentFolder.deselectAll();
+    }
+    //=== Public methods
     $scope.searchBlog = (item: Blog) => {
         return !$scope.displayLib.searchBlogs || idiom.removeAccents(item.title.toLowerCase()).indexOf(
             idiom.removeAccents($scope.displayLib.searchBlogs).toLowerCase()
@@ -126,6 +130,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     };
 
     $scope.openFolder = (folder) => {
+        resetSelection();
         template.open('library/folder-content', 'library/folder-content');
         $scope.currentFolder = folder;
         $scope.currentFolder.sync();
@@ -154,23 +159,27 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     }
 
     $scope.openTrash = () => {
+        resetSelection();
         template.open('library/folder-content', 'library/trash');
         $scope.currentFolder = Folders.trash;
         Folders.trash.sync();
     };
 
     $scope.openRoot = () => {
+        resetSelection();
         template.open('library/folder-content', 'library/folder-content');
         $scope.currentFolder = Folders.root;
         Folders.root.sync();
     };
 
     $scope.viewBlog = (blog: Blog, ev) => {
+        resetSelection();
         ev && ev.stopPropagation();
         $location.path('/view/' + blog._id);
     };
 
     $scope.open = (item: Blog | Folder) => {
+        resetSelection();
         if (item instanceof Blog) {
             $scope.viewBlog(item);
         }
