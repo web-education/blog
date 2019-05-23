@@ -11,12 +11,12 @@
         <div ng-if="currentFolder.selectionIsRessources">
             <!-- Exclusive to blogs-->
             <resource-right name="share" resource="currentFolder.selection">
-                <button class="zero-mobile" ng-click="shareBlog()">
+                <button ng-click="shareBlog()">
                     <i18n>share</i18n>
                 </button>
             </resource-right>
             <resource-right name="removeBlog" resource="currentFolder.selection">
-                <button class="zero-mobile" ng-click="editBlogProperties()" ng-if="currentFolder.selection.length === 1">
+                <button ng-click="editBlogProperties()" ng-if="currentFolder.selection.length === 1">
                     <i18n>properties</i18n>
                 </button>
             </resource-right>
