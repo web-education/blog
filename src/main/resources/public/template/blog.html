@@ -117,7 +117,7 @@
 				</div>
 			</div>
 
-			<div class="row">
+			<div class="row" ng-if="!isContainerEmpty('create-post')">
 				<container template="create-post"></container>
 			</div>
 			<div class="hash-magnet twelve cell" ng-repeat="post in blog.posts.all" id="/detail/[[blog._id]]/[[post._id]]" bottom-scroll="loadPosts()">

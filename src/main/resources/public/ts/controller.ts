@@ -43,6 +43,7 @@ interface BlogControllerScope extends LibraryControllerScope{
 	openFirstPost(blog: BlogModel, post:PostModel):void
 	openClosePost(blog: BlogModel, post:PostModel):void
 	launchSearchingPost(search:string, event?:any): void;
+	isContainerEmpty(name:string):boolean
 }
 //=== Utils
 function safeApply(that) {
@@ -326,6 +327,9 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		});
 	}
 
+	$scope.isContainerEmpty = (name)=>{
+		return template.isEmpty(name);
+	}
 	$scope.resetSearching = function () {
 		$scope.display.searching = true;
 	};
