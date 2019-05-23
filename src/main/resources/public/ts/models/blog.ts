@@ -95,10 +95,15 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         Folders.trash.sync();
     }
     async moveTo(target: Folder | string) {
-        await Folders.toRoot(this);
+        const origins = await Folders.findFoldersContaining(this);
+        const promises = origins.map(async origin => {
+            origin.detachRessource(this._id);
+            await origin.save();
+        });
+        await Promise.all(promises);
         if (target instanceof Folder && target._id) {
-            target.ressourceIds.push(this._id);
-            await target.sync();
+            target.attachRessource(this._id);
+            await target.save();
         }
         else {
             await Folders.root.sync();
@@ -106,7 +111,6 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
                 await this.toTrash();
             }
         }
-        await this.save();
     }
     copy(): Blog {
         let data = JSON.parse(JSON.stringify(this));
@@ -188,7 +192,7 @@ export class Blogs {
         this.filtered = this.all.filter(
             w => {
                 return Filters.shared && w.author.userId != model.me.userId
-                    || Filters.mine   && w.author.userId == model.me.userId;
+                    || Filters.mine && w.author.userId == model.me.userId;
             }
         );
     }
