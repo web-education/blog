@@ -58,7 +58,7 @@
 				</li>
 			</ul>
 			<a class="classic-link" ng-click="lightbox('newFolder')" workflow="blog.folders.add">
-				<i18n>folder.new</i18n>
+				<i18n>blog.folder.new</i18n>
 			</a>
 		</nav>
 	</section>
@@ -86,7 +86,7 @@
 	<h2>
 		<i18n>rename</i18n>
 	</h2>
-	<input type="text" class="twelve cell" ng-model="currentFolder.selection[0].name" i18n-placeholder="name" />
+	<input type="text" class="twelve cell" ng-model="currentFolder.selection[0].name" i18n-placeholder="blog.folder.placeholder" />
 	<div class="row">
 		<button class="right-magnet" ng-click="currentFolder.selection[0].save(); lightbox('renameFolder')">
 			<i18n>save</i18n>
@@ -120,7 +120,7 @@
 <lightbox show="displayLib.lightbox.newFolder" on-close="lightbox('newFolder')">
 	<form ng-submit="createFolder()">
 		<h2>
-			<i18n>folder.new</i18n>
+			<i18n>blog.folder.new</i18n>
 		</h2>
 		<div class="row">
 			<input type="text" ng-model="folder.name" i18n-placeholder="name" required autofocus class="twelve cell" />

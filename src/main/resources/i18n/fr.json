@@ -111,9 +111,9 @@
   "sniplet.blog.choose": "Choisir un blog existant",
   "sniplet.blog.search":	"Recherchez le blog dans lequel vous postez les articles que vous souhaitez afficher.",
   "sniplet.blog.create":	"Créer le blog",
-  "projects.root": "Mes projets",
-  "folder.new": "Nouveau dossier",
-  "folder.create.new": "Nouveau dossier",
+  "projects.root": "Mes blogs",
+  "blog.folder.new": "Créer un dossier",
+  "blog.folder.create.new": "Créer un dossier",
   "folder.trash": "Corbeille",
   "filters.privateBlogs": "Blogs internes",
   "modified.on": "Modifié le [[blog.lastModified]]",
@@ -125,5 +125,11 @@
   "filters.sharedBlogs": "Les blogs partagés avec moi",
   "confirm.remove.elements": "Voulez-vous vraiment supprimer les élèments sélectionnés ?",
   "blog.selection.trashed": "Les élements ont été déplacés vers la corbeille",
-  "blog.selection.removed": "Les élements ont été supprimés"
+  "blog.selection.removed": "Les élements ont été supprimés",
+  "tooltip.shared": "Blog partagé",
+  "tooltip.manager": "Gestionnaire",
+  "tooltip.update": "Contributeur",
+  "tooltip.read": "Lecteur",
+  "tooltip.public": "Blog public",
+  "blog.folder.placeholder": "Nom du dossier"
 }
