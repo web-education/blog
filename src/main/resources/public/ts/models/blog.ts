@@ -104,6 +104,7 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         if (target instanceof Folder && target._id) {
             target.attachRessource(this._id);
             await target.save();
+            await Folders.root.sync();
         }
         else {
             await Folders.root.sync();

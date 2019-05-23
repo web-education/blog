@@ -1,5 +1,5 @@
 import { ng, template, idiom, notify } from 'entcore';
-import { Folders, Folder, Blog, Filters, BaseFolder, Root } from '../models';
+import { Folders, Folder, Blog, Filters, BaseFolder, Root, Trash } from '../models';
 import { _ } from 'entcore';
 import { BlogModel } from './commons';
 
@@ -42,6 +42,7 @@ export interface LibraryControllerScope {
     selectionContains(folder: Folder): boolean;
     dropTo(targetItem: string | Folder, $originalEvent): void;
     removeBlog(): void;
+    isTrashFolder():boolean
     //
     $apply: any
     display: {
@@ -98,7 +99,9 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             idiom.removeAccents($scope.displayLib.searchBlogs).toLowerCase()
         ) !== -1;
     };
-
+    $scope.isTrashFolder = ()=>{
+        return $scope.currentFolder instanceof Trash;
+    }
     $scope.searchFolder = (item: Folder) => {
         return !$scope.displayLib.searchBlogs || idiom.removeAccents(item.name.toLowerCase()).indexOf(
             idiom.removeAccents($scope.displayLib.searchBlogs).toLowerCase()
@@ -114,9 +117,16 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.lightbox('properties');
         //adapt old model to new
         const blog = Folders.root.findRessource($scope.blog._id) || new Blog();
+        const isNew = !blog._id;
         blog.fromJSON($scope.blog.toJSON() as any);
         await blog.save();
+        if(isNew && $scope.currentFolder && $scope.currentFolder._id){
+           await blog.moveTo($scope.currentFolder as Folder);
+        }
         $location.path("/list-blogs");
+        if($scope.currentFolder){
+            await $scope.currentFolder.sync();
+        }
         $scope.$apply();
     }
 
