@@ -37,7 +37,7 @@ export interface LibraryControllerScope {
     removeSelection(): void;
     duplicateBlogs(): void;
     createBlogView(): void;
-    viewBlog(blog: Blog): void;
+    viewBlog(blog: Blog, ev?: Event): void;
     openFolder(folder: Folder): void;
     selectionContains(folder: Folder): boolean;
     dropTo(targetItem: string | Folder, $originalEvent): void;
@@ -165,7 +165,8 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         Folders.root.sync();
     };
 
-    $scope.viewBlog = (blog: Blog) => {
+    $scope.viewBlog = (blog: Blog, ev) => {
+        ev && ev.stopPropagation();
         $location.path('/view/' + blog._id);
     };
 

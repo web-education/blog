@@ -98,7 +98,7 @@
 	</div>
 </lightbox>
 <!--SHARE LIGHTBOX-->
-<lightbox show="displayLib.showShare" on-close="displayLib.showShare = false">
+<lightbox show="displayLib.showShare" ng-if="displayLib.showShare" on-close="displayLib.showShare = false">
 	<container template="share"></container>
 </lightbox>
 <!--??? LIGHTBOX-->
