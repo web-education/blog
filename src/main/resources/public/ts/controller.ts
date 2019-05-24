@@ -17,6 +17,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	showComments: boolean
 	maxResults: number;
 	display: {
+		showShare?: boolean
 		showMove?: boolean
 		showPrintComments?: boolean
 		printPost?: boolean
@@ -70,7 +71,8 @@ interface BlogControllerScope extends LibraryControllerScope {
 	//blog view
 	trashOneBlog(blog: BlogModel): void;
 	moveOneBlog(blog: BlogModel): void;
-	updateOnePublishType(blog: BlogModel): void;
+	updateOnePublishType(blog: BlogModel | BlogModel[]): void;
+	shareOneBlog(): void;
 }
 //=== Utils
 function safeApply(that) {
@@ -648,10 +650,11 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		Folders.root.sync();
 		$scope.$apply();
 	}
-	$scope.updateOnePublishType = async (blog: BlogModel) => {
-		let _blog = Folders.root.findRessource(blog._id);
+	$scope.updateOnePublishType = async (blog) => {
+		let _first = blog instanceof Array? blog[0] : blog;
+		let _blog = Folders.root.findRessource(_first._id);
 		if (!_blog) {
-			_blog = new Blog({ _id: blog._id } as any);
+			_blog = new Blog({ _id: _first._id } as any);
 			await _blog.sync();
 		}
 		_blog["publish-type"] = $scope.display.publishType;
@@ -668,4 +671,8 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
     }
 
+	$scope.shareOneBlog = function () {
+		$scope.display.showShare = true;
+		$scope.display.publishType = $scope.blog['publish-type'];
+	}
 }]);
