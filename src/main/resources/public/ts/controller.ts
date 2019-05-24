@@ -1,4 +1,4 @@
-import { Behaviours, routes, template, idiom, http, notify, ng, angular } from 'entcore'
+import { Behaviours, routes, template, idiom, http, notify, ng, angular, skin } from 'entcore'
 import { LibraryDelegate, LibraryControllerScope } from './controllers/library';
 import { PostModel, BlogModel, CommentModel, ComentsModel, PostsModel, State } from './controllers/commons';
 import { Blog, Folders } from './models';
@@ -65,7 +65,8 @@ interface BlogControllerScope extends LibraryControllerScope {
 	openFirstPost(blog: BlogModel, post: PostModel): void
 	openClosePost(blog: BlogModel, post: PostModel): void
 	launchSearchingPost(search: string, event?: any): void;
-	isContainerEmpty(name: string): boolean
+	isContainerEmpty(name: string): boolean;
+	replaceAudio(s: string): string;
 	//blog view
 	trashOneBlog(blog: BlogModel): void;
 	moveOneBlog(blog: BlogModel): void;
@@ -658,5 +659,9 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		Folders.root.sync();
 		$scope.$apply();
 	}
+
+	$scope.replaceAudio = function (s: string) {
+        return s && s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>");
+    }
 
 }]);

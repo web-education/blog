@@ -22,7 +22,7 @@
 						<div class="six cell">
 							<h2 class="upper-title">[[post.title]]</h2>
 							<strong class="subtitle">
-								[[translate('blog.by')]] [[post.author.username]] [[formatDate(post.created.fromNow())]]
+								<i18n>blog.by</i18n> [[post.author.username]], <i18n>blog.on.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]
 						<span data-ng-if="isCurrentView('lastPosts')">
 							[[translate('blog.on.blog')]] [[blog.title]]
 						</span>
@@ -31,7 +31,7 @@
 					</div>
 
 					<div class="row">
-						<div class="twelve cell" ng-bind-html="post.content"></div>
+						<div class="twelve cell" ng-bind-html="replaceAudio(post.content)"></div>
 					</div>
 
 					<div ng-if="showComments && post.comments.all.length > 0">
