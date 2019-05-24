@@ -400,9 +400,9 @@ export class Folders {
 export class Filters {
     private static _mine: boolean;
     private static _shared: boolean;
-    private static reset() {
-        Filters._mine = false;
-        Filters._shared = false;
+    public static reset() {
+        Filters._mine = true;
+        Filters._shared = true;
     }
     static get mine(): boolean { return Filters._mine; }
     static set mine(a) {
@@ -415,3 +415,4 @@ export class Filters {
         Filters._shared = a;
     }
 }
+Filters.reset();
