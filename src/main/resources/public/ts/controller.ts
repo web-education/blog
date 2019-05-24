@@ -66,7 +66,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	openClosePost(blog: BlogModel, post: PostModel): void
 	launchSearchingPost(search: string, event?: any): void;
 	isContainerEmpty(name: string): boolean;
-	replaceAudio(s: string): string;
+	replaceAudioVideo(s: string): string;
 	//blog view
 	trashOneBlog(blog: BlogModel): void;
 	moveOneBlog(blog: BlogModel): void;
@@ -660,8 +660,12 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		$scope.$apply();
 	}
 
-	$scope.replaceAudio = function (s: string) {
-        return s && s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>");
+	$scope.replaceAudioVideo = function (s: string) {
+		return s &&
+		// Audio
+		s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>")
+		// Video
+		.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
     }
 
 }]);
