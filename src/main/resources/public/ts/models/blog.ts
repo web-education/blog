@@ -54,8 +54,8 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
             this._id = data._id;
             this.owner = data.author as any;
             this.shortenedTitle = data.title || '';
-            if (this.shortenedTitle.length > 40) {
-                this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
+            if (this.shortenedTitle.length > 35) {
+                this.shortenedTitle = this.shortenedTitle.substr(0, 33) + '...';
             }
             this.icon = data.thumbnail ? data.thumbnail + '?thumbnail=290x290' : '';
             this.realLastModified = data.modified ? data.modified.$date :

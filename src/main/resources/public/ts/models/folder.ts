@@ -51,8 +51,8 @@ class HierarchicalFolder extends BaseFolder {
         if (shortenedName === "root") {
             shortenedName = idiom.translate("projects.root");
         }
-        if (shortenedName.length > 38) {
-            shortenedName = shortenedName.substr(0, 35) + '...';
+        if (shortenedName.length > 35) {
+            shortenedName = shortenedName.substr(0, 33) + '...';
         }
         return shortenedName;
     }
