@@ -2,7 +2,11 @@ import { Selectable, Model, Selection, Eventer, Mix } from 'entcore-toolkit';
 import http from "axios";
 import { Shareable, Rights, notify, moment, model } from 'entcore';
 import { Folders, Folder, Filters } from './folder';
-type BlogData = { _id: string, author: { userId: string, username: string }, title: string, thumbnail: string };
+type MongoDate = {
+    $date: number
+};
+type PostData = { _id: string, created: MongoDate, modified: MongoDate, firstPublishDate: MongoDate, title: string }
+type BlogData = { _id: string, author: { userId: string, username: string }, title: string, thumbnail: string, created: MongoDate, modified: MongoDate };
 export class Blog extends Model<Blog> implements Selectable, Shareable {
     static eventer = new Eventer();
     _id: string;
@@ -19,6 +23,7 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
     shortenedTitle: string;
     visibility: 'PUBLIC' | 'PRIVATE';
     icon: string;
+    fetchPosts: Array<PostData>
     modified: {
         $date: number
     };
@@ -26,6 +31,10 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         $date: number
     };
     author: { userId: string, username: string }
+    realLastModified: number;
+    get realLastModifiedFormat() {
+        return moment(this.realLastModified).format('DD/MM/YYYY');
+    }
     get lastModified(): string {
         return moment(this.modified.$date).format('DD/MM/YYYY');
     }
@@ -49,6 +58,14 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
                 this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
             }
             this.icon = data.thumbnail ? data.thumbnail + '?thumbnail=290x290' : '';
+            this.realLastModified = data.modified.$date;
+            if (this.fetchPosts) {
+                this.fetchPosts.forEach(p => {
+                    if (p.modified && this.realLastModified < p.modified.$date) {
+                        this.realLastModified = p.modified.$date;
+                    }
+                })
+            }
         }
         this.rights.fromBehaviours();
     }

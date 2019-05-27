@@ -337,7 +337,7 @@ export class Folders {
     private static _folderProvider: Provider<Folder>;
     static get ressourceProvider() {
         if (Folders._ressourceProvider == null) {
-            Folders._ressourceProvider = new Provider<Blog>('/blog/list/all?excludePost=true', Blog);
+            Folders._ressourceProvider = new Provider<Blog>('/blog/list/all', Blog);
         }
         return Folders._ressourceProvider;
     }
@@ -359,7 +359,11 @@ export class Folders {
             //ressources = await this.publicRessourceProvider.data();
             ressources = await this.ressourceProvider.data();
         }
-
+        //sort by real last modified
+        ressources = ressources.sort((a,b)=>{
+            return b.realLastModified - a.realLastModified;
+        })
+        //
         return ressources;
     }
 

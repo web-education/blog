@@ -117,6 +117,7 @@
   "folder.trash": "Corbeille",
   "filters.privateBlogs": "Blogs internes",
   "modified.on": "Modifié le [[blog.lastModified]]",
+  "real.modified.on": "Modifié le [[blog.realLastModifiedFormat]]",
   "open": "Ouvrir",
   "rename": "Renommer",
   "move": "Déplacer",
