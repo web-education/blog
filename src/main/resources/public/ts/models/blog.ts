@@ -58,7 +58,8 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
                 this.shortenedTitle = this.shortenedTitle.substr(0, 38) + '...';
             }
             this.icon = data.thumbnail ? data.thumbnail + '?thumbnail=290x290' : '';
-            this.realLastModified = data.modified.$date;
+            this.realLastModified = data.modified ? data.modified.$date :
+                data.created ? data.created.$date : 0;
             if (this.fetchPosts) {
                 this.fetchPosts.forEach(p => {
                     if (p.modified && this.realLastModified < p.modified.$date) {
