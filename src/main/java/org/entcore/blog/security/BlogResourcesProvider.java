@@ -31,6 +31,7 @@ import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.webutils.http.Binding;
 import org.entcore.common.http.filter.ResourcesProvider;
+import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
 
@@ -62,6 +63,9 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			case "removeShare":
 				authorizeBlog(request, user, binding.getServiceMethod(), handler);
 				break;
+			case "getPublicBlogInfos":
+				isPublicBlog(request, user, binding.getServiceMethod(), handler);
+				break;
 			default:
 				handler.handle(false);
 			}
@@ -87,6 +91,9 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			case "unpublish":
 				hasRightOnPost(request, user, handler, serviceMethod.replaceAll("\\.", "-"));
 				break;
+			case "getPublicBlogPosts":
+				isPublicBlog(request, user, binding.getServiceMethod(), handler);
+				break;
 			default:
 				handler.handle(false);
 			}
@@ -101,6 +108,33 @@ public class BlogResourcesProvider implements ResourcesProvider {
 		if (id != null && !id.trim().isEmpty()) {
 			QueryBuilder query = getDefaultQueryBuilder(user, serviceMethod, id);
 			executeCountQuery(request, "blogs", MongoQueryBuilder.build(query), 1, handler);
+		} else {
+			handler.handle(false);
+		}
+	}
+
+	private void isPublicBlog(HttpServerRequest request, UserInfos user, String serviceMethod,
+							  Handler<Boolean> handler) {
+		String slug = request.params().get("slug");
+		if (slug != null && !slug.trim().isEmpty()) {
+			QueryBuilder findBySlug = QueryBuilder.start("slug").is(slug);
+			JsonObject query = MongoQueryBuilder.build(findBySlug);
+			request.pause();
+			mongo.find("blogs", query, new Handler<Message<JsonObject>>() {
+				@Override
+				public void handle(Message<JsonObject> event) {
+					request.resume();
+					JsonArray results = event.body().getJsonArray("results");
+					if ("ok".equals(event.body().getString("status")) && results != null && results.size() == 1) {
+						JsonObject blog = results.getJsonObject(0);
+						String visibility = blog.getString("visibility");
+						boolean isPublic = VisibilityFilter.PUBLIC.name().equals(visibility);
+						handler.handle(isPublic);
+					} else {
+						handler.handle(false);
+					}
+				}
+			});
 		} else {
 			handler.handle(false);
 		}

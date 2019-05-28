@@ -29,6 +29,7 @@ import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import org.entcore.blog.services.BlogService;
 import fr.wseduc.webutils.*;
+import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
@@ -54,7 +55,7 @@ public class DefaultBlogService implements BlogService{
 	}
 
 	@Override
-	public void create(JsonObject blog, UserInfos author, final Handler<Either<String, JsonObject>> result) {
+	public void create(JsonObject blog, UserInfos author, boolean isPublic, final Handler<Either<String, JsonObject>> result) {
 		CommentType commentType = Utils.stringToEnum(blog.getString("comment-type", "").toUpperCase(),
 				CommentType.NONE, CommentType.class);
 		PublishType publishType = Utils.stringToEnum(blog.getString("publish-type", "").toUpperCase(),
@@ -70,6 +71,12 @@ public class DefaultBlogService implements BlogService{
 				.put("comment-type", commentType.name())
 				.put("publish-type", publishType.name())
 				.put("shared", new JsonArray());
+		if (isPublic) {
+		    blog.put("visibility", VisibilityFilter.PUBLIC.name());
+        } else {
+		    blog.put("visibility", VisibilityFilter.OWNER.name());
+		    blog.put("slug","");
+        }
 		JsonObject b = Utils.validAndGet(blog, FIELDS, FIELDS);
 		if (validationError(result, b)) return;
 		mongo.save(BLOG_COLLECTION, b, new Handler<Message<JsonObject>>() {
@@ -147,6 +154,18 @@ public class DefaultBlogService implements BlogService{
 				result.handle(Utils.validResult(event));
 			}
 		});
+	}
+
+	@Override
+	public void getPublic(String slug, final Handler<Either<String, JsonObject>> result) {
+		QueryBuilder query = QueryBuilder.start("slug").is(slug);
+		mongo.findOne(BLOG_COLLECTION, MongoQueryBuilder.build(query),
+				new Handler<Message<JsonObject>>() {
+					@Override
+					public void handle(Message<JsonObject> event) {
+						result.handle(Utils.validResult(event));
+					}
+				});
 	}
 
 	@Override

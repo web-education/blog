@@ -401,4 +401,37 @@ public class PostController extends BaseController {
 		post.publishComment(blogId, commentId, defaultResponseHandler(request));
 	}
 
+	@Get("/pub/posts/:blogId")
+	@SecuredAction(value = "", type = ActionType.RESOURCE)
+	public void getPublicBlogPosts(final HttpServerRequest request) {
+		final String blogId = request.params().get("blogId");
+		if (blogId == null || blogId.trim().isEmpty()) {
+			badRequest(request);
+			return;
+		}
+
+		final Integer page;
+		try {
+			page = (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page")) : null;
+		} catch (NumberFormatException e) {
+			badRequest(request, e.getMessage());
+			return;
+		}
+		final int pagingSize = (page == null) ? 0 : this.pagingSize;
+
+		final String search = request.params().get("search");
+
+		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+			@Override
+			public void handle(final UserInfos user) {
+				if (user != null) {
+				    post.list(blogId, BlogResourcesProvider.getStateType(request), user, page, pagingSize, search,
+                            arrayResponseHandler(request));
+				} else {
+					unauthorized(request);
+				}
+			}
+		});
+	}
+
 }
