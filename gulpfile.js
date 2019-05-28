@@ -68,7 +68,7 @@ gulp.task('watch', () => {
 
     gulp.watch('./src/main/resources/public/ts/**/*.ts', () => gulp.start('build'));
 
-    fs.readFile("./gradle.properties", "utf8", function(error, content){
+    fs.readFile("./gradle.properties", "utf8", function(err, content){
         var modName = getModName(content);
         gulp.watch(['./src/main/resources/public/js'], () => {
             console.log('Copying resources to ' + springboard + 'mods/' + modName);

@@ -1,4 +1,5 @@
 import { Behaviours, routes, template, idiom, http, notify, ng, angular } from 'entcore'
+import { LibraryDelegate } from './controllers/library';
 
 function safeApply(that) {
 	return new Promise((resolve, reject) => {
@@ -11,7 +12,8 @@ function safeApply(that) {
 		}
 	});
 }
-export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', ($scope, route, model, $location) => {
+export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope, route, model, $location, $rootScope) => {
+	LibraryDelegate($scope,$rootScope, $location)
 	$scope.template = template;
 	template.open('filters', 'filters');
 	template.open('edit-post', 'edit-post');
@@ -218,17 +220,30 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			$scope.display.filters.published = true;
 			$scope.display.filters.all = true;
 			$scope.display.postSearch = '';
-
-			model.blogs.syncPag(function () { $scope.$apply(); }, false, $scope.display.search);
+			//dont load blog using pagination (see library.ts)
+			//model.blogs.syncPag(function () { $scope.$apply(); }, false, $scope.display.search);
 		},
 		editBlog: function (params) {
 			$scope.blog = model.blogs.findWhere({ _id: params.blogId });
-			if ($scope.blog) {
-				template.open('main', 'edit-blog');
+			const callback = ()=>{
+				if ($scope.blog) {
+					template.open('main', 'edit-blog');
+				}
+				else {
+					$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog();
+					template.open('main', 'edit-blog');
+				}
 			}
-			else {
-				$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog();
-				template.open('main', 'edit-blog');
+			if(params.blogId=="new"){
+				callback();
+			}else if($scope.blog){
+				callback();
+			}else{
+				const data = { _id: params.blogId };
+				$scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(data);
+				$scope.blog.open(()=>{
+					callback();
+				})
 			}
 		}
 	});
@@ -284,17 +299,6 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		}, false, mysearch, $scope.display.filters);
 	};
 
-	$scope.launchSearching = function (mysearch, event) {
-		$scope.display.searching = true;
-		event.stopPropagation();
-		model.blogs.syncPag(function () { $scope.display.searching = false; $scope.$apply(); }, false, mysearch);
-	};
-
-	$scope.searching = function () {
-		$scope.display.searching = true;
-		model.blogs.syncPag(function () { $scope.display.searching = false; $scope.$apply(); }, false, $scope.display.search);
-	};
-
 	$scope.openClosePost = function (blog, post) {
 		if (post.slided) {
 			post.slided = false;
@@ -327,13 +331,6 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			all: true
 		},
 		searching: false
-	}
-
-	$scope.saveBlog = function () {
-		$scope.blog.save(function () {
-			model.blogs.syncPag();
-			history.back();
-		});
 	}
 
 	$scope.cancel = function () {
@@ -483,22 +480,8 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		});
 	}
 
-	$scope.removeBlog = function () {
-		model.blogs.remove($scope.blog);
-		$location.path('/list-blogs');
-	}
-
-	$scope.removeBlogs = async function () {
-		await $scope.blogs.removeSelection();
-		model.blogs.syncPag();
-	}
-
 	$scope.redirect = function (path) {
 		$location.path(path);
-	}
-
-	$scope.loadBlogs = function () {
-		model.blogs.syncPag(undefined, true, $scope.display.search);
 	}
 
 	$scope.loadPosts = function () {
@@ -507,21 +490,6 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 				post.comments.sync();
 			})
 		}, true, $scope.display.postSearch, $scope.display.filters)
-	}
-
-	$scope.shareBlog = function () {
-		$scope.display.showShare = true;
-		let same = true;
-		let publishType = model.blogs.selection()[0]['publish-type'];
-		model.blogs.selection().forEach(function (blog) {
-			same = same && (blog['publish-type'] === publishType);
-		});
-		if (same) {
-			$scope.display.publishType = publishType;
-		}
-		else {
-			$scope.display.publishType = undefined;
-		}
 	}
 
 	$scope.postComment = function (comment, post) {

@@ -1,4 +1,4 @@
-<share-panel resources="blogs.selection()" app-prefix="'blog'"></share-panel>
+<share-panel resources="currentFolder.selection" app-prefix="'blog'" ng-if="currentFolder.selectionIsRessources"></share-panel>
 <div class="share" ng-show="!isCloseConfirmLoaded()">
 	<h3><i18n>share.publish.title</i18n></h3>
 	<div class="row publication-option">
