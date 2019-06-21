@@ -1,8 +1,21 @@
 import { moment, _, Behaviours, http as oldHttp, Collection, model } from 'entcore';
 import http from 'axios';
 
-console.log('blog behaviours file')
-
+const slugify = function(string:string) {
+	if(!string) return "";
+	const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœøṕŕßśșțùúüûǘẃẍÿź·/_,:;'
+	const b = 'aaaaaaaaceeeeghiiiimnnnooooooprssstuuuuuwxyz------'
+	const p = new RegExp(a.split('').join('|'), 'g')
+  
+	return string.toString().toLowerCase()
+	  .replace(/\s+/g, '-') // Replace spaces with -
+	  .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
+	  .replace(/&/g, '-and-') // Replace & with ‘and’
+	  .replace(/[^\w\-]+/g, '') // Remove all non-word characters
+	  .replace(/\-\-+/g, '-') // Replace multiple - with single -
+	  .replace(/^-+/, '') // Trim - from start of text
+	  .replace(/-+$/, '') // Trim - from end of text
+  }
 export let blogModel: any = {
 		Comment: function(data){
 			if(data && data.created){
@@ -29,6 +42,49 @@ export let blogModel: any = {
 		},
 		Blog: function(data){
 			let that = this;
+			const tryUpdateSlug = ()=>{
+				if(this.enablePublic && !this.slug){
+					this.safeSlug = this.title;
+				}else if(!this.enablePublic){
+					this.slug = null;
+				}
+			}
+			Object.defineProperty(this, "dynTitle", {
+				get(){
+					return this.title;
+				},
+				set(a:string){
+					this.title = a
+					tryUpdateSlug();
+				}
+			})
+			Object.defineProperty(this, "enablePublic", {
+				get(){
+					return this.visibility == "PUBLIC"
+				},
+				set(a:boolean){
+					this.visibility = a?"PUBLIC":"OWNER";
+					tryUpdateSlug();
+				}
+			})
+			Object.defineProperty(this, "safeSlug", {
+				get(){
+					return this.slug;
+				},
+				set(a:string){
+					this.slug = slugify(a)
+				}
+			})
+			Object.defineProperty(this, "slugDomain", {
+				get(){
+					return `${window.location.origin}/blog/pub/`
+				}
+			})
+			Object.defineProperty(this, "fullUrl", {
+				get(){
+					return `${this.slugDomain}${this.slug}`
+				}
+			})
 			if(data && data._id){
 				this._id = data._id;
 				this.owner = data.author;
@@ -49,7 +105,7 @@ export let blogModel: any = {
 			}
 
 			this.collection(Behaviours.applicationsBehaviours.blog.model.Post, {
-			    syncPosts: function (cb, paginate, search, filters) {
+			    syncPosts: function (cb, paginate, search, filters, publicPost = false) {
 					//for direct resource access (via uri)
 					if (paginate && !this.page) {
 						paginate = false;
@@ -92,8 +148,8 @@ export let blogModel: any = {
 							jsonParam["states"] = "";
 						}
 					}
-
-					oldHttp().get('/blog/post/list/all/' + that._id, jsonParam).done(function(posts){
+					const postUrl = publicPost?'/blog/pub/posts/' : '/blog/post/list/all/'
+					oldHttp().get(postUrl+ that._id , jsonParam).done(function(posts){
 						if(posts.length > 0){
 							var type = this.model.data['publish-type'];
 							posts.map(function(item){
@@ -121,13 +177,13 @@ export let blogModel: any = {
 			        .e401(function () { })
 			        .e404(function () { });
 				},
-				syncAllPosts: function (cb) {
+				syncAllPosts: function (cb,publicPost=false) {
 					if (this.postsLoading) {
 						return;
 					}
 					this.postsLoading = true;
-					
-					oldHttp().get('/blog/post/list/all/' + that._id).done(function(posts) {
+					const postUrl = publicPost?'/blog/pub/posts/' : '/blog/post/list/all/'
+					oldHttp().get(postUrl + that._id).done(function(posts) {
 						posts.map(function (item) {
 							item.blogId = data._id;
 							item['publish-type'] = data['publish-type'];
@@ -258,7 +314,9 @@ export let blogModel: any = {
 					thumbnail: this.thumbnail || '',
 					'comment-type': this['comment-type'] || 'IMMEDIATE',
 					'publish-type': this['publish-type'] || 'RESTRAINT',
-					description: this.description || ''
+					description: this.description || '',
+					visibility: this.visibility || "OWNER",
+					slug: this.slug,
 				}
 			}
 
@@ -492,6 +550,7 @@ Behaviours.register('blog', {
 		workflow: {
 			createFolder: 'org.entcore.blog.controllers.FoldersController|add',
 			create: 'org.entcore.blog.controllers.BlogController|create',
+			createPublic: 'org.entcore.blog.controllers.BlogController|createPublicBlog',
 			print: 'org.entcore.blog.controllers.BlogController|print'
 		}
 	},

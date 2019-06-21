@@ -31,8 +31,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.entcore.blog.security.BlogResourcesProvider;
+import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
+import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.neo4j.Neo;
@@ -60,6 +62,7 @@ public class PostController extends BaseController {
 	public static final String LIST_ACTION = "org-entcore-blog-controllers-PostController|list";
 	public static final String SUBMIT_ACTION = "org-entcore-blog-controllers-PostController|submit";
 	private PostService post;
+	private BlogService blogService;
 	private BlogTimelineService timelineService;
 	private int pagingSize;
 
@@ -68,6 +71,8 @@ public class PostController extends BaseController {
 		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
 		this.post = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), LIST_ACTION);
+		this.blogService = new DefaultBlogService(mongo, post, config.getInteger("blog-paging-size", 30),
+				config.getInteger("blog-search-word-min-size", 4));
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		this.pagingSize = config.getInteger("post-paging-size", 20);
 	}
@@ -399,6 +404,27 @@ public class PostController extends BaseController {
 			return;
 		}
 		post.publishComment(blogId, commentId, defaultResponseHandler(request));
+	}
+
+	@Get("/pub/posts/:blogId")
+	public void getPublicBlogPosts(final HttpServerRequest request) {
+		final String blogId = request.params().get("blogId");
+		blogService.isPublicBlog(blogId, BlogService.IdType.Id, ev->{
+			if(!ev){
+				unauthorized(request);
+				return;
+			}
+			final Integer page;
+			try {
+				page = (request.params().get("page") != null) ? Integer.parseInt(request.params().get("page")) : null;
+			} catch (NumberFormatException e) {
+				badRequest(request, e.getMessage());
+				return;
+			}
+			final int pagingSize = (page == null) ? 0 : this.pagingSize;
+			final String search = request.params().get("search");
+			post.listPublic(blogId, page, pagingSize, search, arrayResponseHandler(request));
+		});
 	}
 
 }

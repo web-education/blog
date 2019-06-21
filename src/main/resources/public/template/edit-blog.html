@@ -1,33 +1,84 @@
 <app-title>
 	<h1>
-		<a ng-href="#/list-blogs"><i18n>blog.title</i18n></a>
+		<a ng-href="#/list-blogs">
+			<i18n>blog.title</i18n>
+		</a>
 	</h1>
 </app-title>
 <article class="twelve cell">
-
-	<form ng-submit="saveProperties()">
+	<form ng-submit="saveProperties()" name="blogForm">
+		<div class="info" ng-if="blog.enablePublic">
+			<i18n>blog.url.warning</i18n>
+		</div>
 		<div class="row rigid-grid">
-
 			<div class="two cell clip height-two three-mobile" loading-panel="upload-blog-thumbnail">
 				<image-select ng-model="blog.thumbnail" default="/img/illustrations/blog.png"></image-select>
 			</div>
 
-			<div class="margin-two height-two">
-				<div class="twelve cell horizontal-spacing">
-					<input type="text" class="twelve cell right-magnet" ng-model="blog.title" required i18n-placeholder="blog.title.placeholder" />
+			<div class="margin-two">
+				<div class="twelve cell horizontal-spacing-twice bottom-spacing">
+					<label class="high-importance">
+						<i18n>blog.form.title</i18n>
+					</label>
 				</div>
-
-				<div class="row bottom-locked">
-					<button class="right-magnet">
-						<i18n>blog.save</i18n>
-					</button>
-					<button type="button" class="right-magnet cancel" ng-click="redirect('/list-blogs')">
-						<i18n>cancel</i18n>
-					</button>
+				<div class="twelve cell horizontal-spacing-twice bottom-spacing">
+					<input type="text" class="twelve cell right-magnet" ng-model="blog.dynTitle" required
+						i18n-placeholder="blog.form.title.placeholder" />
 				</div>
-				
+				<div workflow="blog.createPublic">
+					<div class="twelve cell horizontal-spacing-twice top-spacing bottom-spacing">
+						<label class="high-importance">
+							<i18n>blog.url.title</i18n>
+						</label>
+					</div>
+					<div class="twelve cell horizontal-spacing-twice bottom-spacing">
+						<label class="checkbox">
+							<input type="checkbox" ng-model="blog.enablePublic" />
+							<span></span>
+						</label>
+						<span>
+							<i18n>blog.url.info</i18n>
+						</span>
+					</div>
+					<div class="twelve cell horizontal-spacing-twice bottom-spacing flex-row align-baseline" ng-show="blog.enablePublic">
+						<a class="cell" href="javascript:void(0)">[[blog.slugDomain]]</a>
+						<div class="cell" style="flex:1;max-width: 500px">
+							<input type="text" class="twelve no-margin" ng-model="blog.safeSlug" ng-required="blog.enablePublic"
+								i18n-placeholder="blog.url.title" />
+							<span class="warning-color italic-text" ng-if="display.warningDuplicate">
+								<i18n>blog.slug.duplicate.errmsg</i18n>
+							</span>
+						</div>
+						<a class="cell left-spacing-four" ng-click="copyToClipboard()">
+							<i18n>blog.url.copy</i18n>
+						</a>
+					</div>
+				</div>
 			</div>
 		</div>
-
+		<div class="row twelve top-spacing-four" style="right:0px">
+			<button class="right-magnet" ng-disabled="blogForm.$invalid">
+				<i18n>blog.save</i18n>
+			</button>
+			<button type="button" class="right-magnet cancel" ng-click="redirect('/list-blogs')">
+				<i18n>cancel</i18n>
+			</button>
+		</div>
 	</form>
 </article>
+<!--LIGHTBOX-->
+<lightbox show="displayLib.lightbox.warningEditBlog" on-close="displayLib.lightbox.warningEditBlog=false">
+	<div class="horizontal-spacing-twice">
+		<h2>
+			<i18n>blog.slug.duplicate.title</i18n>
+		</h2>
+		<p>
+			<i18n>blog.slug.duplicate.body</i18n>
+		</p>
+		<div class="row">
+			<button ng-click="displayLib.lightbox.warningEditBlog=false" class="right-magnet">
+				<i18n>blog.understood</i18n>
+			</button>
+		</div>
+	</div>
+</lightbox>

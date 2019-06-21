@@ -198,7 +198,7 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void list(String blogId, final UserInfos user, final Integer page, final int limit, final String search, final Set<String> states, final Handler<Either<String, JsonArray>> result) {
+	public void list(String blogId, final UserInfos user, final Integer page, final int limit, final String search, final Set<String> states,final boolean withContent, final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder accessQuery;
 		if (states == null || states.isEmpty()) {
 			accessQuery = QueryBuilder.start("blog.$id").is(blogId);
@@ -209,8 +209,9 @@ public class DefaultPostService implements PostService {
 		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject sort = new JsonObject().put("sorted", -1);
 		final JsonObject projection = defaultKeys.copy();
-		projection.remove("content");
-
+		if(!withContent) {
+			projection.remove("content");
+		}
 		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
@@ -298,6 +299,40 @@ public class DefaultPostService implements PostService {
     			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), null, projection, finalHandler);
 			}
 		});
+	}
+
+	@Override
+	public void count(final String blogId, final StateType state, final Handler<Either<String, Integer>> result){
+		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("state").is(state.name());
+		mongo.count(POST_COLLECTION, MongoQueryBuilder.build(query), event -> {
+			JsonObject res = event.body();
+			if (res != null && "ok".equals(res.getString("status"))) {
+				result.handle(new Either.Right(res.getInteger("count")));
+			}else{
+				result.handle(new Either.Left(res.getString("message", "")));
+			}
+		});
+
+	}
+
+	@Override
+	public void listPublic(String blogId, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result) {
+		final QueryBuilder accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").is(StateType.PUBLISHED.name());
+		final QueryBuilder query = getQueryListBuilder(search, result, accessQuery);
+		final JsonObject sort = new JsonObject().put("sorted", -1);
+		final JsonObject projection = defaultKeys.copy();
+		//projection.remove("content");
+		final Handler<Message<JsonObject>> finalHandler =event -> {
+			result.handle(Utils.validResults(event));
+		};
+		if (limit > 0 && page == null) {
+			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
+		} else if (page == null) {
+			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
+		} else {
+			final int skip = (0 == page) ? -1 : page * limit;
+			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
+		}
 	}
 
 	@Override
@@ -688,4 +723,26 @@ public class DefaultPostService implements PostService {
 		return false;
 	}
 
+	private boolean isOk(JsonObject body) {
+		return "ok".equals(body.getString("status"));
+	}
+
+	private String toErrorStr(JsonObject body) {
+		return body.getString("error", body.getString("message", "query helper error"));
+	}
+
+	public void updateAllContents(List<JsonObject>posts, Handler<Either<String,JsonArray>> handler){
+		JsonArray operations = new JsonArray();
+		String now = MongoDb.formatDate(new Date());
+		posts.stream().map(o -> (JsonObject) o).forEach(row -> {
+			JsonObject set = new MongoUpdateBuilder()//
+					.set("content", row.getString("content")).build();
+			JsonObject op = new JsonObject().put("operation", "update")//
+					.put("document", set)//
+					.put("criteria", new JsonObject().put("_id", row.getString("_id")));
+			operations.add(op);
+		});
+		//
+		mongo.bulk(POST_COLLECTION, operations, MongoDbResult.validResultsHandler(handler));
+	}
 }

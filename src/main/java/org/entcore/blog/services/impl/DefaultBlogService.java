@@ -29,6 +29,8 @@ import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import org.entcore.blog.services.BlogService;
 import fr.wseduc.webutils.*;
+import org.entcore.blog.services.PostService;
+import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
@@ -46,15 +48,17 @@ public class DefaultBlogService implements BlogService{
 	private final MongoDb mongo;
 	private int pagingSize;
 	private int searchWordMinSize;
+	private final PostService postService;
 
-	public DefaultBlogService(MongoDb mongo, int pagingSize, int searchWordMinSize) {
+	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize) {
 		this.mongo = mongo;
 		this.pagingSize = pagingSize;
+		this.postService = postService;
 		this.searchWordMinSize = searchWordMinSize;
 	}
 
 	@Override
-	public void create(JsonObject blog, UserInfos author, final Handler<Either<String, JsonObject>> result) {
+	public void create(JsonObject blog, UserInfos author, boolean isPublic, final Handler<Either<String, JsonObject>> result) {
 		CommentType commentType = Utils.stringToEnum(blog.getString("comment-type", "").toUpperCase(),
 				CommentType.NONE, CommentType.class);
 		PublishType publishType = Utils.stringToEnum(blog.getString("publish-type", "").toUpperCase(),
@@ -70,6 +74,12 @@ public class DefaultBlogService implements BlogService{
 				.put("comment-type", commentType.name())
 				.put("publish-type", publishType.name())
 				.put("shared", new JsonArray());
+		if (isPublic) {
+		    blog.put("visibility", VisibilityFilter.PUBLIC.name());
+        } else {
+		    blog.put("visibility", VisibilityFilter.OWNER.name());
+		    blog.put("slug","");
+        }
 		JsonObject b = Utils.validAndGet(blog, FIELDS, FIELDS);
 		if (validationError(result, b)) return;
 		mongo.save(BLOG_COLLECTION, b, new Handler<Message<JsonObject>>() {
@@ -146,6 +156,50 @@ public class DefaultBlogService implements BlogService{
 			public void handle(Message<JsonObject> event) {
 				result.handle(Utils.validResult(event));
 			}
+		});
+	}
+
+	@Override
+	public void getPublic(String slug, IdType type, Handler<Either<String, JsonObject>> result) {
+		QueryBuilder querySlug = QueryBuilder.start(IdType.Slug.equals(type)?"slug":"_id").is(slug);
+		mongo.findOne(BLOG_COLLECTION, MongoQueryBuilder.build(querySlug),event -> {
+			Either<String,JsonObject> eitherBlog = Utils.validResult(event);
+			if(eitherBlog.isRight()){
+				JsonObject blog = eitherBlog.right().getValue();
+				postService.count(blog.getString("_id"), PostService.StateType.PUBLISHED,eventCount->{
+					if(eventCount.isRight()){
+						blog.put("countAll", eventCount.right().getValue());
+					}
+					result.handle(eitherBlog);
+				});
+			}else{
+				result.handle(eitherBlog);
+			}
+		});
+	}
+
+	public void isPublicBlog(String id, IdType type, Handler<Boolean> handler){
+		if (id!=null) {
+			final String prop = IdType.Slug.equals(type)?"slug":"_id";
+			JsonObject query = MongoQueryBuilder.build(QueryBuilder.start(prop).is(id).and("visibility").is(VisibilityFilter.PUBLIC.name()));
+			mongo.count(BLOG_COLLECTION, query, event -> {
+				JsonObject res = (JsonObject)event.body();
+				handler.handle(res != null && "ok".equals(res.getString("status")) && 1 == res.getInteger("count"));
+			});
+		} else {
+			handler.handle(false);
+		}
+	}
+
+	public void isBlogExists(Optional<String> blogId, String slug, Handler<Boolean> handler){
+		QueryBuilder queryM = QueryBuilder.start("slug").is(slug);
+		if(blogId.isPresent()){
+			queryM = queryM.and("_id").notEquals(blogId.get());
+		}
+		JsonObject query = MongoQueryBuilder.build(queryM);
+		mongo.count(BLOG_COLLECTION, query, event -> {
+			JsonObject res = (JsonObject)event.body();
+			handler.handle(res != null && "ok".equals(res.getString("status")) && 0 != res.getInteger("count"));
 		});
 	}
 

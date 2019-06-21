@@ -5,8 +5,21 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script src="/blog/public/dist/entcore/ng-app.js" id="context"  type="text/javascript"></script>
 	<script src="/blog/public/dist/application.js" type="text/javascript"></script>
+	
+	{{#public}}
+	<script type="text/javascript">
+        var currentBlog = {{{ blogStr }}};
+    </script>
+	<script type="text/javascript">var notLoggedIn = true;</script>
+	{{/public}}
+	
 </head>
+{{#public}}
+<body ng-controller="BlogPublicController" ng-init="preparePrint(currentBlog)">
+{{/public}}
+{{^public}}
 <body ng-controller="BlogController">
+{{/public}}
 	<portal-styles></portal-styles>
 
 	<div class="centered container row">

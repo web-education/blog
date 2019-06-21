@@ -52,6 +52,13 @@
 				<i18n>blog.by</i18n> <a
 					ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
 			</div>
+			<div class="row centered-text block-container" 
+				 ng-if="blog.enablePublic" resource-right resource="blog" name="manager">
+				<label class="high-importance">
+					<i18n>blog.url.public</i18n>
+				</label>
+				<a ng-href="[[blog.fullUrl]]" target="_blank" class="twelve cell-ellipsis" style="display:block">[[blog.fullUrl]]</a>
+			</div>
 			<hr class="row zero-mobile" />
 			<div class="row action-row zero-mobile centered-text">
 				<a class="button text-flow" ng-click="print()">
@@ -94,7 +101,6 @@
 			</ul>
 		</floating-navigation>
 	</div>
-
 	<div class="margin-three option-row six-mobile">
 
 		<div class="content-line overflow-hd">
@@ -163,6 +169,21 @@
 	</div>
 </div>
 <!--LIGHTBOXES-->
+<lightbox ng-if="display.linkerWarning" show="display.linkerWarning" on-close="display.linkerWarning = false">
+	<div class="twelve cell horizontal-spacing-twice vertical-spacing-twice">
+		<h2>
+			<i18n>blog.public.warning</i18n>
+		</h2>
+		<p>
+			<i18n>blog.public.warning.body</i18n>
+		</p>
+		<div class="row">
+			<button ng-click="display.linkerWarning=false" class="right-magnet">
+				<i18n>blog.understood</i18n>
+			</button>
+		</div>
+	</div>
+</lightbox>
 <lightbox ng-if="display.showShare" show="display.showShare" on-close="display.showShare = false">
 	<container template="blog/share"></container>
 </lightbox>

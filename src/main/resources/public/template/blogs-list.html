@@ -76,6 +76,12 @@
 				<i18n>filters.sharedBlogs</i18n>
 				<input type="checkbox" ng-model="filters.shared" />
 			</label>
+			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
+				ng-class="{ selected: filters.public }">
+				<i class="public" tooltip="filters.publicBlogs"></i>
+				<i18n>filters.publicBlogs</i18n>
+				<input type="checkbox" ng-model="filters.public" />
+			</label>
 			<container template="library/folder-content"></container>
 		</div>
 	</section>

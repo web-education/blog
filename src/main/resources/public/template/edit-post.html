@@ -1,6 +1,6 @@
 <form data-ng-submit="saveOrCreates(post);">
 	<input type="text" ng-model="post.title" class="twelve cell" required />
-	<editor ng-model="post.content"></editor>
+	<editor ng-model="post.content" visibility="currentVisibility()"></editor>
 
 	<button type="button" class="right-magnet" ng-click="saveModifications(post);">
 		<i18n>save</i18n>

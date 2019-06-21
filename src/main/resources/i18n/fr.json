@@ -133,5 +133,19 @@
   "tooltip.update": "Contributeur",
   "tooltip.read": "Lecteur",
   "tooltip.public": "Blog public",
-  "blog.folder.placeholder": "Nom du dossier"
+  "blog.folder.placeholder": "Nom du dossier",
+  "blog.form.title": "Titre de mon blog",
+  "blog.form.title.placeholder": "Titre de mon blog",
+  "blog.url.copy": "Copier l'adresse",
+  "blog.url.title": "Adresse de mon blog",
+  "blog.url.warning": "<strong>Attention</strong>, ce blog étant public, les documents appartenants à d'autres utilisateurs et présents sur le blog sont rendus publics également.",
+  "blog.url.info": "Le blog est accessible publiquement via cette adresse personnalisable :",
+  "blog.slug.duplicate.title": "URL de blog déjà existante",
+  "blog.slug.duplicate.body": "<strong>Attention !&nbsp;</strong>&nbsp;Cette URL de blog a déjà été utilisée, veuillez en choisir une autre pour pouvoir valider !",
+  "blog.slug.duplicate.errmsg": "Choisissez une autre URL pour votre blog",
+  "blog.public.warning": "Contenu privé ajouté !",
+  "blog.public.warning.body": "<strong>Attention!</strong> Vous venez d'ajouter un lien vers un contenu qui n'est pas public. <br/>Les personnes non partagés avec ce contenu ne pourront pas le voir !",
+  "blog.understood": "J'ai compris",
+  "blog.url.public": "Adresse publique du blog",
+  "blog.copy.clipboard": "L'adresse a été ajouté au presse papier."
 }

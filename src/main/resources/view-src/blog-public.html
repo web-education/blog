@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_blank">
+    <title>{{#i18n}}blog.title{{/i18n}}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <script src="/blog/public/dist/entcore/ng-app.js" id="context" type="text/javascript"></script>
+    <script src="/blog/public/dist/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var currentBlog = {{{ blogStr }}};
+    </script>
+    <script type="text/javascript">var notLoggedIn = true;</script>
+</head>
+
+<body ng-controller="BlogPublicController" ng-init="setBlog(currentBlog)">
+    <!--TEMPLATE-->
+    <script type="text/ng-template" id="blogTemplate.html">
+        <div class="row rigid-grid">
+            <!--BLOG TITLE-->
+            <div class="row">
+                <app-title>
+                    <h1>
+                        <i class="blog"></i>
+                        <span>
+                            <i18n>blog.title</i18n>
+                        </span> / <span subtitle>[[blog.title]]</span>
+                    </h1>
+                </app-title>
+            </div>
+            <!--BODY-->
+            <div class="row rigid-grid">
+                <div class="three cell side-col five-mobile">
+                    <nav class="vertical">
+                        <div class="twelve cell height-seven">
+                            <div class="illustration">
+                                <img skin-src="[[blog.icon]]" />
+                            </div>
+                        </div>
+
+                        <div class="row centered-text block-container">
+                            <i18n>blog.by</i18n> <a
+                                ng-href="/userbook/annuaire#/user-view/[[blog.owner.userId]]">[[blog.owner.username]]</a>
+                        </div>
+                        <hr class="row zero-mobile" />
+                        <div class="row action-row zero-mobile centered-text">
+                            <a class="button text-flow" ng-click="print()">
+                                <i18n>blog.print</i18n>
+                            </a>
+                        </div>
+                    </nav>
+                    <h2 class="float-title zero-mobile">
+                        <i18n>blog.posts.list</i18n> ([[blog.posts.length()]]/[[blog.countAll]])
+                    </h2>
+                    <floating-navigation tooltip="blog.posts.list" class="zero-mobile" ng-if="blog.posts.length() != 0">
+                        <ul>
+                            <li ng-repeat="post in blog.posts.all" ng-init="$first ? openFirstPost(blog, post) : ''">
+                                <a ng-class="{'selected': post._id === currPost}" ng-click="openClosePost(blog, post)">
+                                    [[post.title]]
+                                </a>
+                            </li>
+                        </ul>
+                    </floating-navigation>
+                </div>
+                <div class="margin-three main-col twelve-mobile">
+                    <div class="twelve cell">
+                        <!--SEARCH
+                        <div
+                            class="search-pagination flex-row justify-start mobile-justify-center vertical-spacing-twice">
+                            <div class="row twelve vertical-spacing">
+                                <input type="text" class="twelve" ng-model="display.postSearch"
+                                    i18n-placeholder="blog.search.internal"
+                                    ng-keyup="$event.keyCode == 13 ? launchSearchingPost(display.postSearch, $event) : resetSearching()" />
+                                <i class="search align-center justify-center" ng-click="searchingPost();"></i>
+                            </div>
+                        </div>-->
+                        <div class="hash-magnet twelve cell" ng-repeat="post in blog.posts.all"
+                            id="/detail/[[blog._id]]/[[post._id]]" bottom-scroll="loadPosts()">
+                            <article class="twelve cell"
+                                ng-class="{ slided: post.slided, unpublished: (post.state !== 'PUBLISHED') }">
+                                <!--READ POST-->
+                                <h2 ng-click="openClosePost(blog, post)">
+                                    <span ng-if="post.state !== 'PUBLISHED'"
+                                        class="warning-text">[[lang.translate(post.state.toLowerCase())]]</span>
+                                        <i class="no-1d" ng-if="post.slided">&#9662</i><i class="no-1d" ng-if="!post.slided">&#9656</i>&nbsp;[[post.title]]<i class="small-arrow"></i>
+                                    <strong class="subtitle">
+                                        <i18n>blog.by</i18n> <a
+                                            ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a>
+                                        <i18n>blog.on.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]
+                                    </strong>
+                                </h2>
+                                <div ng-if="post.slided">
+                                    <div bind-html="post.content"> </div>
+                                </div>
+                                <!--/READ POST-->
+                            </article>
+                        </div>
+                        <div class="row"
+                            ng-if="blog.posts.length() === 0 && !display.searching && !display.postSearch">
+                            <article>
+                                <i18n>blog.empty</i18n>
+                            </article>
+                        </div>
+                        <div class="row"
+                            ng-if="blog.posts.length() === 0 && !display.searching && display.postSearch">
+                            <article>
+                                <i18n>post.search.internal.empty</i18n>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </script>
+    <!---->
+    <portal-styles></portal-styles>
+    <div class="no-1d">
+        <header class="main">
+            <section class="navbar">
+                <div class="logo"></div>
+            </section>
+        </header>
+        <div class="material">
+            <section class="main">
+                <div ng-include="'blogTemplate.html'"></div>
+            </section>
+        </div>
+    </div>
+    <div class="no-2d">
+        <div class="centered container row">
+            <div class="main wrapper">
+                <section class="main">
+                    <div ng-include="'blogTemplate.html'"></div>
+                </section>
+            </div>
+            <header class="main">
+                <section class="navbar row zero-desktop"></section>
+                <section class="row">
+                    <div class="logo"></div>
+                </section>
+            </header>
+        </div>
+    </div>
+</body>
+
+</html>

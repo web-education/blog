@@ -2,7 +2,12 @@ export type BlogModel = {
 	_id:string;
 	posts: PostsModel
 	myRights:any;
+	slug: string
+	enablePublic: boolean
 	modified:{$date:number}
+	safeSlug: string;
+	slugDomain: string
+	visibility: "PUBLIC" | "OWNER";
     'publish-type': "RESTRAINT" | "IMMEDIATE";
     toJSON():any;
 	open(success:()=>void, err?:()=>void): void;
@@ -43,6 +48,6 @@ export type PostsModel = {
 	some(cb:(post:PostModel)=>void):boolean;
 	forEach(callback:(post:PostModel)=>void):void
 	syncOnePost(success:()=>void,id:string):void
-	syncPosts(success:()=>void, b?:boolean,search?:string,filters?:any):void;
-	syncAllPosts(success:()=>void):void
+	syncPosts(success:()=>void, b?:boolean,search?:string,filters?:any, publicPost?:boolean):void;
+	syncAllPosts(success:()=>void, isPublic?:boolean):void
 }

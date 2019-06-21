@@ -26,14 +26,12 @@ import static org.entcore.common.http.response.DefaultResponseHandler.arrayRespo
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 import static org.entcore.common.user.UserUtils.getUserInfos;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.vertx.core.Future;
 import org.entcore.blog.Blog;
+import org.entcore.blog.security.ShareAndOwnerBlog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
@@ -42,11 +40,15 @@ import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.request.ActionsUtils;
 import org.entcore.common.neo4j.Neo;
+import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.share.impl.MongoDbShareService;
 import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
+import org.entcore.common.utils.ResourceUtils;
 import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.http.RouteMatcher;
 
@@ -84,9 +86,9 @@ public class BlogController extends BaseController {
 			Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.blog = new DefaultBlogService(mongo, config.getInteger("blog-paging-size", 30),
-				config.getInteger("blog-search-word-min-size", 4));
 		this.postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION);
+		this.blog = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
+				config.getInteger("blog-search-word-min-size", 4));
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
@@ -104,7 +106,7 @@ public class BlogController extends BaseController {
 	@Get("/print/blog")
 	@SecuredAction("blog.print")
 	public void print(HttpServerRequest request) {
-		renderView(request, new JsonObject().put("printBlogId", request.params().get("blog")), "print.html", null);
+		renderView(request, new JsonObject().put("printBlogId", request.params().get("blog")).put("public", false), "print.html", null);
 	}
 
 	// TODO improve fields matcher and validater
@@ -117,7 +119,7 @@ public class BlogController extends BaseController {
 					@Override
 					public void handle(final UserInfos user) {
 						if (user != null) {
-							blog.create(data, user, defaultResponseHandler(request));
+							blog.create(data, user, false, defaultResponseHandler(request));
 						} else {
 							unauthorized(request);
 						}
@@ -135,20 +137,21 @@ public class BlogController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
-			public void handle(JsonObject data) {
-				blog.update(blogId, data, new Handler<Either<String, JsonObject>>() {
-					@Override
-					public void handle(Either<String, JsonObject> event) {
-						if (event.isRight()) {
-							renderJson(request, event.right().getValue());
-						} else {
-							JsonObject error = new JsonObject().put("error", event.left().getValue());
-							renderJson(request, error, 400);
-						}
+		RequestUtils.bodyToJson(request, data -> {
+			getUserInfos(eb, request, user -> {
+				if (user != null) {
+					String visibility = data.getString("visibility");
+					if(visibility==null || "".equals(visibility)){
+						blog.update(blogId, data,  defaultResponseHandler(request));
+					}else{
+						changeResourcesVisibility(blogId, data, user, visibility).setHandler(res->{
+							blog.update(blogId, data,  defaultResponseHandler(request));
+						});
 					}
-				});
-			}
+				} else {
+					unauthorized(request);
+				}
+			});
 		});
 	}
 
@@ -520,6 +523,216 @@ public class BlogController extends BaseController {
 	@SecuredAction(value = "blog.habilitation", type = ActionType.AUTHENTICATED)
 	public void getActionsInfos(final HttpServerRequest request) {
 		ActionsUtils.findWorkflowSecureActions(eb, request, this);
+	}
+
+	// Routes for public blogs
+	@Get("/pub/print/:blog")
+	public void printPublic(HttpServerRequest request) {
+		String blogId = request.params().get("blog");
+		blog.isPublicBlog(blogId, BlogService.IdType.Id, ev->{
+			if(ev){
+				JsonObject context = new JsonObject().put("printBlogId", blogId);
+				blog.getPublic(blogId, BlogService.IdType.Id, json -> {
+					if (json.isLeft()) {
+						badRequest(request);
+						return;
+					}
+					JsonObject blog = json.right().getValue();
+					renderView(request, context.put("public", true).put("blog",blog).put("blogStr",blog.toString()), "print.html", null);
+				});
+			}else{
+				unauthorized(request);
+			}
+		});
+	}
+
+	@Get("/pub/:slug")
+	public void getPublicBlogInfos(final HttpServerRequest request) {
+		final String slug = request.params().get("slug");
+		blog.isPublicBlog(slug, BlogService.IdType.Slug, ev->{
+			if(ev){
+				UserUtils.getUserInfos(eb, request, user ->{
+					JsonObject context = new JsonObject().put("notLoggedIn", user == null);
+					blog.getPublic(slug, BlogService.IdType.Slug, json -> {
+						if(json.isLeft()){
+							badRequest(request);
+							return;
+						}
+						JsonObject blog = json.right().getValue();
+						if("json".equals(request.params().get("type"))){
+							renderJson(request,blog);
+						}else{
+							renderView(request,context.put("blog",blog).put("blogStr",blog.toString()), "blog-public.html", null);
+						}
+					});
+				});
+			}else{
+				unauthorized(request);
+			}
+		});
+	}
+
+	@Post("/pub")
+	@SecuredAction("blog.public")
+	public void createPublicBlog(final HttpServerRequest request) {
+		RequestUtils.bodyToJson(request, data -> {
+			String slug = data.getString("slug");
+			blog.isBlogExists(Optional.empty(),slug, evExists -> {
+				if (evExists) {
+					conflict(request);
+					return;
+				}
+				getUserInfos(eb, request, user -> {
+					if (user != null) {
+						blog.create(data, user, true, defaultResponseHandler(request));
+					} else {
+						unauthorized(request);
+					}
+				});
+			});
+		});
+	}
+
+	@Put("/pub/:id")
+	@ResourceFilter(ShareAndOwnerBlog.class)
+	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
+	public void updatePublicBlog(final HttpServerRequest request) {
+		final String blogId = request.params().get("id");
+		if (blogId == null || blogId.trim().isEmpty()) {
+			badRequest(request);
+			return;
+		}
+        RequestUtils.bodyToJson(request, data -> {
+        	String slug = data.getString("slug");
+        	blog.isBlogExists(Optional.ofNullable(blogId),slug,evExists ->{
+				if(evExists){
+					conflict(request);
+					return;
+				}
+				getUserInfos(eb, request,  user -> {
+					if (user != null) {
+						String visibility = data.getString("visibility");
+						changeResourcesVisibility(blogId,data, user, visibility).setHandler(res->{
+							blog.update(blogId, data, defaultResponseHandler(request));
+						});
+					} else {
+						unauthorized(request);
+					}
+				});
+			});
+        });
+	}
+
+	private Future<JsonArray> changeResourcesVisibility(String blogId, JsonObject data, UserInfos user, String visibility) {
+		final VisibilityFilter eVisibility = VisibilityFilter.valueOf(visibility);
+		final VisibilityFilter inverse = eVisibility.equals(VisibilityFilter.PUBLIC)?VisibilityFilter.OWNER:VisibilityFilter.PUBLIC;
+		//get old version of blog
+		Future<JsonObject> futureBlog = Future.future();
+		blog.get(blogId,res->{
+			if(res.isRight()){
+				futureBlog.complete(res.right().getValue());
+			}else{
+				futureBlog.fail(res.left().getValue());
+			}
+		});
+		//check if visibility has changed
+		return futureBlog.map(blog->{
+			String oldVisibility = blog.getString("visibility","");
+			if(oldVisibility.equals(visibility)){
+				//nothing to change
+				return false;
+			}
+			return true;
+		})//change logo
+		.compose(changed->{
+			JsonObject blog = futureBlog.result();
+			String icon = blog.getString("thumbnail");
+			List<String> ids = ResourceUtils.extractIds(icon);
+			if(!changed || ids.isEmpty()){
+				return Future.succeededFuture(changed);
+			}
+			//
+			Future<Boolean> future = Future.future();
+			JsonObject j = new JsonObject()
+					.put("action", "changeVisibility")
+					.put("visibility", visibility)
+					.put("documentIds", new JsonArray(ids));
+			eb.send("org.entcore.workspace", j, r -> {
+				data.put("thumbnail", ResourceUtils.transformUrlTo(icon,ids,eVisibility));
+				future.complete(changed);
+			});
+			return future;
+		})//fetch post
+		.compose(changed ->{
+			if(!changed){
+				return Future.succeededFuture(new JsonArray());
+			}
+			Future<JsonArray> futureList = Future.future();
+			//fetch posts
+			postService.list(blogId, user, null, 0, "", null, true, event -> {
+				if (event.isRight()) {
+					JsonArray posts = event.right().getValue();
+					futureList.complete(posts);
+				}else{
+					futureList.fail(event.left().getValue());
+				}
+			});
+			return futureList;
+		})//transform content
+		.compose(posts -> {
+			if(posts.isEmpty()){
+				return Future.succeededFuture(new ArrayList<JsonObject>());
+			}
+			Future<List<JsonObject>> postToSave = Future.future();
+			Map<String, JsonObject> postByIds = new HashMap<>();
+			Map<String, List<String>> idsByPost = new HashMap<>();
+			List<String> allIds = new ArrayList<>();
+			for(Object elem : posts){
+				JsonObject post = (JsonObject)(elem);
+				String content = post.getString("content");
+				String id = post.getString("_id");
+				final List<String> currentIds = ResourceUtils.extractIds(content,inverse);
+				if(!currentIds.isEmpty()){
+					idsByPost.put(id,currentIds);
+					postByIds.put(id, post);
+				}
+				allIds.addAll(currentIds);
+			};
+			JsonObject j = new JsonObject()
+					.put("action", "changeVisibility")
+					.put("visibility", visibility)
+					.put("documentIds", new JsonArray(allIds));
+			if(allIds.size()>0){
+				eb.send("org.entcore.workspace", j, r -> {
+					List<JsonObject> toSave = new ArrayList<>(postByIds.values());
+					for(String postId : postByIds.keySet()){
+						JsonObject post = postByIds.get(postId);
+						String content = post.getString("content");
+						List<String> ids = idsByPost.get(postId);
+						content = ResourceUtils.transformUrlTo(content, ids,eVisibility);
+						post.put("content", content);
+					}
+					postToSave.complete(toSave);
+				});
+			}else{
+				postToSave.complete(new ArrayList<>());
+			}
+			return postToSave;
+		})//save post content
+		.compose(postsToSave->{
+			if(postsToSave.isEmpty()){
+				return Future.succeededFuture(new JsonArray());
+			}
+			Future<JsonArray> future = Future.future();
+			postService.updateAllContents(postsToSave,res->{
+				if(res.isRight()){
+					future.complete(res.right().getValue());
+				}else{
+					future.fail(res.left().getValue());
+				}
+			});
+			return future;
+		});
 	}
 
 }

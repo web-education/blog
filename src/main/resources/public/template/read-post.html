@@ -1,4 +1,5 @@
 <h2 ng-click="openClosePost(blog, post)">
+		<i class="no-1d" ng-if="post.slided">&#9662</i><i class="no-1d" ng-if="!post.slided">&#9656</i>&nbsp;
 	<span ng-if="post.state !== 'PUBLISHED'" class="warning-text">[[lang.translate(post.state.toLowerCase())]]</span>
 	[[post.title]]<i class="small-arrow"></i>
 	<strong class="subtitle"><i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a> <i18n>blog.on.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]</strong>
@@ -20,7 +21,6 @@
     		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="showEditPost(blog, post)"><i18n>edit</i18n></button>
     		<button ng-if="(blog.myRights.share || post.author.userId === me.userId) && blog.posts.all.indexOf(post) !== 0" ng-click="post.showConfirmUp = true"><i18n>goUp</i18n></button>
 			<button authorize="print" ng-click="printPost(post)"><i18n>print</i18n></button>
-			<button ng-if="blog['publish-type'] === 'RESTRAINT'" authorize="manager" resource="blog"><i18n>unpublish</i18n></button>
     		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="post.showConfirmRemove = true"><i18n>remove</i18n></button>
     	</plus>
 	</div>

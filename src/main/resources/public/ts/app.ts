@@ -1,5 +1,6 @@
 import { model, Collection, Behaviours, ng, routes } from 'entcore';
 import { blogController } from './controller';
+import { blogPublicController } from './controllers/publicBlog';
 
 routes.define(function($routeProvider){
 	$routeProvider
@@ -34,6 +35,7 @@ routes.define(function($routeProvider){
 });
 
 ng.controllers.push(blogController);
+ng.controllers.push(blogPublicController);
 
 console.log("Initializing model");
 

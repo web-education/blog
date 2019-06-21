@@ -21,7 +21,7 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
     trashed: boolean = false;
     title: string;
     shortenedTitle: string;
-    visibility: 'PUBLIC' | 'PRIVATE';
+    visibility: 'PUBLIC' | 'OWNER' = "OWNER";
     icon: string;
     fetchPosts: Array<PostData>
     modified: {
@@ -32,6 +32,7 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
     };
     author: { userId: string, username: string }
     realLastModified: number;
+    slug: string
     get realLastModifiedFormat() {
         return moment(this.realLastModified).format('DD/MM/YYYY');
     }
@@ -107,7 +108,19 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         Folders.unprovide(this);
         await http.delete('/blog/' + this._id);
     }
+    create(item?: Blog, opts?: {}) {
+        const visibility = item && item.visibility ? item.visibility : this.visibility;
+        this.api.create = visibility == "PUBLIC" ? '/blog/pub' : '/blog';
+        return super.create(item, opts)
+    }
+    update(item?: Blog, opts?: {}) {
+        const visibility = item && item.visibility ? item.visibility : this.visibility;
+        this.api.update = visibility == "PUBLIC" ? '/blog/pub/:_id' : '/blog/:_id';
+        return super.update(item, opts)
+    }
     async toTrash() {
+        this.slug = null;
+        this.visibility = "OWNER";
         this.trashed = true;
         await this.save();
         Folders.trash.sync();
@@ -141,6 +154,8 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
     toJSON() {
         const { trashed } = this;
         return {
+            visibility: this.visibility || "OWNER",
+            slug: this.slug,
             trashed,
             _id: this._id,
             title: this.title,
@@ -211,7 +226,8 @@ export class Blogs {
         this.filtered = this.all.filter(
             w => {
                 return Filters.shared && w.author.userId != model.me.userId
-                    || Filters.mine && w.author.userId == model.me.userId;
+                    || Filters.mine && w.author.userId == model.me.userId
+                    || Filters.public && w.visibility == "PUBLIC";
             }
         );
     }

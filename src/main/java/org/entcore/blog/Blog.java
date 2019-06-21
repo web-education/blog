@@ -40,8 +40,8 @@ public class Blog extends BaseServer {
 
     @Override
     public void start() throws Exception {
-        setResourceProvider(new BlogResourcesProvider());
         super.start();
+        setDefaultResourceFilter(new BlogResourcesProvider());
 
         MongoDbConf.getInstance().setCollection("blogs");
 

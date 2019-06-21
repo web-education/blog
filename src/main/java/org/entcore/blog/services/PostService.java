@@ -49,8 +49,15 @@ public interface PostService {
 
 	void get(String blogId, String postId, StateType state, Handler<Either<String, JsonObject>> result);
 
-	void list(String blogId, UserInfos user, Integer page, int limit, String search, final Set<String> states, Handler<Either<String, JsonArray>> result);
+	default void list(String blogId, UserInfos user, Integer page, int limit, String search, final Set<String> states, Handler<Either<String, JsonArray>> result){
+		list(blogId, user, page, limit, search, states, false, result);
+	}
+	void list(String blogId, UserInfos user, Integer page, int limit, String search, final Set<String> states, boolean withContent, Handler<Either<String, JsonArray>> result);
+
 	void list(String blogId, StateType state, UserInfos user, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);
+
+	void listPublic(String blogId, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);
+
 	void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result);
 
 	void submit(String blogId, String postId, UserInfos user, Handler<Either<String, JsonObject>> result);
@@ -73,4 +80,7 @@ public interface PostService {
 
 	void counter(final String blogId, final UserInfos user, final Handler<Either<String, JsonArray>> result);
 
+	void count(final String blogId, final StateType state, final Handler<Either<String, Integer>> result);
+
+	void updateAllContents(List<JsonObject>posts, Handler<Either<String,JsonArray>> handler);
 }

@@ -31,20 +31,22 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public interface BlogService {
+	enum IdType { Slug, Id}
 
 	enum CommentType { NONE, IMMEDIATE, RESTRAINT };
 
 	enum PublishType { IMMEDIATE, RESTRAINT };
 
 	List<String> FIELDS = Arrays.asList("author", "title", "description",
-			"thumbnail", "comment-type", "created", "modified", "shared", "publish-type");
+			"thumbnail", "comment-type", "created", "modified", "shared", "publish-type", "visibility", "slug");
 
 	List<String> UPDATABLE_FIELDS = Arrays.asList("title", "description",
-			"thumbnail", "comment-type", "modified", "publish-type", "trashed");
+			"thumbnail", "comment-type", "modified", "publish-type", "trashed", "visibility", "slug");
 
-	void create(JsonObject blog, UserInfos author, Handler<Either<String, JsonObject>> result);
+	void create(JsonObject blog, UserInfos author, boolean isPublic, Handler<Either<String, JsonObject>> result);
 
 	void update(String blogId, JsonObject blog, Handler<Either<String, JsonObject>> result);
 
@@ -52,6 +54,12 @@ public interface BlogService {
 
 	void get(String blogId, Handler<Either<String, JsonObject>> result);
 
+	void getPublic(String id, IdType type, Handler<Either<String, JsonObject>> result);
+
 	void list(UserInfos user, final Integer page, final String search, Handler<Either<String, JsonArray>> result);
+
+	void isPublicBlog(String blogId, IdType type, Handler<Boolean> handler);
+
+	void isBlogExists(Optional<String> blogId, String slug, Handler<Boolean> handler);
 
 }

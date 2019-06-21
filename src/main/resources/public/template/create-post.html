@@ -2,7 +2,7 @@
         <section class="row">
                         <form data-ng-submit="savePublishedPost()">
                                 <input type="text" data-ng-model="post.title" i18n-placeholder="post.title.placeholder" required class="twelve cell" />
-                                <editor ng-model="post.content"></editor>
+                                <editor ng-model="post.content" visibility="currentVisibility()"></editor>
                                 <button class="right-magnet" ng-if="!blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'" ng-disabled="post.publishing">
                                         <i18n>submit</i18n>
                                 </button>

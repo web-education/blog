@@ -1,4 +1,4 @@
-import { Behaviours, routes, template, idiom, http, notify, ng, angular, skin } from 'entcore'
+import { Behaviours, editorEvents,LinkerEventBody, template, idiom, http, notify, ng, angular, skin } from 'entcore'
 import { LibraryDelegate, LibraryControllerScope } from './controllers/library';
 import { PostModel, BlogModel, CommentModel, ComentsModel, PostsModel, State } from './controllers/commons';
 import { Blog, Folders } from './models';
@@ -17,6 +17,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	showComments: boolean
 	maxResults: number;
 	display: {
+		linkerWarning?: boolean
 		showShare?: boolean
 		showMove?: boolean
 		showPrintComments?: boolean
@@ -68,6 +69,8 @@ interface BlogControllerScope extends LibraryControllerScope {
 	launchSearchingPost(search: string, event?: any): void;
 	isContainerEmpty(name: string): boolean;
 	replaceAudioVideo(s: string): string;
+	copyToClipboard():void;
+	currentVisibility(): string;
 	//blog view
 	trashOneBlog(blog: BlogModel): void;
 	moveOneBlog(blog: BlogModel): void;
@@ -86,6 +89,23 @@ function safeApply(that) {
 		}
 	});
 }
+
+const copyStringToClipboard = (str:string) => {
+	// Create new element
+	var el = document.createElement('textarea');
+	// Set value (string to be copied)
+	el.value = str;
+	// Set non-editable to avoid focus and move outside of view
+	el.setAttribute('readonly', '');
+	(el as any).style = {position: 'absolute', left: '-9999px'};
+	document.body.appendChild(el);
+	// Select text inside element
+	el.select();
+	// Copy text to clipboard
+	document.execCommand('copy');
+	// Remove temporary element
+	document.body.removeChild(el);
+}
 //=== Controller
 export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope: BlogControllerScope, route, model, $location, $rootScope) => {
 	LibraryDelegate($scope, $rootScope, $location)
@@ -100,6 +120,16 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.blogs = model.blogs;
 	$scope.comment = new Behaviours.applicationsBehaviours.blog.model.Comment();
 	$scope.lang = idiom;
+	//=== Events
+	editorEvents.onLinkerAdd.subscribe((body:LinkerEventBody)=>{
+		if($scope.blog && $scope.blog.enablePublic){
+			if(body.link.indexOf("/pub/")==-1){
+				$scope.display.linkerWarning = true;
+				$scope.$apply();
+			}
+		}
+	})
+	//=== Routes
 	var viewPostFactory = function (modal) {
 		return function (params) {
 			template.close('create-post');
@@ -629,6 +659,11 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			&& angular.element('share-panel .share').scope().display.showCloseConfirmation;
 	}
 	//
+	$scope.shareOneBlog = ()=>{
+		$scope.display.showShare = true;
+		$scope.display.publishType = $scope.blog['publish-type'] ||'IMMEDIATE';
+		$scope.$apply();
+	}
 	$scope.trashOneBlog = async (blog: BlogModel) => {
 		let _blog = Folders.root.findRessource(blog._id);
 		if (!_blog) {
@@ -669,6 +704,15 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>")
 		// Video
 		.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
-    }
+		}
+		
+	$scope.copyToClipboard = ()=>{
+		const url = `${$scope.blog.slugDomain}${$scope.blog.slug}`
+		copyStringToClipboard(url)
+		notify.info("blog.copy.clipboard")
+	}
+	$scope.currentVisibility = ()=>{
+		return $scope.blog && $scope.blog.visibility?$scope.blog.visibility.toLowerCase():"";
+	}
 
 }]);
