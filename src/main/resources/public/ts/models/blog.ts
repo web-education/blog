@@ -118,12 +118,37 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         this.api.update = visibility == "PUBLIC" ? '/blog/pub/:_id' : '/blog/:_id';
         return super.update(item, opts)
     }
+    async restore(){
+        this.trashed = false;
+        await this.save();
+        const shouldUnlink = await this.isParentTrashed();
+        if(shouldUnlink){
+            await this.unlinkParent();
+        }
+    }
     async toTrash() {
         this.slug = null;
         this.visibility = "OWNER";
         this.trashed = true;
         await this.save();
         Folders.trash.sync();
+    }
+    async unlinkParent(){
+        const origins = await Folders.findFoldersContaining(this);
+        const promises = origins.map(async origin => {
+            origin.detachRessource(this._id);
+            await origin.save();
+        });
+        await Promise.all(promises);
+    }
+    async isParentTrashed(){
+        const origins = await Folders.findFoldersContaining(this);
+        for(let or of origins){
+            if(or.trashed){
+                return true;
+            }
+        }
+        return false;
     }
     async moveTo(target: Folder | string) {
         const origins = await Folders.findFoldersContaining(this);

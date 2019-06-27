@@ -39,6 +39,7 @@ export interface LibraryControllerScope {
     createBlogView(): void;
     viewBlog(blog: Blog, ev?: Event): void;
     openFolder(folder: Folder): void;
+    openTrashFolder(folder: Folder): void;
     selectionContains(folder: Folder): boolean;
     dropTo(targetItem: string | Folder, $originalEvent): void;
     removeBlog(): void;
@@ -162,6 +163,13 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.currentFolder.sync();
     };
 
+    $scope.openTrashFolder = (folder) =>{
+        resetSelection();
+        template.open('library/folder-content', 'library/trash');
+        $scope.currentFolder = folder;
+        $scope.currentFolder.sync();
+    }
+
     $scope.createFolder = async () => {
         $scope.folder.parentId = $scope.currentFolder._id;
         $scope.displayLib.lightbox['newFolder'] = false;
@@ -266,7 +274,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     };
 
     $scope.restore = async () => {
-        await Folders.trash.restoreSelection();
+        await $scope.currentFolder.restoreSelection();
         $scope.$apply();
     };
 

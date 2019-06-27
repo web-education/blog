@@ -4,6 +4,13 @@ import { Mix, Provider, Selection, Selectable, Eventer } from 'entcore-toolkit';
 import { _ } from 'entcore';
 import { Blog, Blogs } from './blog';
 
+//=== Utils
+function uniq<T> (arrArg : T[]) {
+    return arrArg.filter((elem, pos, arr) => {
+        return arr.indexOf(elem) == pos;
+    });
+}
+//
 export class BaseFolder implements Selectable {
     private _ressources: Blogs;
     selected: boolean;
@@ -166,6 +173,24 @@ class HierarchicalFolder extends BaseFolder {
     detachRessource(id: string) {
         this.ressourceIds = this.ressourceIds.filter(r => r != id);
     }
+
+    async restoreSelection(): Promise<void> {
+        //get folders and resources recursively
+        const uniqFolders: Folder[] = uniq(this.selection.filter(f=> f instanceof Folder)//only folders
+                                    .map(f => f as Folder)//cast to folder
+                                    );//return array
+        const uniqResources : Blog[] = uniq(this.selection.filter(f=> f instanceof Blog) as Blog[]);
+        // restore folders FIRST (resource are unlink if parent still trashed)
+        for (let item of uniqFolders) {
+            await item.restore();
+        }
+        // restore resources
+        for (let item of uniqResources) {
+            await item.restore();
+            
+        }
+        await this.sync();
+    }
 }
 
 export class Folder extends HierarchicalFolder implements Shareable {
@@ -213,12 +238,35 @@ export class Folder extends HierarchicalFolder implements Shareable {
             ressourceIds: this.ressourceIds
         }
     }
-
+    async restore(){
+        this.trashed = false;
+        await this.save();
+        const ressources = await Folders.ressources();
+        const folders = await Folders.folders();
+        const parent = folders.find(f=>f._id==this.parentId);
+        const shouldUnlink = parent && parent.trashed;
+        if(shouldUnlink){
+            await this.moveTo("root")
+        }
+        //restore children
+        const children = folders.filter(f=>f.parentId==this._id);
+        for(let child of children){
+            await child.restore();
+        }
+        //restore attached ressources
+        const cRes = ressources.filter(res=>this.ressourceIds.indexOf(res._id)>-1); 
+        for(let res of cRes){
+            await res.restore();
+        }
+    }
     async toTrash(): Promise<void> {
         this.trashed = true;
         await this.ressources.toTrash();
-        await Folders.trash.sync();
         await this.saveChanges();
+        for(let child of this.children.all){
+            await child.toTrash();
+        }
+        await Folders.trash.sync();
         await this.sync();
     }
 
@@ -243,6 +291,22 @@ export class Folder extends HierarchicalFolder implements Shareable {
     async remove(): Promise<void> {
         await http.delete('/blog/folder/' + this._id);
         await this.sync();
+    }
+
+    getRessourcesRecursively(){
+        let ressources = [...this.ressources.all];
+        for(let child of this.children.all){
+            ressources = ressources.concat(child.getRessourcesRecursively());
+        }
+        return ressources;
+    }
+
+    getChildrenRecursively(){
+        let children = [...this.children.all];
+        for(let child of this.children.all){
+            children = children.concat(child.getChildrenRecursively());
+        }
+        return children;
     }
 }
 
@@ -320,18 +384,9 @@ export class Trash extends HierarchicalFolder {
         this.children.deselectAll();
         await Folders.trash.sync();
     }
-
-    async restoreSelection(): Promise<void> {
-        for (let item of this.selection) {
-            item.trashed = false;
-            await item.save();
-        }
-        await this.sync();
-    }
 }
 
 export class Folders {
-    //TODO public blog
     //private static publicRessourceProvider: Provider<Blog> = new Provider<Blog>('/blog/pub/list/all', Blog);
     private static _ressourceProvider: Provider<Blog>;
     private static _folderProvider: Provider<Folder>;
@@ -351,14 +406,7 @@ export class Folders {
         let ressources: Blog[];
         //wait for behaviours before loading blogs
         await new Blog().rights.fromBehaviours();
-        if (model.me) {
-            ressources = await this.ressourceProvider.data();
-        }
-        else {
-            //TODO
-            //ressources = await this.publicRessourceProvider.data();
-            ressources = await this.ressourceProvider.data();
-        }
+        ressources = await this.ressourceProvider.data();
         //sort by real last modified
         ressources = ressources.sort((a,b)=>{
             return b.realLastModified - a.realLastModified;
