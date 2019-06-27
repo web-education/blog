@@ -34,11 +34,10 @@
 					<div class="twelve cell horizontal-spacing-twice bottom-spacing">
 						<label class="checkbox">
 							<input type="checkbox" ng-model="blog.enablePublic" />
-							<span></span>
+							<span>
+								<i18n>blog.url.info</i18n>
+							</span>
 						</label>
-						<span>
-							<i18n>blog.url.info</i18n>
-						</span>
 					</div>
 					<div class="twelve cell horizontal-spacing-twice bottom-spacing flex-row align-baseline" ng-show="blog.enablePublic">
 						<a class="cell" href="javascript:void(0)">[[blog.slugDomain]]</a>
