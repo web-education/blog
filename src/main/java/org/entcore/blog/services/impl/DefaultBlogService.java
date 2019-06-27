@@ -74,13 +74,15 @@ public class DefaultBlogService implements BlogService{
 				.put("comment-type", commentType.name())
 				.put("publish-type", publishType.name())
 				.put("shared", new JsonArray());
+		List<String> fields = new ArrayList<>(FIELDS);
 		if (isPublic) {
 		    blog.put("visibility", VisibilityFilter.PUBLIC.name());
         } else {
 		    blog.put("visibility", VisibilityFilter.OWNER.name());
-		    blog.put("slug","");
+		    blog.remove("slug");//remove field (sparse index)
+			fields.remove("slug");
         }
-		JsonObject b = Utils.validAndGet(blog, FIELDS, FIELDS);
+		JsonObject b = Utils.validAndGet(blog, FIELDS, fields);
 		if (validationError(result, b)) return;
 		mongo.save(BLOG_COLLECTION, b, new Handler<Message<JsonObject>>() {
 			@Override
@@ -109,6 +111,12 @@ public class DefaultBlogService implements BlogService{
 				blog.remove("publish-type");
 			}
 		}
+		//
+		String visibility = blog.getString("visibility", "");
+		if(!VisibilityFilter.PUBLIC.name().equals(visibility)){
+			blog.remove("slug");//remove field (sparse index)
+		}
+		//
 		JsonObject b = Utils.validAndGet(blog, UPDATABLE_FIELDS, Collections.<String>emptyList());
 		if (validationError(result, b)) return;
 		QueryBuilder query = QueryBuilder.start("_id").is(blogId);
