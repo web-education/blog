@@ -119,19 +119,26 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         return super.update(item, opts)
     }
     async restore(){
-        this.trashed = false;
-        await this.save();
-        const shouldUnlink = await this.isParentTrashed();
-        if(shouldUnlink){
-            await this.unlinkParent();
+        if(this.owner.userId==model.me.userId || this.myRights.manager){
+            this.trashed = false;
+            await this.save();
+            const shouldUnlink = await this.isParentTrashed();
+            if(shouldUnlink){
+                await this.unlinkParent();
+            }
         }
     }
     async toTrash() {
-        this.slug = null;
-        this.visibility = "OWNER";
-        this.trashed = true;
-        await this.save();
-        Folders.trash.sync();
+        if(this.owner.userId==model.me.userId || this.myRights.manager){
+            this.slug = null;
+            this.visibility = "OWNER";
+            this.trashed = true;
+            await this.save();
+            Folders.trash.sync();
+        }else{
+            //shared ressources are moved to root
+            await this.unlinkParent();
+        }
     }
     async unlinkParent(){
         const origins = await Folders.findFoldersContaining(this);
