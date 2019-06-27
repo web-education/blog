@@ -127,6 +127,13 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             if (isNew && $scope.currentFolder && $scope.currentFolder._id) {
                 await blog.moveTo($scope.currentFolder as Folder);
             }
+            if(isNew){
+                if(blog.visibility=="PUBLIC"){
+                    Filters.public = true;
+                }else {
+                    Filters.mine = true;
+                }
+            }
             $location.path("/list-blogs");
             if ($scope.currentFolder) {
                 await $scope.currentFolder.sync();
