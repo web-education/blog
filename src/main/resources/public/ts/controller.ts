@@ -17,6 +17,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	showComments: boolean
 	maxResults: number;
 	display: {
+		editingPublicBlog?: boolean
 		linkerWarning?: boolean
 		showShare?: boolean
 		showMove?: boolean
@@ -340,9 +341,11 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 			//model.blogs.syncPag(function () { $scope.$apply(); }, false, $scope.display.search);
 		},
 		editBlog: function (params) {
+			$scope.display.editingPublicBlog = undefined;
 			$scope.blog = model.blogs.findWhere({ _id: params.blogId });
 			const callback = () => {
 				if ($scope.blog) {
+					$scope.display.editingPublicBlog = $scope.blog.enablePublic;
 					template.open('main', 'edit-blog');
 				}
 				else {

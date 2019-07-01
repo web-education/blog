@@ -8,7 +8,9 @@
 <article class="twelve cell">
 	<form ng-submit="saveProperties()" name="blogForm">
 		<div class="info" ng-if="blog.enablePublic">
-			<i18n>blog.url.warning</i18n>
+			<i18n ng-if="display.editingPublicBlog === undefined">blog.url.warning</i18n>
+			<i18n ng-if="display.editingPublicBlog === true">blog.url.warning</i18n>
+			<i18n ng-if="display.editingPublicBlog === false">blog.url.warning.changing</i18n>
 		</div>
 		<div class="row rigid-grid">
 			<div class="two cell clip height-two three-mobile" loading-panel="upload-blog-thumbnail">
