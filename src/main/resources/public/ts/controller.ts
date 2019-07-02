@@ -17,6 +17,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	showComments: boolean
 	maxResults: number;
 	display: {
+		confirmRemoveBlogPublic?:boolean
 		editingPublicBlog?: boolean
 		linkerWarning?: boolean
 		showShare?: boolean
@@ -74,6 +75,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	currentVisibility(): string;
 	//blog view
 	trashOneBlog(blog: BlogModel): void;
+	confirmTrashOneBlog():void;
 	moveOneBlog(blog: BlogModel): void;
 	updateOnePublishType(blog: BlogModel | BlogModel[]): void;
 	shareOneBlog(): void;
@@ -667,7 +669,9 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		$scope.display.publishType = $scope.blog['publish-type'] ||'IMMEDIATE';
 		$scope.$apply();
 	}
-	$scope.trashOneBlog = async (blog: BlogModel) => {
+	//
+	let _trashingBlog:BlogModel=null;
+	const trashOneBlog = async (blog:BlogModel) =>{
 		let _blog = Folders.root.findRessource(blog._id);
 		if (!_blog) {
 			_blog = new Blog({ _id: blog._id } as any);
@@ -680,6 +684,25 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		await Folders.trash.sync();
 		$scope.$apply();
 		notify.info('blog.selection.trashed.one');
+	}
+	$scope.trashOneBlog = async (blog: BlogModel) => {
+		if(blog.enablePublic){
+			_trashingBlog = blog;
+			$scope.display.confirmRemoveBlogPublic = true;
+			$location.path("/list-blogs");
+		}else{
+			$location.path("/list-blogs");
+			trashOneBlog(blog);
+		}
+	}
+	$scope.confirmTrashOneBlog = async () => {
+		try {
+			await trashOneBlog(_trashingBlog)
+		} finally {
+			_trashingBlog = null;
+			$scope.display.confirmRemoveBlogPublic = false;
+			safeApply($scope)
+		}
 	}
 	$scope.moveOneBlog = async (blog: BlogModel) => {
 		const _blog = Folders.root.findRessource(blog._id) || new Blog({ _id: blog._id } as any);

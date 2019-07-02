@@ -132,3 +132,41 @@
 		<container template="library/move"></container>
 	</div>
 </lightbox>
+<!--CONFIRM REMOVE PUBLIC-->
+<lightbox show="display.confirmRemoveBlogPublic" on-close="display.confirmRemoveBlogPublic = false">
+	<div class="medium-block-container">
+		<h2>
+			<i18n>remove</i18n>
+		</h2>
+		<p>
+			<i18n>confirm.remove.blog.public</i18n>
+		</p>
+		<div class="row">
+			<button ng-click="confirmTrashOneBlog()" class="right-magnet">
+				<i18n>remove</i18n>
+			</button>
+			<button type="button" ng-click="display.confirmRemoveBlogPublic = false" class="right-magnet cancel">
+				<i18n>cancel</i18n>
+			</button>
+		</div>
+	</div>
+</lightbox>
+<!--CONFIRM REMOVE PUBLIC SELECTION-->
+<lightbox show="display.confirmRemoveBlogsPublic" on-close="display.confirmRemoveBlogsPublic = false">
+	<div class="medium-block-container">
+		<h2>
+			<i18n>remove</i18n>
+		</h2>
+		<p>
+			<i18n>confirm.remove.blogs.public</i18n>
+		</p>
+		<div class="row">
+			<button ng-click="trashSelection()" class="right-magnet">
+				<i18n>remove</i18n>
+			</button>
+			<button type="button" ng-click="display.confirmRemoveBlogsPublic = false" class="right-magnet cancel">
+				<i18n>cancel</i18n>
+			</button>
+		</div>
+	</div>
+</lightbox>

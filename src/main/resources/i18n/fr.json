@@ -35,6 +35,8 @@
   "blog.comment.update.date": "modifié le",
   "blog.comment.update.by": "par",
   "confirm.remove.blog": "Voulez-vous vraiment supprimer ce blog?",
+  "confirm.remove.blog.public": "Attention, en supprimant ce blog public il sera déplacé dans la corbeille et deviendra privé, êtes vous sûr de vouloir supprimer ce blog public ?",
+  "confirm.remove.blogs.public": "Attention, la sélection contient des blogs publics. Ils seront déplacés dans la corbeille et deviendront privés, êtes-vous sûr de vouloir supprimer ces blogs publics?",
   "confirm.remove.post": "Voulez-vous vraiment supprimer ce billet?",
   "confirm.up.post": "Voulez-vous vraiment remonter ce billet en première position ?",
   "draft": "(Brouillon)",

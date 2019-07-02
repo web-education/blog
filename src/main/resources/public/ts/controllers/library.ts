@@ -34,6 +34,7 @@ export interface LibraryControllerScope {
     searchFolder(folder: Folder): void;
     createFolder(): void;
     trashSelection(): void;
+    tryTrashSelection():void
     removeSelection(): void;
     duplicateBlogs(): void;
     createBlogView(): void;
@@ -50,6 +51,7 @@ export interface LibraryControllerScope {
         warningDuplicate?: boolean
         publishType?: 'IMMEDIATE' | 'RESTRAINT'
         confirmRemoveBlog?: boolean
+        confirmRemoveBlogsPublic?:boolean
     }
 }
 export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $location) {
@@ -184,12 +186,26 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         await $scope.folder.save();
         $scope.folder = new Folder();
     };
-
-    $scope.trashSelection = async () => {
+    const doTrashSelection = async () =>{
         $scope.closeLightbox('confirmRemove');
+        $scope.display.confirmRemoveBlogsPublic = false;
         await $scope.currentFolder.trashSelection();
+        await $scope.currentFolder.sync();
+        await Folders.trash.sync();
         $scope.$apply();
         notify.info('blog.selection.trashed');
+    }
+    $scope.tryTrashSelection = async () => {
+        const founded = $scope.currentFolder.selection.filter(f => f instanceof Blog).map(f => f as Blog).findIndex(f => f.visibility == "PUBLIC");
+        if (founded > -1) {
+            $scope.display.confirmRemoveBlogsPublic = true;
+        } else {
+            await doTrashSelection();
+        }
+    }
+
+    $scope.trashSelection = async () => {
+        await doTrashSelection();
     }
 
     $scope.removeSelection = async () => {
