@@ -23,6 +23,7 @@
 
 package org.entcore.blog;
 
+import fr.wseduc.mongodb.MongoDb;
 import org.entcore.blog.controllers.BlogController;
 import org.entcore.blog.controllers.FoldersController;
 import org.entcore.blog.controllers.PostController;
@@ -58,7 +59,7 @@ public class Blog extends BaseServer {
         conf.setCollection(BLOGS_COLLECTION);
         conf.setResourceIdLabel("id");
 
-        addController(new BlogController());
+        addController(new BlogController(MongoDb.getInstance()));
         addController(new PostController());
         addController(new FoldersController("blogsFolders"));
     }

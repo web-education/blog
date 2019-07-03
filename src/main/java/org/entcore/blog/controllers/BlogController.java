@@ -29,6 +29,8 @@ import static org.entcore.common.user.UserUtils.getUserInfos;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.mongodb.QueryBuilder;
+import fr.wseduc.mongodb.MongoQueryBuilder;
 import io.vertx.core.Future;
 import org.entcore.blog.Blog;
 import org.entcore.blog.security.ShareAndOwnerBlog;
@@ -77,6 +79,11 @@ public class BlogController extends BaseController {
 	private BlogTimelineService timelineService;
 	private ShareService shareService;
 	private EventStore eventStore;
+	private final MongoDb mongo;
+
+	public BlogController(MongoDb mongo){
+		this.mongo = mongo;
+	}
 
 	private enum BlogEvent {
 		ACCESS
@@ -488,11 +495,14 @@ public class BlogController extends BaseController {
 						shareService.share(user.getUserId(), blogId, share, r -> {
 							if (r.isRight()) {
 								JsonArray nta = r.right().getValue().getJsonArray("notify-timeline-array");
+								boolean sendNotification = false;
 								if (nta != null) {
+									sendNotification = true;
 									timelineService.notifyShare(request, blogId, user, nta,
 											getBlogUri(request, blogId));
 								}
 								renderJson(request, r.right().getValue());
+								doShareSucceed(request, blogId, user, share, r.right().getValue(), sendNotification);
 							} else {
 								JsonObject error = new JsonObject().put("error", r.left().getValue());
 								renderJson(request, error, 400);
@@ -732,6 +742,34 @@ public class BlogController extends BaseController {
 				}
 			});
 			return future;
+		});
+	}
+
+	private void cleanFolders(String id, UserInfos user, List<String> recipientIds){
+		//owner style keep the reference to the ressource
+		JsonArray jsonRecipients = new JsonArray(recipientIds).add(user.getUserId());
+		JsonObject query = MongoQueryBuilder.build(QueryBuilder.start("ressourceIds").is(id).and("owner.userId").notIn(jsonRecipients));
+		JsonObject update = new JsonObject().put("$pull", new JsonObject().put("ressourceIds", new JsonObject().put("$nin",jsonRecipients)));
+		mongo.update("blogsFolders", query, update, message -> {
+			JsonObject body = message.body();
+			if (!"ok".equals(body.getString("status"))) {
+				String err = body.getString("error", body.getString("message", "unknown cleanFolder Error"));
+				log.error("[cleanFolders] failed to clean folder because of: "+err);
+			}
+		});
+	}
+
+	public void doShareSucceed(HttpServerRequest request, String id, UserInfos user,JsonObject sharePayload, JsonObject result, boolean sendNotify){
+		Set<String> userIds = sharePayload.getJsonObject("users").getMap().keySet();
+		Set<String> groupIds = sharePayload.getJsonObject("users").getMap().keySet();
+		UserUtils.getUserIdsForGroupIds(groupIds,user.getUserId(),this.eb, founded->{
+			if(founded.succeeded()){
+				List<String> userToKeep = new ArrayList<>(userIds);
+				userToKeep.addAll(founded.result());
+				cleanFolders(id, user, userToKeep);
+			}else{
+				log.error("[doShareSucceed] failed to found recipient because:",founded.cause());
+			}
 		});
 	}
 
