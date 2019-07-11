@@ -17,7 +17,8 @@ interface BlogPublicControllerScope {
     currentBlog: BlogModel
     blog: BlogModel;
     lang: typeof idiom;
-    showComments:boolean
+    showComments:boolean;
+    printed: boolean;
     $apply: any;
     replaceAudioVideo(s:string):string
     preparePrint(blog: BlogModel): void
@@ -69,7 +70,26 @@ export const blogPublicController = ng.controller('BlogPublicController', ['$sco
             let counter = $scope.blog.posts.length();
             if (counter === 0) $scope.$apply();
             setTimeout(()=>{
-                window.print()
+                const imgs = jQuery(document).find("img").toArray();
+                for(let img of imgs){
+                    img.onerror=(()=>{
+                        (img as any).error = true;
+                    })
+                }
+                const isComplete = (img)=>{
+                    return img.complete || (img.context && img.context.complete)
+                }
+                $scope.printed = false;
+                const it = setInterval(()=>{
+                    const pending = imgs.filter(img=>!(img as any).error && !isComplete(img));
+                    if(pending.length == 0){
+                        clearInterval(it);
+                        if(!$scope.printed){
+                            $scope.printed = true;
+                            window.print()
+                        }
+                    }
+                },100)
             },1000)
         }, true);
     }

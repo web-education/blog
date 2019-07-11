@@ -16,6 +16,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	currPost: string;
 	showComments: boolean
 	maxResults: number;
+	printed: boolean;
 	display: {
 		confirmRemoveBlogPublic?:boolean
 		editingPublicBlog?: boolean
@@ -296,9 +297,28 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 					let countDown = $scope.blog.posts.length();
 					let onFinish = function () {
 						if (--countDown <= 0) {
-							setTimeout(function () {
-								window.print()
-							}, 1000);
+							setTimeout(()=>{
+								const imgs = jQuery(document).find("img").toArray();
+								for(let img of imgs){
+									img.onerror=(()=>{
+										(img as any).error = true;
+									})
+								}
+								const isComplete = (img)=>{
+									return img.complete || (img.context && img.context.complete)
+								}
+								$scope.printed = false;
+								const it = setInterval(()=>{
+									const pending = imgs.filter(img=>!(img as any).error && !isComplete(img));
+									if(pending.length == 0){
+										clearInterval(it);
+										if(!$scope.printed){
+											$scope.printed = true;
+											window.print()
+										}
+									}
+								},100)
+							},1000)
 						}
 					};
 					if (countDown === 0) {
