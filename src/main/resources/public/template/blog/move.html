@@ -1,36 +1,71 @@
-﻿<h2><i18n>move</i18n></h2>
-<hr class="row" />
-
-<script type="text/ng-template" id="folder-management">
-    <a 
-       ng-class="{ selected: displayLib.targetFolder === f }" 
-       ng-click="displayLib.targetFolder = f"
-        ng-if="!selectionContains(f)">
-        [[f.displayName]]
-    </a>
-    <ul class="row" ng-if="!selectionContains(f)">
-        <li ng-repeat="f in f.children.all" ng-include="'folder-management'"></li>
-    </ul>
-</script>
-
+<h2>Publier dans la bibliothèque</h2>
 <div class="row">
-    <nav class="vertical">
-        <nav class="vertical" ng-init="f=root">
-            <ul>
-                <li data-ng-include="'folder-management'"></li>
-            </ul>
-        </nav>
-    </nav>
-    <a ng-if="displayLib.targetFolder && !displayLib.newFolder" ng-click="displayLib.newFolder = true" class="twelve cell vertical-spacing">
-        <i18n>blog.folder.create.new</i18n>
-    </a>
-    <div class="row vertical-spacing" ng-if="displayLib.newFolder">
-        <input type="text" ng-model="folder.name" class="cell five" />
-        <button ng-click="createFolder(); displayLib.newFolder = false;" class="cell"><i18n>create</i18n></button>
-    </div>
-    <hr class="row" />
-    <div class="row">
-        <button ng-click="moveOneBlog(blog)" class="right-magnet" ng-disabled="!displayLib.targetFolder"><i18n>move</i18n></button>
-        <button type="button" class="cancel right-magnet" ng-click="display.showMove = false"><i18n>cancel</i18n></button>
-    </div>
+<p class="medium-importance">La bibliothèque est un espace privé de partage d'activité numériques entre enseignants qui utilisent les mêmes outils. <a href="">En savoir plus</a></p>
+<p class="small-text italic-text medium-importance">Tous les champs suivis d'une étoile (*) sont obligatoires.</p>
 </div>
+<div class="row">
+  <form>
+    <div class="row top-spacing-four">
+      <label class="cell twelve bold" for="">Titre (maximum XX caractères) :</label>
+      <input class="cell twelve top-spacing-twice" type="text" placeholder="Veuillez entrer le nom de votre activité">
+    </div>
+    <div class="row top-spacing-twice">
+      <div class="cell ten">
+        <label class="bold" for="">Vignette de l'activité :</label>
+        <div class="vertical-spacing-twice horizontal-spacing-twice ">
+          <file-picker-list></file-picker-list>
+        </div>
+      </div>
+      <div class="cell two right-magnet">
+        <label class="bold" for="">Aperçu :</label>
+        <div class="vertical-spacing-twice">
+          <img src="http://moncarrevert.com/wp-content/uploads/2014/10/Image_01-325x325.png" alt="">
+        </div>
+      </div>
+    </div>
+    <div class="row top-spacing-twice">
+      <label class="cell five bold" for="">Type d'activité :</label>
+      <div class="cell five">
+        <select-list></select-list>
+      </div>
+    </div>
+    <div class="row top-spacing-twice">
+      <label class="cell five bold"for="">Discipline :</label>
+      <select required class="cell five"></select>
+    </div>
+    <div class="row top-spacing-twice">
+      <label class="cell five bold" for="">Âge des élèves :</label>
+      <!-- A intégrer quand on aura choisit la place dans infra-front :
+      https://codepen.io/sakamies/pen/qOEGLJ -->
+      <input class="cell five" type="range" multiple min="0" step="1" max="10" data-values="1 9">
+    </div>
+    <div class="row top-spacing-twice">
+      <label class="cell five bold" for="">Langues :</label>
+      <select class="cell five"></select>
+    </div>
+    <div class="row top-spacing-twice">
+      <label class="cell twelve bold" for="">Description et contexte de l'activité :</label>
+      <textarea name="name" rows="8" cols="80" placeholder="Décrivez-nous la ressource et les objectifs pédagogiques que vous essayez d'atteindre."></textarea>
+    </div>
+    <div class="row top-spacing-twice">
+      <label class="bold" for="">Recherchez et ajoutez des mots clés (5 maximum) :</label>
+      <recipient-list>
+      </recipient-list>
+    </div>
+    <div class="row top-spacing-twice">
+      <input type="checkbox" name="" value="">
+      <label for="">Je suis d'accord pour publier le sujet en Creative Commons
+        <a href="https://creativecommons.org/licenses/by/4.0/deed.fr">
+          <img height="16px" src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by.svg" alt="Creative Commons BY">
+        </a>
+      </label>
+    </div>
+    <div class="row top-spacing-ten">
+        <p class="cell seven medium-importance small-text bottom-magnet">
+          <i class="help"></i>
+          Besoin d'aide? Consulter l'aide en ligne ou contactez-nous via l'application Assistance ENT
+        </p>
+        <!-- Le bouton "publier" reste griser tant que la personne n'a pas coché la case pour la licence -->
+        <button type="submit" class="right-magnet"><i18n>publish</i18n></button>
+        <button type="button" class="cancel right-magnet"><i18n>cancel</i18n></button>
+    </div>
