@@ -551,6 +551,7 @@ Behaviours.register('blog', {
 			createFolder: 'org.entcore.blog.controllers.FoldersController|add',
 			create: 'org.entcore.blog.controllers.BlogController|create',
 			createPublic: 'org.entcore.blog.controllers.BlogController|createPublicBlog',
+			publish: 'org.entcore.blog.controllers.BlogController|publishToLibrary',
 			print: 'org.entcore.blog.controllers.BlogController|print'
 		}
 	},
