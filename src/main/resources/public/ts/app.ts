@@ -1,6 +1,13 @@
 import { model, Collection, Behaviours, ng, routes } from 'entcore';
 import { blogController } from './controller';
 import { blogPublicController } from './controllers/publicBlog';
+import { BlogModel } from "./controllers/commons";
+
+ng.configs.push(ng.config(['libraryServiceProvider', function(libraryServiceProvider) {
+	libraryServiceProvider.setApplicationShareToLibraryEndpointFn(function(id: string) {
+		return `/blog/${id}/library`;
+	});
+}]));
 
 routes.define(function($routeProvider){
 	$routeProvider
@@ -57,4 +64,4 @@ model.build = async function(){
 			await blog.remove();
 		}
 	}
-}
+};

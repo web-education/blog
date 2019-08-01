@@ -1,6 +1,5 @@
-import { ng, template, idiom, notify } from 'entcore';
-import { Folders, Folder, Blog, Filters, BaseFolder, Root, Trash } from '../models';
-import { _ } from 'entcore';
+import { idiom, notify, template } from 'entcore';
+import { BaseFolder, Blog, Filters, Folder, Folders, Root, Trash } from '../models';
 import { BlogModel } from './commons';
 
 export interface LibraryControllerScope {
@@ -19,30 +18,57 @@ export interface LibraryControllerScope {
             properties: boolean
         }
     }
+
     shareBlog(): void
+
     restore(): void;
+
     move(): void;
+
     open(blog: Blog): void;
+
     openRoot(): void;
+
     openTrash(): void;
+
     editBlogProperties(): void;
+
     lightbox(name: string, data?: any): void;
+
     closeLightbox(name: string, data?: any): void;
+
     saveProperties(): void;
+
     can(right: string): boolean
+
     searchBlog(blog: Blog): void;
+
     searchFolder(folder: Folder): void;
+
     createFolder(): void;
+
     trashSelection(): void;
-    tryTrashSelection():void
+
+    tryTrashSelection(): void;
+
+    isABlog(item: Blog | Folder): boolean;
+
     removeSelection(): void;
+
     duplicateBlogs(): void;
+
     createBlogView(): void;
+
     viewBlog(blog: Blog, ev?: Event): void;
+
     openFolder(folder: Folder): void;
+
     openTrashFolder(folder: Folder): void;
+
     selectionContains(folder: Folder): boolean;
+
     dropTo(targetItem: string | Folder, $originalEvent): void;
+
     removeBlog(): void;
     isTrashFolder(): boolean;
     hasFiltersActive(): boolean;
@@ -52,9 +78,10 @@ export interface LibraryControllerScope {
         warningDuplicate?: boolean
         publishType?: 'IMMEDIATE' | 'RESTRAINT'
         confirmRemoveBlog?: boolean
-        confirmRemoveBlogsPublic?:boolean
+        confirmRemoveBlogsPublic?: boolean
     }
 }
+
 export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $location) {
     $scope.displayLib = {
         data: undefined,
@@ -65,7 +92,8 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         },
         searchBlogs: "",
         targetFolder: undefined
-    }
+    };
+
     template.open('library/folder-content', 'library/folder-content');
     $scope.currentFolder = Folders.root;
     $scope.currentFolder.sync();
@@ -98,19 +126,21 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
 
         $scope.$apply();
     });
-    //=== Private methods
+
     const resetSelection = () => {
         $scope.currentFolder.deselectAll();
-    }
-    //=== Public methods
+    };
+
     $scope.searchBlog = (item: Blog) => {
         return !$scope.displayLib.searchBlogs || idiom.removeAccents(item.title.toLowerCase()).indexOf(
             idiom.removeAccents($scope.displayLib.searchBlogs).toLowerCase()
         ) !== -1;
     };
+
     $scope.isTrashFolder = () => {
         return $scope.currentFolder instanceof Trash;
-    }
+    };
+
     $scope.searchFolder = (item: Folder) => {
         return !$scope.displayLib.searchBlogs || idiom.removeAccents(item.name.toLowerCase()).indexOf(
             idiom.removeAccents($scope.displayLib.searchBlogs).toLowerCase()
@@ -134,10 +164,10 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             if (isNew && $scope.currentFolder && $scope.currentFolder._id) {
                 await blog.moveTo($scope.currentFolder as Folder);
             }
-            if(isNew){
-                if(blog.visibility=="PUBLIC"){
+            if (isNew) {
+                if (blog.visibility == "PUBLIC") {
                     Filters.public = true;
-                }else {
+                } else {
                     Filters.mine = true;
                 }
             }
@@ -155,7 +185,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
                 console.error(e);
             }
         }
-    }
+    };
 
     $scope.removeBlog = async function () {
         const blog = Folders.root.findRessource($scope.blog._id);
@@ -163,8 +193,12 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             await blog.remove();
         }
         $location.path('/list-blogs');
+<<<<<<< HEAD
         Folders.onChange.next(!((await Folders.ressources()).length || (await Folders.folders()).length)); // ICI
     }
+=======
+    };
+>>>>>>> 52e457a... feat(bpr): #25024, share to library using entcore bus, utils and infra-front provider and directive
 
     $scope.editBlogProperties = () => {
         const blog = $scope.currentFolder.selection[0] as Blog;
@@ -178,12 +212,12 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.currentFolder.sync();
     };
 
-    $scope.openTrashFolder = (folder) =>{
+    $scope.openTrashFolder = (folder) => {
         resetSelection();
         template.open('library/folder-content', 'library/trash');
         $scope.currentFolder = folder;
         $scope.currentFolder.sync();
-    }
+    };
 
     $scope.createFolder = async () => {
         $scope.folder.parentId = $scope.currentFolder._id;
@@ -193,7 +227,8 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.folder = new Folder();
         Folders.onChange.next(!((await Folders.ressources()).length || (await Folders.folders()).length)); // ICI
     };
-    const doTrashSelection = async () =>{
+
+    const doTrashSelection = async () => {
         $scope.closeLightbox('confirmRemove');
         $scope.display.confirmRemoveBlogsPublic = false;
         await $scope.currentFolder.trashSelection();
@@ -201,7 +236,8 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         await Folders.trash.sync();
         $scope.$apply();
         notify.info('blog.selection.trashed');
-    }
+    };
+
     $scope.tryTrashSelection = async () => {
         const founded = $scope.currentFolder.selection.filter(f => f instanceof Blog).map(f => f as Blog).findIndex(f => f.visibility == "PUBLIC");
         if (founded > -1) {
@@ -209,18 +245,22 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         } else {
             await doTrashSelection();
         }
-    }
+    };
+
+    $scope.isABlog = (item: Blog | Folder): boolean => {
+        return item instanceof Blog;
+    };
 
     $scope.trashSelection = async () => {
         await doTrashSelection();
-    }
+    };
 
     $scope.removeSelection = async () => {
         $scope.closeLightbox('confirmRemove');
         await $scope.currentFolder.removeSelection();
         $scope.$apply();
         notify.info('blog.selection.removed');
-    }
+    };
 
     $scope.openTrash = () => {
         resetSelection();
@@ -246,8 +286,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         resetSelection();
         if (item instanceof Blog) {
             $scope.viewBlog(item);
-        }
-        else {
+        } else {
             $scope.openFolder(item);
         }
     };
@@ -285,10 +324,10 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         });
 
         return contains;
-    }
+    };
 
     $scope.move = async () => {
-        $scope.lightbox('move')
+        $scope.lightbox('move');
         let folder = $scope.currentFolder as Folder;
         await folder.moveSelectionTo($scope.displayLib.targetFolder);
         await Folders.root.sync();
@@ -328,9 +367,8 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         });
         if (same) {
             $scope.display.publishType = publishType;
-        }
-        else {
+        } else {
             $scope.display.publishType = undefined;
         }
-    }
+    };
 }

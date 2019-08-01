@@ -40,8 +40,10 @@ import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.common.appregistry.LibraryUtils;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
+import org.entcore.common.http.filter.OwnerOnly;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.request.ActionsUtils;
 import org.entcore.common.neo4j.Neo;
@@ -454,6 +456,13 @@ public class BlogController extends BaseController {
 				});
 			}
 		});
+	}
+
+	@Post("/:blogId/library")
+	@ResourceFilter(OwnerOnly.class)
+	@SecuredAction("blog.publish")
+	public void publishToLibrary(final HttpServerRequest request) {
+        LibraryUtils.share(eb, request);
 	}
 
 	@Put("/share/remove/:blogId")
