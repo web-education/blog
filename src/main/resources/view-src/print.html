@@ -43,8 +43,8 @@
 			<div>
 				<article class="twelve cell" ng-repeat="post in blog.posts.all">
 					<div class="row title-background">
-						<h2 class="upper-title">
-							[[post.title]]</h2>
+						<h3 class="upper-title">
+							[[post.title]]</h3>
 						<strong class="subtitle">
 							<i18n>blog.by</i18n> [[post.author.username]], <i18n>blog.on.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]
 							<span data-ng-if="isCurrentView('lastPosts')">
