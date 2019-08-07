@@ -21,10 +21,10 @@
                 </button>
             </resource-right>
             <resource-right name="manager" resource="currentFolder.selection">
-                <button library item="[[currentFolder.selection[0]._id]]"
+                <button library-resource="currentFolder.selection[0]"
                         workflow="blog.publish"
                         ng-if="currentFolder.selection.length === 1 && isABlog(currentFolder.selection[0])">
-                    <i18n>publish.to.bpr</i18n></button>
+                    <i18n>bpr.publish</i18n></button>
             </resource-right>
         </div>
         <div>
