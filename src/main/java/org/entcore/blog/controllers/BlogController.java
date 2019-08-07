@@ -459,10 +459,16 @@ public class BlogController extends BaseController {
 	}
 
 	@Post("/:blogId/library")
-	@ResourceFilter(OwnerOnly.class)
-	@SecuredAction("blog.publish")
+	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void publishToLibrary(final HttpServerRequest request) {
-        LibraryUtils.share(eb, request);
+        LibraryUtils.publish("Blog", eb, request);
+	}
+
+	@Get("/publish")
+	@SecuredAction("blog.publish")
+	public void publish(final HttpServerRequest request) {
+		// This route is used to create publish Workflow right, nothing to do
+		return;
 	}
 
 	@Put("/share/remove/:blogId")
