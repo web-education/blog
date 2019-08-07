@@ -1,14 +1,11 @@
-<share-panel resources="blog" app-prefix="'blog'" auto-close="true"></share-panel>
-<div class="share" ng-show="!isCloseConfirmLoaded()">
-	<h3><i18n>share.publish.title</i18n></h3>
-	<div class="row publication-option">
-		<label>
-			<input type="radio" name="publish-type" ng-model="display.publishType" ng-change="updateOnePublishType(blog)" value="IMMEDIATE" />
-			<i18n>share.publish.immediate</i18n>
-		</label>
-		<label>
-			<input type="radio" name="publish-type" ng-model="display.publishType" ng-change="updateOnePublishType(blog)" value="RESTRAINT" />
-			<i18n>share.publish.differed</i18n>
-		</label>
-	</div>
-</div>
+<!-- A afficher si tout c'est bien passé -->
+<h2>Votre activité a été publiée avec succès !</h2>
+<i class="congrats"></i>
+<p>Bravo ! Votre activité va permettre d'inspirer d'autres enseignants de la communauté.</p>
+<p>N'hésitez pas à explorer vous-même d'autres activités et à échanger avec d'autres enseignants !</p>
+<button class="right-magnet" href="#">Voir dans la bibliothèque</button>
+
+<!-- A afficher si la ressource n'a pas été publié sur la BPR -->
+<h2>Oups, quelque chose c'est mal passé</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+<p><strong>Rééssayez plus tard.</strong></p>
