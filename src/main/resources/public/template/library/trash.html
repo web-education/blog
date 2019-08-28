@@ -1,5 +1,12 @@
 ﻿<div class="row">
     <div class="fallen dominos">
+      <!-- Si la corbeille est vide -->
+      <div class="emptyscreen">
+          <img class="emptyscreen-image" src="/assets/themes/entcore-css-lib/images/empty-trash.svg">
+          <p class="emptyscreen-footer">
+              <i18n>empty.trash1</i18n>
+          </p>
+      </div>
         <div ng-repeat="folder in currentFolder.children.all | filter:searchFolder">
             <explorer ng-model="folder.selected" class="folder item">
                 <section class="domino" dragstart ng-model="folder._id">

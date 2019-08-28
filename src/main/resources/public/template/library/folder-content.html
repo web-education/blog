@@ -1,4 +1,46 @@
 <div class="fallen dominos">
+  <!-- 1D Création -->
+  <div class="emptyscreen no-2d">
+      <h2 class="emptyscreen-header"><i18n>empty.blog.creation.title</i18n></h2>
+      <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+      <p class="emptyscreen-footer">
+          <i18n>empty.blog.creation</i18n>
+      </p>
+      <a class="button" ng-href="#/edit/new" workflow="blog.create"><i18n>blog.create.blog</i18n></a>
+  </div>
+  <!-- 1D Consultation -->
+  <div class="emptyscreen no-2d">
+      <h2 class="emptyscreen-header"><i18n>empty.blog.consultation.title</i18n></h2>
+      <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+      <p class="emptyscreen-footer">
+          <i18n>empty.blog.consultation</i18n>
+      </p>
+  </div>
+  <!-- 2D Création -->
+  <div class="emptyscreen no-1d">
+      <h2 class="emptyscreen-header"><i18n>empty.blog.creation.title</i18n></h2>
+      <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+      <p class="emptyscreen-footer">
+          <i18n>empty.blog.creation</i18n>
+      </p>
+      <a class="button" ng-href="#/edit/new" workflow="blog.create"><i18n>blog.create.blog</i18n></a>
+  </div>
+  <!-- 2D Consultation -->
+  <div class="emptyscreen no-1d">
+      <h2 class="emptyscreen-header"><i18n>empty.blog.consultation.title</i18n></h2>
+      <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+      <p class="emptyscreen-footer">
+          <i18n>empty.blog.consultation</i18n>
+      </p>
+  </div>
+  <!-- Si les filtres sont tous désactivés -->
+  <div class="emptyscreen">
+      <h2 class="emptyscreen-header"><i18n>empty.filters.title</i18n></h2>
+      <img class="emptyscreen-image__mini" src="/assets/themes/entcore-css-lib/images/empty-filters.svg">
+      <p class="emptyscreen-footer">
+          <i18n>empty.filters</i18n>
+      </p>
+  </div>
     <div ng-repeat="folder in currentFolder.children.all | filter:searchFolder">
         <explorer ng-model="folder.selected" on-open="open(folder)" class="folder item">
             <section class="domino" dragstart ng-model="folder._id" dragdrop="dropTo(folder, $originalEvent)">
