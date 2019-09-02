@@ -594,7 +594,9 @@ public class BlogController extends BaseController {
 				}
 				getUserInfos(eb, request, user -> {
 					if (user != null) {
-						blog.create(data, user, true, defaultResponseHandler(request));
+						changeLogoVisibilityIfNeeded(data, VisibilityFilter.PUBLIC.name()).setHandler(res-> {
+							blog.create(data, user, true, defaultResponseHandler(request));
+						});
 					} else {
 						unauthorized(request);
 					}
@@ -631,6 +633,30 @@ public class BlogController extends BaseController {
 				});
 			});
         });
+	}
+
+	private Future<JsonObject> changeLogoVisibilityIfNeeded(JsonObject blog, String visibility){
+		final VisibilityFilter eVisibility = VisibilityFilter.valueOf(visibility);
+		final String icon = blog.getString("thumbnail");
+		List<String> ids = ResourceUtils.extractIds(icon);
+		if(icon==null || ids.isEmpty()){
+			return Future.succeededFuture(blog);
+		}
+		final String newUrl = ResourceUtils.transformUrlTo(icon,ids,eVisibility);
+		if(newUrl.equals(icon)){
+			return Future.succeededFuture(blog);
+		}
+		//
+		Future<JsonObject> future = Future.future();
+		JsonObject j = new JsonObject()
+				.put("action", "changeVisibility")
+				.put("visibility", visibility)
+				.put("documentIds", new JsonArray(ids));
+		eb.send("org.entcore.workspace", j, r -> {
+			blog.put("thumbnail", newUrl);
+			future.complete(blog);
+		});
+		return future;
 	}
 
 	private Future<JsonArray> changeResourcesVisibility(String blogId, JsonObject data, UserInfos user, String visibility) {
