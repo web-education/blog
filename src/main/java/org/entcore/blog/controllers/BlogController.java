@@ -681,10 +681,9 @@ public class BlogController extends BaseController {
 			return true;
 		})//change logo
 		.compose(changed->{
-			JsonObject blog = futureBlog.result();
-			String icon = blog.getString("thumbnail");
+			String icon = data.getString("thumbnail");
 			List<String> ids = ResourceUtils.extractIds(icon);
-			if(!changed || ids.isEmpty()){
+			if(ids.isEmpty()){
 				return Future.succeededFuture(changed);
 			}
 			//
