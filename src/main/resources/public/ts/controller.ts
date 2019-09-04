@@ -301,7 +301,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 							setTimeout(()=>{
 								const imgs = jQuery(document).find("img").toArray();
 								for(let img of imgs){
-									img.onerror=(()=>{
+									(img as any).onerror=(()=>{
 										(img as any).error = true;
 									})
 								}
