@@ -594,7 +594,9 @@ public class BlogController extends BaseController {
 				}
 				getUserInfos(eb, request, user -> {
 					if (user != null) {
-						blog.create(data, user, true, defaultResponseHandler(request));
+						changeLogoVisibilityIfNeeded(data, VisibilityFilter.PUBLIC.name()).setHandler(res-> {
+							blog.create(data, user, true, defaultResponseHandler(request));
+						});
 					} else {
 						unauthorized(request);
 					}
@@ -633,6 +635,30 @@ public class BlogController extends BaseController {
         });
 	}
 
+	private Future<JsonObject> changeLogoVisibilityIfNeeded(JsonObject blog, String visibility){
+		final VisibilityFilter eVisibility = VisibilityFilter.valueOf(visibility);
+		final String icon = blog.getString("thumbnail");
+		List<String> ids = ResourceUtils.extractIds(icon);
+		if(icon==null || ids.isEmpty()){
+			return Future.succeededFuture(blog);
+		}
+		final String newUrl = ResourceUtils.transformUrlTo(icon,ids,eVisibility);
+		if(newUrl.equals(icon)){
+			return Future.succeededFuture(blog);
+		}
+		//
+		Future<JsonObject> future = Future.future();
+		JsonObject j = new JsonObject()
+				.put("action", "changeVisibility")
+				.put("visibility", visibility)
+				.put("documentIds", new JsonArray(ids));
+		eb.send("org.entcore.workspace", j, r -> {
+			blog.put("thumbnail", newUrl);
+			future.complete(blog);
+		});
+		return future;
+	}
+
 	private Future<JsonArray> changeResourcesVisibility(String blogId, JsonObject data, UserInfos user, String visibility) {
 		final VisibilityFilter eVisibility = VisibilityFilter.valueOf(visibility);
 		final VisibilityFilter inverse = eVisibility.equals(VisibilityFilter.PUBLIC)?VisibilityFilter.OWNER:VisibilityFilter.PUBLIC;
@@ -655,10 +681,9 @@ public class BlogController extends BaseController {
 			return true;
 		})//change logo
 		.compose(changed->{
-			JsonObject blog = futureBlog.result();
-			String icon = blog.getString("thumbnail");
+			String icon = data.getString("thumbnail");
 			List<String> ids = ResourceUtils.extractIds(icon);
-			if(!changed || ids.isEmpty()){
+			if(ids.isEmpty()){
 				return Future.succeededFuture(changed);
 			}
 			//

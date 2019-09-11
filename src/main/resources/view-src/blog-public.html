@@ -13,6 +13,12 @@
         var currentBlog = {{{ blogStr }}};
     </script>
     <script type="text/javascript">var notLoggedIn = true;</script>
+    <style>
+        .no-1d .navbar{
+            position: fixed;
+            top: 0;
+        }
+    </style>
 </head>
 
 <body ng-controller="BlogPublicController" ng-init="setBlog(currentBlog)">
