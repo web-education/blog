@@ -44,7 +44,8 @@ export interface LibraryControllerScope {
     selectionContains(folder: Folder): boolean;
     dropTo(targetItem: string | Folder, $originalEvent): void;
     removeBlog(): void;
-    isTrashFolder(): boolean
+    isTrashFolder(): boolean;
+    hasFiltersActive(): boolean;
     //
     $apply: any
     display: {
@@ -75,6 +76,10 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     $scope.display = {
         publishType: undefined
     };
+
+    $scope.hasFiltersActive = () => {
+        return $scope.filters.mine || $scope.filters.public || $scope.filters.shared
+    }
 
     template.open('library/create-blog', 'library/create-blog');
     template.open('library/toaster', 'library/toaster');
@@ -158,6 +163,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             await blog.remove();
         }
         $location.path('/list-blogs');
+        Folders.onChange.next(!((await Folders.ressources()).length || (await Folders.folders()).length)); // ICI
     }
 
     $scope.editBlogProperties = () => {
@@ -185,6 +191,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         $scope.currentFolder.children.push($scope.folder);
         await $scope.folder.save();
         $scope.folder = new Folder();
+        Folders.onChange.next(!((await Folders.ressources()).length || (await Folders.folders()).length)); // ICI
     };
     const doTrashSelection = async () =>{
         $scope.closeLightbox('confirmRemove');

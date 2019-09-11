@@ -1,7 +1,7 @@
 ﻿<div class="row">
     <div class="fallen dominos">
       <!-- Si la corbeille est vide -->
-      <div class="emptyscreen">
+      <div class="emptyscreen" ng-if="!currentFolder.ressources.all.length && !currentFolder.children.all.length">
           <img class="emptyscreen-image" src="/assets/themes/entcore-css-lib/images/empty-trash.svg">
           <p class="emptyscreen-footer">
               <i18n>empty.trash1</i18n>
