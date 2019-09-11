@@ -80,6 +80,7 @@ interface BlogControllerScope extends LibraryControllerScope {
 	moveOneBlog(blog: BlogModel): void;
 	updateOnePublishType(blog: BlogModel | BlogModel[]): void;
 	shareOneBlog(): void;
+	empty: boolean;
 }
 //=== Utils
 function safeApply(that) {
@@ -751,7 +752,7 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 		// Video
 		.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
 		}
-		
+
 	$scope.copyToClipboard = ()=>{
 		const url = `${$scope.blog.slugDomain}${$scope.blog.slug}`
 		copyStringToClipboard(url)
@@ -760,5 +761,10 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	$scope.currentVisibility = ()=>{
 		return $scope.blog && $scope.blog.visibility?$scope.blog.visibility.toLowerCase():"";
 	}
+
+	$scope.empty = true;
+	Folders.onChange.subscribe((isEmpty: boolean) => {
+		$scope.empty = isEmpty;
+	});
 
 }]);

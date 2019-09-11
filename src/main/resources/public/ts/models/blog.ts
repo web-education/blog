@@ -108,10 +108,12 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
         Folders.unprovide(this);
         await http.delete('/blog/' + this._id);
     }
-    create(item?: Blog, opts?: {}) {
+    async create(item?: Blog, opts?: {}) {
         const visibility = item && item.visibility ? item.visibility : this.visibility;
         this.api.create = visibility == "PUBLIC" ? '/blog/pub' : '/blog';
-        return super.create(item, opts)
+        const ret = super.create(item, opts)
+        Folders.onChange.next(!((await Folders.ressources()).length || (await Folders.folders()).length)); // ICI
+        return ret;
     }
     update(item?: Blog, opts?: {}) {
         const visibility = item && item.visibility ? item.visibility : this.visibility;
