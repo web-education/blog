@@ -5,12 +5,17 @@ import { IdAndLibraryResourceInformation, LibraryServiceProvider } from 'entcore
 import { Blog } from './models';
 
 ng.configs.push(ng.config(['libraryServiceProvider', function (libraryServiceProvider: LibraryServiceProvider<Blog>) {
-    libraryServiceProvider.setPublishUrlGetterFromId(function (id: string) {
-        return `/blog/${id}/library`;
-    });
     libraryServiceProvider.setInvokableResourceInformationGetterFromResource(function () {
         return function (resource: Blog): IdAndLibraryResourceInformation {
-            return {id: resource._id, resourceInformation: {title: resource.title, cover: resource.thumbnail}};
+            return {
+                id: resource._id, 
+                resourceInformation: {
+                    title: resource.title, 
+                    cover: resource.thumbnail,
+                    application: "Blog",
+                    pdfUri: `/blog/print/blog#/print/${resource._id}?comments=true`
+                }
+            };
         };
     });
 }]));

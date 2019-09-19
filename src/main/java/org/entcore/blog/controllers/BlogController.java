@@ -22,16 +22,26 @@
 
 package org.entcore.blog.controllers;
 
-import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
-import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
-import static org.entcore.common.user.UserUtils.getUserInfos;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.mongodb.QueryBuilder;
+import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
+import fr.wseduc.security.ActionType;
+import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.http.BaseController;
+import fr.wseduc.webutils.http.Renders;
+import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.entcore.blog.Blog;
 import org.entcore.blog.security.ShareAndOwnerBlog;
 import org.entcore.blog.services.BlogService;
@@ -40,10 +50,8 @@ import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.services.impl.DefaultPostService;
-import org.entcore.common.appregistry.LibraryUtils;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
-import org.entcore.common.http.filter.OwnerOnly;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.request.ActionsUtils;
 import org.entcore.common.neo4j.Neo;
@@ -56,23 +64,12 @@ import org.entcore.common.utils.ResourceUtils;
 import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.http.RouteMatcher;
 
-import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.rs.Delete;
-import fr.wseduc.rs.Get;
-import fr.wseduc.rs.Post;
-import fr.wseduc.rs.Put;
-import fr.wseduc.security.ActionType;
-import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
-import fr.wseduc.webutils.I18n;
-import fr.wseduc.webutils.http.BaseController;
-import fr.wseduc.webutils.http.Renders;
-import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
+import static org.entcore.common.user.UserUtils.getUserInfos;
 
 public class BlogController extends BaseController {
 
@@ -456,12 +453,6 @@ public class BlogController extends BaseController {
 				});
 			}
 		});
-	}
-
-	@Post("/:blogId/library")
-	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
-	public void publishToLibrary(final HttpServerRequest request) {
-        LibraryUtils.publish("Blog", eb, request);
 	}
 
 	@Get("/publish")
