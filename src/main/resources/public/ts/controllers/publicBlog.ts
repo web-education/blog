@@ -32,7 +32,7 @@ interface BlogPublicControllerScope {
     launchSearchingPost(search: string, event?: Event): void;
 }
 
-export const blogPublicController = ng.controller('BlogPublicController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope: BlogPublicControllerScope, route, model, $location, $rootScope) => {
+export const blogPublicController = ng.controller('BlogPublicController', ['$scope', '$sce', 'route', 'model', '$location', '$rootScope', ($scope: BlogPublicControllerScope, $sce, route, model, $location, $rootScope) => {
     $scope.display = {
         printPost: false,
         searching: false,
@@ -94,11 +94,12 @@ export const blogPublicController = ng.controller('BlogPublicController', ['$sco
         }, true);
     }
     $scope.replaceAudioVideo = function (s: string) {
-        return s &&
+        let res = s &&
             // Audio
-            s.replace(/<div class=\"audio-wrapper.*?\/div>/g, "<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>")
+            s.replace(/<div class=\"audio-wrapper.*?\/div>/g, "<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>");
                 // Video
-                .replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g, "<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
+                //.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g, "<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
+            return $sce.trustAsHtml(res);
     }
     $scope.setBlog = (blog: BlogModel = (window as any).currentBlog) => {
         $scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(blog);

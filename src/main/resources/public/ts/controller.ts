@@ -112,7 +112,7 @@ const copyStringToClipboard = (str:string) => {
 	document.body.removeChild(el);
 }
 //=== Controller
-export const blogController = ng.controller('BlogController', ['$scope', 'route', 'model', '$location', '$rootScope', ($scope: BlogControllerScope, route, model, $location, $rootScope) => {
+export const blogController = ng.controller('BlogController', ['$scope', '$sce', 'route', 'model', '$location', '$rootScope', ($scope: BlogControllerScope, $sce, route, model, $location, $rootScope) => {
 	LibraryDelegate($scope, $rootScope, $location)
 	$scope.template = template;
 	template.open('filters', 'filters');
@@ -746,11 +746,12 @@ export const blogController = ng.controller('BlogController', ['$scope', 'route'
 	}
 
 	$scope.replaceAudioVideo = function (s: string) {
-		return s &&
+		let res =  s &&
 		// Audio
-		s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>")
+		s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>");
 		// Video
-		.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
+		//.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
+		return $sce.trustAsHtml(res);
 		}
 
 	$scope.copyToClipboard = ()=>{
