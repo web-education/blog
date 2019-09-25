@@ -10,15 +10,15 @@
         </div>
         <div ng-if="currentFolder.selectionIsRessources">
             <!-- Exclusive to blogs-->
-            <resource-right name="share" resource="currentFolder.selection">
-                <button ng-click="shareBlog()">
-                    <i18n>share</i18n>
-                </button>
-            </resource-right>
             <resource-right name="removeBlog" resource="currentFolder.selection">
                 <button ng-click="editBlogProperties()" ng-if="currentFolder.selection.length === 1">
                     <i18n>properties</i18n>
                 </button>
+            </resource-right>
+            <resource-right name="share" resource="currentFolder.selection">
+              <button ng-click="shareBlog()">
+                <i18n>share</i18n>
+              </button>
             </resource-right>
             <resource-right name="manager" resource="currentFolder.selection">
                 <button library-resource="currentFolder.selection[0]"
