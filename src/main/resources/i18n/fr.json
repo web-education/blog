@@ -150,5 +150,6 @@
   "blog.public.warning.body": "<strong>Attention!</strong> Vous venez d'ajouter un lien vers un contenu qui n'est pas public. <br/>Les personnes non partagés avec ce contenu ne pourront pas le voir !",
   "blog.understood": "J'ai compris",
   "blog.url.public": "Adresse publique du blog",
-  "blog.copy.clipboard": "L'adresse a été ajoutée au presse papier."
+  "blog.copy.clipboard": "L'adresse a été ajoutée au presse papier.",
+  "blog.label.write.your.comment" : "Saisissez votre commentaire"
 }
