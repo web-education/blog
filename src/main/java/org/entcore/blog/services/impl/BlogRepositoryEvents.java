@@ -40,6 +40,9 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 	public BlogRepositoryEvents(Vertx vertx) {
 		super(vertx);
+
+		this.collectionNameToImportPrefixMap.put(DefaultBlogService.BLOG_COLLECTION, "blog_");
+		this.collectionNameToImportPrefixMap.put(DefaultPostService.POST_COLLECTION, "post_");
 	}
 
 	@Override
@@ -67,6 +70,8 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 			final AtomicBoolean exported = new AtomicBoolean(false);
 
+			Map<String, String> prefixMap = this.collectionNameToImportPrefixMap;
+
 			mongo.find(DefaultBlogService.BLOG_COLLECTION, query, new Handler<Message<JsonObject>>()
 			{
 				@Override
@@ -78,7 +83,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 						results.forEach(elem ->
 						{
 							JsonObject blog = ((JsonObject) elem);
-							blog.put("title","blog_" + blog.getString("title"));
+							blog.put("title", prefixMap.get(DefaultBlogService.BLOG_COLLECTION) + blog.getString("title"));
 						});
 
 						final Set<String> ids = results.stream().map(res -> ((JsonObject)res).getString("_id")).collect(Collectors.toSet());
@@ -96,7 +101,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 									results2.forEach(elem ->
 									{
 										JsonObject post = ((JsonObject) elem);
-										post.put("title","post_" + post.getString("title"));
+										post.put("title", prefixMap.get(DefaultPostService.POST_COLLECTION) + post.getString("title"));
 									});
 
 									createExportDirectory(exportPath, locale, new Handler<String>()
