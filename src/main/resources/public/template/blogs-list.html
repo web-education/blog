@@ -15,7 +15,7 @@
 </script>
 <!--TITLE-->
 <div class="row">
-	<a class="button right-magnet" ng-disabled="isTrashFolder()" ng-href="#/edit/new" workflow="blog.create" class="right-magnet cell" ng-if="!empty">
+	<a class="button right-magnet" ng-hide="isTrashFolder()" ng-href="#/edit/new" workflow="blog.create" class="right-magnet cell" ng-if="!empty">
 		<i18n>blog.create.blog</i18n>
 	</a>
 	<app-title>
@@ -57,31 +57,33 @@
 					</a>
 				</li>
 			</ul>
-			<a class="classic-link" ng-disabled="isTrashFolder()" ng-click="lightbox('newFolder')" workflow="blog.createFolder">
+			<a class="classic-link" ng-hide="isTrashFolder()" ng-click="lightbox('newFolder')" workflow="blog.createFolder">
 				<i18n>blog.folder.new</i18n>
 			</a>
 		</nav>
 	</section>
 	<section class="margin-four">
 		<div class="twelve cell chips">
-			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
-				ng-class="{ selected: filters.mine }">
-				<i class="mine" tooltip="filters.mine"></i>
-				<i18n>filters.mine</i18n>
-				<input type="checkbox" ng-model="filters.mine" />
-			</label>
-			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
-				ng-class="{ selected: filters.shared }">
-				<i class="ic-share" tooltip="filters.sharedBlogs"></i>
-				<i18n>filters.sharedBlogs</i18n>
-				<input type="checkbox" ng-model="filters.shared" />
-			</label>
-			<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
-				ng-class="{ selected: filters.public }">
-				<i class="public" tooltip="filters.publicBlogs"></i>
-				<i18n>filters.publicBlogs</i18n>
-				<input type="checkbox" ng-model="filters.public" />
-			</label>
+			<div ng-hide="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length">
+				<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
+					ng-class="{ selected: filters.mine }">
+					<i class="mine" tooltip="filters.mine"></i>
+					<i18n>filters.mine</i18n>
+					<input type="checkbox" ng-model="filters.mine" />
+				</label>
+				<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
+					ng-class="{ selected: filters.shared }">
+					<i class="ic-share" tooltip="filters.sharedBlogs"></i>
+					<i18n>filters.sharedBlogs</i18n>
+					<input type="checkbox" ng-model="filters.shared" />
+				</label>
+				<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
+					ng-class="{ selected: filters.public }">
+					<i class="public" tooltip="filters.publicBlogs"></i>
+					<i18n>filters.publicBlogs</i18n>
+					<input type="checkbox" ng-model="filters.public" />
+				</label>
+			</div>
 			<container template="library/folder-content"></container>
 		</div>
 	</section>

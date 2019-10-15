@@ -106,7 +106,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     };
 
     $scope.hasFiltersActive = () => {
-        return $scope.filters.mine || $scope.filters.public || $scope.filters.shared
+        return $scope.filters.mine && $scope.filters.public && $scope.filters.shared
     }
 
     template.open('library/create-blog', 'library/create-blog');

@@ -425,6 +425,7 @@ export class Folders {
             return b.realLastModified - a.realLastModified;
         })
         Folders.cacheLength.ressource = ressources.length;
+        // console.log("next ressources", !ressources.length && !Folders.cacheLength.folders);
         Folders.onChange.next(!ressources.length && !Folders.cacheLength.folders); // ICI
         return ressources;
     }
@@ -432,6 +433,7 @@ export class Folders {
     static async folders(): Promise<Folder[]> {
         let folders: Folder[] = await this.folderProvider.data();
         Folders.cacheLength.folders = folders.length;
+        // console.log("next folders", !folders.length && !Folders.cacheLength.ressource);
         Folders.onChange.next(!folders.length && !Folders.cacheLength.ressource); // ICI
         return folders;
     }
