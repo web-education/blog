@@ -70,7 +70,6 @@ export interface LibraryControllerScope {
     dropTo(targetItem: string | Folder, $originalEvent): void;
 
     removeBlog(): void;
-    printBlog(blog: Blog, printComments: boolean): void;
     isTrashFolder(): boolean;
     hasFiltersActive(): boolean;
     //
@@ -195,14 +194,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         }
         $location.path('/list-blogs');
         Folders.onChange.next(!((await Folders.ressources()).length || (await Folders.folders()).length)); // ICI
-    }
-
-    $scope.printBlog = async function(blog: Blog, printComments: boolean)
-    {
-        if(blog)
-            window.open(`/blog/print/blog#/print/${blog._id}?comments=${printComments}`, '_blank');
-
-    }
+    };
 
     $scope.editBlogProperties = () => {
         const blog = $scope.currentFolder.selection[0] as Blog;
