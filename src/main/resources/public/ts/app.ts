@@ -1,7 +1,8 @@
 import { Behaviours, model, ng, routes } from 'entcore';
 import { blogController } from './controller';
 import { blogPublicController } from './controllers/publicBlog';
-import { IdAndLibraryResourceInformation, LibraryServiceProvider } from 'entcore/types/src/ts/library/library.service';
+import { IdAndLibraryResourceInformation } from 'entcore/types/src/ts/library/library.types';
+import { LibraryServiceProvider } from 'entcore/types/src/ts/library/library.service';
 import { Blog } from './models';
 
 ng.configs.push(ng.config(['libraryServiceProvider', function (libraryServiceProvider: LibraryServiceProvider<Blog>) {
