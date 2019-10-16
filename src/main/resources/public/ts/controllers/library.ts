@@ -193,12 +193,8 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             await blog.remove();
         }
         $location.path('/list-blogs');
-<<<<<<< HEAD
         Folders.onChange.next(!((await Folders.ressources()).length || (await Folders.folders()).length)); // ICI
     }
-=======
-    };
->>>>>>> 52e457a... feat(bpr): #25024, share to library using entcore bus, utils and infra-front provider and directive
 
     $scope.editBlogProperties = () => {
         const blog = $scope.currentFolder.selection[0] as Blog;
