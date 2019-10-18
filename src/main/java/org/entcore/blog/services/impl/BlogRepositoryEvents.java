@@ -146,6 +146,20 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 	}
 
 	@Override
+	protected void transformDocumentBeforeImport(JsonObject document, String collectionName, String userId, String userLogin, String userName)
+	{
+		if(collectionName == DefaultBlogService.BLOG_COLLECTION)
+		{
+			JsonObject owner = document.getJsonObject("owner");
+			owner.put("login", userLogin);
+			document.put("author", owner);
+			document.remove("owner");
+			document.remove("slug");
+			document.put("visibility", "OWNER");
+		}
+	}
+
+	@Override
 	public void deleteUsers(JsonArray users) {
 		if(users == null || users.size() == 0) {
 			return;
