@@ -14,7 +14,7 @@ ng.configs.push(ng.config(['libraryServiceProvider', function (libraryServicePro
                     title: resource.title, 
                     cover: resource.thumbnail,
                     application: "Blog",
-                    pdfUri: `/blog/print/blog#/print/${resource._id}?comments=true`
+                    pdfUri: `/blog/print/blog#/print/${resource._id}`
                 }
             };
         };
