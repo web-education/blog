@@ -745,14 +745,15 @@ export const blogController = ng.controller('BlogController', ['$scope', '$sce',
 		$scope.$apply();
 	}
 
-	$scope.replaceAudioVideo = function (s: string) {
+	$scope.replaceAudioVideo = (s: string) => s;
+	/*{
 		let res =  s &&
 		// Audio
 		s.replace(/<div class=\"audio-wrapper.*?\/div>/g,"<img src='" + skin.basePath + "img/illustrations/audio-file.png' width='300' height='72'>");
 		// Video
-		//.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
+		.replace(/<iframe.*?src="(.+?)[\?|\"].*?\/iframe>/g,"<img src='" + skin.basePath + "img/icons/video-large.png' width='135' height='135'><br><a href=\"$1\">$1</a>");
 		return $sce.trustAsHtml(res);
-		}
+	}*/
 
 	$scope.copyToClipboard = ()=>{
 		const url = `${$scope.blog.slugDomain}${$scope.blog.slug}`
