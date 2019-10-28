@@ -745,7 +745,7 @@ export const blogController = ng.controller('BlogController', ['$scope', '$sce',
 		$scope.$apply();
 	}
 
-	$scope.replaceAudioVideo = (s: string) => s;
+	$scope.replaceAudioVideo = (s: string) => $sce.trustAsHtml(s);
 	/*{
 		let res =  s &&
 		// Audio
