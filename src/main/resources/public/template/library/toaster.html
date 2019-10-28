@@ -30,7 +30,10 @@
         <div>
             <!-- Both -->
             <button ng-click="lightbox('move')" workflow="blog.createFolder"><i18n>move</i18n></button>
-            <button ng-click="printBlog()" workflow="blog.print" ng-if="currentFolder.selection.length === 1 && isABlog(currentFolder.selection[0])">
+            <button workflow="blog.print"
+              ng-if="currentFolder.selection.length === 1 && isABlog(currentFolder.selection[0])"
+              ng-click="printBlog(currentFolder.selection[0])"
+            >
                 <i18n>blog.print</i18n>
             </button>
             <button ng-click="tryTrashSelection()" ng-if="can('removeBlog')"><i18n>remove</i18n></button>
