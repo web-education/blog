@@ -146,7 +146,8 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 	}
 
 	@Override
-	protected void transformDocumentBeforeImport(JsonObject document, String collectionName, String userId, String userLogin, String userName)
+	protected JsonObject transformDocumentBeforeImport(JsonObject document, String collectionName,
+		String importId, String userId, String userLogin, String userName)
 	{
 		if(collectionName == DefaultBlogService.BLOG_COLLECTION)
 		{
@@ -157,6 +158,8 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 			document.remove("slug");
 			document.put("visibility", "OWNER");
 		}
+
+		return document;
 	}
 
 	@Override
