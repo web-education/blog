@@ -2,10 +2,10 @@
     <div class="fallen dominos">
         <!-- Si la corbeille est vide -->
         <div class="emptyscreen" ng-if="!currentFolder.ressources.all.length && !currentFolder.children.all.length">
-            <img class="emptyscreen-image" src="/assets/themes/entcore-css-lib/images/empty-trash.svg">
-            <p class="emptyscreen-footer">
+            <h2 class="emptyscreen-header">
                 <i18n>empty.trash1</i18n>
-            </p>
+            </h2>
+            <img class="emptyscreen-image" src="/assets/themes/entcore-css-lib/images/empty-trash.svg">
         </div>
         <!-- Si la recherche n'a rien donné -->
         <div class="emptyscreen" ng-if="displayLib.searchBlogs &&
