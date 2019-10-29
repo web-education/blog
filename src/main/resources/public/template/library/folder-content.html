@@ -1,14 +1,15 @@
 <div class="fallen dominos">
-    <!-- 1D Création -->
+    <!-- Empty screen Création -->
     <div class="emptyscreen"
-        ng-if="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length && currentFolder === root"
+        ng-if="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length"
         workflow="blog.create">
         <h2 class="emptyscreen-header">
-            <i18n>empty.blog.creation.title</i18n>
+            <i18n ng-if="currentFolder === root">empty.blog.creation.title</i18n>
+            <i18n ng-if="currentFolder !== root">empty.blog.subfolder.title</i18n>
         </h2>
         <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
         <p class="emptyscreen-footer">
-            <i18n>empty.blog.creation</i18n>
+            <i18n ng-if="currentFolder === root">empty.blog.creation</i18n>
         </p>
         <a class="button" ng-href="#/edit/new" workflow="blog.create">
             <i18n>blog.create.blog</i18n>
@@ -16,41 +17,15 @@
     </div>
     <!-- 1D Consultation -->
     <div class="emptyscreen"
-        ng-if="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length && currentFolder === root"
+        ng-if="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length"
         workflow-not="blog.create">
         <h2 class="emptyscreen-header">
-            <i18n>empty.blog.consultation.title</i18n>
+            <i18n ng-if="currentFolder === root">empty.blog.consultation.title</i18n>
+            <i18n ng-if="currentFolder !== root">empty.blog.subfolder.title</i18n>
         </h2>
         <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
         <p class="emptyscreen-footer">
-            <i18n>empty.blog.consultation</i18n>
-        </p>
-    </div>
-    <!-- Sous-dossier Création -->
-    <div class="emptyscreen"
-        ng-if="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length && currentFolder !== root"
-        workflow="blog.create">
-        <h2 class="emptyscreen-header">
-            <i18n>empty.blog.subfolder.title</i18n>
-        </h2>
-        <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
-        <p class="emptyscreen-footer">
-            <i18n>empty.blog.creation</i18n>
-        </p>
-        <a class="button" ng-href="#/edit/new" workflow="blog.create">
-            <i18n>blog.create.blog</i18n>
-        </a>
-    </div>
-    <!-- Sous-dossier Consultation -->
-    <div class="emptyscreen"
-        ng-if="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length && currentFolder !== root"
-        workflow-not="blog.create">
-        <h2 class="emptyscreen-header">
-            <i18n>empty.blog.subfolder.title</i18n>
-        </h2>
-        <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
-        <p class="emptyscreen-footer">
-            <i18n>empty.blog.consultation</i18n>
+            <i18n ng-if="currentFolder === root">empty.blog.consultation</i18n>
         </p>
     </div>
     <!-- Si la recherche n'a rien donné -->
@@ -77,6 +52,7 @@
             <i18n>empty.filters</i18n>
         </p>
     </div>
+
     <div ng-repeat="folder in currentFolder.children.all | filter:searchFolder">
         <explorer ng-model="folder.selected" on-open="open(folder)" class="folder item">
             <section class="domino" dragstart ng-model="folder._id" dragdrop="dropTo(folder, $originalEvent)">
