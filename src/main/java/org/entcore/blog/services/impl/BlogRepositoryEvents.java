@@ -27,6 +27,7 @@ import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import io.vertx.core.Vertx;
 import org.entcore.common.service.impl.MongoDbRepositoryEvents;
+import org.entcore.common.folders.impl.DocumentHelper;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -84,6 +85,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 						{
 							JsonObject blog = ((JsonObject) elem);
 							blog.put("title", prefixMap.get(DefaultBlogService.BLOG_COLLECTION) + blog.getString("title"));
+							DocumentHelper.clearComments(blog);
 						});
 
 						final Set<String> ids = results.stream().map(res -> ((JsonObject)res).getString("_id")).collect(Collectors.toSet());
@@ -102,6 +104,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 									{
 										JsonObject post = ((JsonObject) elem);
 										post.put("title", prefixMap.get(DefaultPostService.POST_COLLECTION) + post.getString("title"));
+										DocumentHelper.clearComments(post);
 									});
 
 									createExportDirectory(exportPath, locale, new Handler<String>()
