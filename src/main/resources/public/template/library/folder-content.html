@@ -7,7 +7,9 @@
             <i18n ng-if="currentFolder === root">empty.blog.creation.title</i18n>
             <i18n ng-if="currentFolder !== root">empty.blog.subfolder.title</i18n>
         </h2>
-        <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+        <img ng-if="currentFolder === root" class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+        <img ng-if="currentFolder !== root" class="emptyscreen-image__mini"
+            src="/assets/themes/entcore-css-lib/images/empty-search.svg">
         <p class="emptyscreen-footer">
             <i18n ng-if="currentFolder === root">empty.blog.creation</i18n>
         </p>
@@ -23,7 +25,9 @@
             <i18n ng-if="currentFolder === root">empty.blog.consultation.title</i18n>
             <i18n ng-if="currentFolder !== root">empty.blog.subfolder.title</i18n>
         </h2>
-        <img class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+        <img ng-if="currentFolder === root" class="emptyscreen-image__mini" src="/blog/public/img/empty-blog.svg">
+        <img ng-if="currentFolder !== root" class="emptyscreen-image__mini"
+            src="/assets/themes/entcore-css-lib/images/empty-search.svg">
         <p class="emptyscreen-footer">
             <i18n ng-if="currentFolder === root">empty.blog.consultation</i18n>
         </p>
