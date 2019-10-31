@@ -155,6 +155,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 		if(collectionName == DefaultBlogService.BLOG_COLLECTION)
 		{
 			JsonObject owner = document.getJsonObject("owner");
+			owner.put("username", owner.getString("displayName", ""));
 			owner.put("login", userLogin);
 			document.put("author", owner);
 			document.remove("owner");
