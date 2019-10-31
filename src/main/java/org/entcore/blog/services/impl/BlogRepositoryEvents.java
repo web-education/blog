@@ -152,7 +152,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 	protected JsonObject transformDocumentBeforeImport(JsonObject document, String collectionName,
 		String importId, String userId, String userLogin, String userName)
 	{
-		if(collectionName == DefaultBlogService.BLOG_COLLECTION)
+		if(collectionName == DefaultBlogService.BLOG_COLLECTION || collectionName == DefaultPostService.POST_COLLECTION)
 		{
 			JsonObject owner = document.getJsonObject("owner");
 			owner.put("username", owner.getString("displayName", ""));
