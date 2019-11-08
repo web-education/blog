@@ -361,10 +361,16 @@ export let blogModel: any = {
 				this.state = 'SUBMITTED';
 				oldHttp().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
-						callback();
+						callback(true);
 					}
 					this.trigger('change');
-				}.bind(this));
+				}.bind(this))
+				.error(function()
+				{
+					if(typeof callback === 'function'){
+						callback(null);
+					}
+				});
 			}
 
 			this.Post.prototype.publish = function(callback, selfPost?){
@@ -372,21 +378,33 @@ export let blogModel: any = {
 				if(this['publish-type'] === 'IMMEDIATE' && selfPost){
 				    oldHttp().putJson('/blog/post/submit/' + this.blogId + '/' + this._id).done(function(){
 				        if (typeof callback === 'function') {
-				            callback();
+				            callback(true);
 				            this.trigger('change');
 				        }
+				    }).error(function()
+				    {
+				      if (typeof callback === 'function') {
+				          callback(null);
+				      }
 				    });
 					return;
 				}
 				oldHttp().putJson('/blog/post/publish/' + this.blogId + '/' + this._id).done(function(){
 					if(typeof callback === 'function'){
-						callback();
+						callback(true);
 						this.trigger('change');
 					}
 				}.bind(this))
 				.e401(function(){
 					this.submit(callback);
-				}.bind(this));
+				}.bind(this))
+				.error(function()
+				{
+					if(typeof callback === 'function'){
+						callback(null);
+						this.trigger('change');
+					}
+				});
 			}
 
 			this.Post.prototype.create = function(callback, blog, state){
@@ -405,10 +423,15 @@ export let blogModel: any = {
 					}
 					else{
 						if(typeof  callback === 'function'){
-							callback();
+							callback(true);
 						}
 					}
-				}.bind(this));
+				}.bind(this))
+				.error(function()
+				{
+					if(typeof callback === "function")
+						callback(null);
+				});
 			}
 
 			this.Post.prototype.saveModifications = function(callback){
@@ -419,7 +442,12 @@ export let blogModel: any = {
 					if(typeof  callback === 'function'){
                         callback(rep.state);
                     }
-                });
+        })
+        .error(function()
+        {
+          if(typeof callback === "function")
+            callback(null);
+        });
 			}
 
 			this.Post.prototype.save = function(callback, blog, state){

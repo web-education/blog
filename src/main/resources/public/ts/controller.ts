@@ -54,8 +54,8 @@ interface BlogControllerScope extends LibraryControllerScope {
 	updatePublishType(): void;
 	publishPost(post: PostModel): void
 	republish(blog: BlogModel, post: PostModel): void
-	saveModifications(post: PostModel): void
-	saveOrCreates(post: PostModel): void
+	saveModifications(post: PostModel): Promise<void>
+	saveOrCreates(post: PostModel): Promise<void>
 	redirect(url: string): void
 	resetSearching(): void;
 	searchingPost(): void;
@@ -63,8 +63,8 @@ interface BlogControllerScope extends LibraryControllerScope {
 	switchAll(): void;
 	checkAll(): void;
 	count(state: State): number;
-	saveDraft(): void;
-	savePublishedPost(): void;
+	saveDraft(): Promise<void>;
+	savePublishedPost(): Promise<void>;
 	cancelEditing(post: PostModel & { data: PostModel }): void
 	showEditPost(blog: BlogModel, post: PostModel): void
 	openFirstPost(blog: BlogModel, post: PostModel): void
@@ -527,33 +527,60 @@ export const blogController = ng.controller('BlogController', ['$scope', '$sce',
 		post.title = post.data.title;
 	};
 
-	$scope.saveDraft = function () {
-		if (checkPost($scope.post)) {
-			$scope.post.publishing = true;
-			$scope.post.save(function () {
-				$location.path('/view/' + $scope.blog._id);
-			}, $scope.blog, 'DRAFT');
-			notify.info('draft.saved');
-		}
+	$scope.saveDraft = function (): Promise<void> {
+		return new Promise<void>(function(resolve, reject)
+		{
+			if (checkPost($scope.post)) {
+				$scope.post.publishing = true;
+				$scope.post.save(function (result: boolean) {
+					if(result != null)
+					{
+						resolve();
+						$location.path('/view/' + $scope.blog._id);
+					}
+					else
+						reject();
+				}, $scope.blog, 'DRAFT');
+				notify.info('draft.saved');
+			}
+		});
 	};
 
-	$scope.saveOrCreates = function (post) {
-		if (checkPost($scope.post)) {
-			post.save(function () {
-				initPostCounter(post.blogId);
-				post.editing = false;
-			});
-		}
+	$scope.saveOrCreates = function (post): Promise<void> {
+		return new Promise<void>(function(resolve, reject)
+		{
+			if (checkPost($scope.post)) {
+				post.save(function (result: boolean) {
+					if(result == true)
+					{
+						resolve();
+						initPostCounter(post.blogId);
+						post.editing = false;
+					}
+					else
+						reject();
+				});
+			}
+		});
 	};
 
-	$scope.saveModifications = function (post) {
-		if (checkPost(post)) {
-			post.saveModifications(function (state) {
-				initPostCounter(post.blogId);
-				post.state = state;
-				post.editing = false;
-			});
-		}
+	$scope.saveModifications = function (post): Promise<void> {
+		return new Promise<void>(function(resolve, reject)
+		{
+			if (checkPost(post)) {
+				post.saveModifications(function (state) {
+					if(state != null)
+					{
+						resolve();
+						initPostCounter(post.blogId);
+						post.state = state;
+						post.editing = false;
+					}
+					else
+						reject();
+				});
+			}
+		});
 	};
 
 	function checkPost(post): boolean {
@@ -569,22 +596,37 @@ export const blogController = ng.controller('BlogController', ['$scope', '$sce',
 		return checked;
 	};
 
-	$scope.savePublishedPost = function () {
-		if (checkPost($scope.post)) {
-			if ($scope.post._id !== undefined) {
-				$scope.post.publish(function () {
-					$scope.post.publishing = true;
-					initPostCounter($scope.post.blogId);
-				});
+	$scope.savePublishedPost = function (): Promise<void> {
+		return new Promise<void>(function(resolve, reject)
+		{
+			if (checkPost($scope.post)) {
+				if ($scope.post._id !== undefined) {
+					$scope.post.publish(function (succeeded) {
+						if(succeeded == true)
+						{
+							$scope.post.publishing = true;
+							initPostCounter($scope.post.blogId);
+							resolve();
+						}
+						else
+							reject();
+					});
+				}
+				else {
+					$scope.post.save(function (result: boolean) {
+						if(result != null)
+						{
+							$scope.post = $scope.blog.posts.first();
+							$scope.post.publishing = true;
+							resolve();
+							$location.path('/detail/' + $scope.post.blogId + '/' + $scope.post._id);
+						}
+						else
+							reject();
+					}, $scope.blog, 'PUBLISHED');
+				}
 			}
-			else {
-				$scope.post.save(function () {
-					$scope.post = $scope.blog.posts.first();
-					$scope.post.publishing = true;
-					$location.path('/detail/' + $scope.post.blogId + '/' + $scope.post._id);
-				}, $scope.blog, 'PUBLISHED');
-			}
-		}
+		});
 	};
 
 	$scope.publishPost = function (post) {

@@ -6,7 +6,7 @@
 	</h1>
 </app-title>
 <article class="twelve cell">
-	<form ng-submit="saveProperties()" name="blogForm">
+	<form guard-root reset-guard="saveProperties()" name="blogForm">
 		<div class="info" ng-if="blog.enablePublic">
 			<i18n ng-if="display.editingPublicBlog === undefined">blog.url.warning</i18n>
 			<i18n ng-if="display.editingPublicBlog === true">blog.url.warning</i18n>
@@ -25,7 +25,7 @@
 				</div>
 				<div class="twelve cell horizontal-spacing-twice bottom-spacing">
 					<input type="text" class="twelve cell right-magnet" ng-model="blog.dynTitle" required
-						i18n-placeholder="blog.form.title.placeholder" />
+						i18n-placeholder="blog.form.title.placeholder" input-guard/>
 				</div>
 				<div workflow="blog.createPublic">
 					<div class="twelve cell horizontal-spacing-twice top-spacing bottom-spacing">
@@ -35,7 +35,7 @@
 					</div>
 					<div class="twelve cell horizontal-spacing-twice bottom-spacing">
 						<label class="checkbox">
-							<input type="checkbox" ng-model="blog.enablePublic" />
+							<input type="checkbox" ng-model="blog.enablePublic"/>
 							<span>
 								<i18n>blog.url.info</i18n>
 							</span>
@@ -45,7 +45,7 @@
 						<a class="cell" href="javascript:void(0)">[[blog.slugDomain]]</a>
 						<div class="cell" style="flex:1;max-width: 500px">
 							<input type="text" class="twelve no-margin" ng-model="blog.safeSlug" ng-required="blog.enablePublic"
-								i18n-placeholder="blog.url.title" />
+								i18n-placeholder="blog.url.title" input-guard/>
 							<span class="warning-color italic-text" ng-if="display.warningDuplicate">
 								<i18n>blog.slug.duplicate.errmsg</i18n>
 							</span>

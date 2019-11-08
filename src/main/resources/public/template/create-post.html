@@ -1,15 +1,15 @@
 <article class="twelve cell">
         <section class="row">
-                        <form data-ng-submit="savePublishedPost()">
-                                <input type="text" data-ng-model="post.title" i18n-placeholder="post.title.placeholder" required class="twelve cell" />
-                                <editor ng-model="post.content" visibility="currentVisibility()"></editor>
+                        <form guard-root reset-guard="savePublishedPost()">
+                                <input type="text" data-ng-model="post.title" i18n-placeholder="post.title.placeholder" required class="twelve cell" input-guard/>
+                                <editor ng-model="post.content" visibility="currentVisibility()" input-guard></editor>
                                 <button class="right-magnet" ng-if="!blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'" ng-disabled="post.publishing">
                                         <i18n>submit</i18n>
                                 </button>
                                 <button class="right-magnet" ng-if="blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE'" ng-disabled="post.publishing">
                                         <i18n>publish</i18n>
                                 </button>
-                                <button type="button" class="right-magnet" ng-click="saveDraft()" ng-disabled="post.publishing">
+                                <button type="button" class="right-magnet" reset-guard="saveDraft()" ng-disabled="post.publishing">
                                         <i18n>blog.save</i18n>
                                 </button>
                                 <button type="button" class="right-magnet cancel" ng-click="template.close('create-post'); redirect('/view/' + blog._id)">

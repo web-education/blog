@@ -34,9 +34,9 @@ export type PostModel = {
 	updateComment(comment:CommentModel):void;
 	comment(comment:CommentModel):void;
 	republish(success:()=>void):void;
-	publish(success:()=>void,owner?:boolean):void
-	saveModifications(success:(state)=>void):void;
-	save(success:()=>void, blog?:BlogModel, state?:State):void;
+	publish(success:(succeeded:boolean)=>boolean|void,owner?:boolean):void
+	saveModifications(success:(state)=>boolean|void):void;
+	save(success:(result:boolean)=>boolean|void, blog?:BlogModel, state?:State):void;
 	open(success:()=>void, err?:()=>void): void;
 	remove(success:()=>void, b?:boolean,search?:string,filters?:any):void;
 }

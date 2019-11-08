@@ -37,7 +37,7 @@ export interface LibraryControllerScope {
 
     closeLightbox(name: string, data?: any): void;
 
-    saveProperties(): void;
+    saveProperties(): Promise<void>;
 
     can(right: string): boolean
 
@@ -152,39 +152,57 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         return folder.ressources.sel.selected.find((w: Blog) => !w.myRights[right]) === undefined;
     };
 
-    $scope.saveProperties = async () => {
-        try {
+    $scope.saveProperties = (): Promise<void> => {
+
+        return new Promise<void>(function(resolve, reject)
+        {
             $scope.display.warningDuplicate = false;
             $scope.lightbox('properties');
             //adapt old model to new
             const blog = Folders.root.findRessource($scope.blog._id) || new Blog();
             const isNew = !blog._id;
             blog.fromJSON($scope.blog.toJSON() as any);
-            await blog.save();
-            if (isNew && $scope.currentFolder && $scope.currentFolder._id) {
-                await blog.moveTo($scope.currentFolder as Folder);
-            }
-            if (isNew) {
-                if (blog.visibility == "PUBLIC") {
-                    Filters.public = true;
-                } else {
-                    Filters.mine = true;
+
+            blog.save().then(function()
+            {
+                if(isNew && $scope.currentFolder && $scope.currentFolder._id)
+                    return blog.moveTo($scope.currentFolder as Folder);
+                else
+                    return null;
+            }).then(function()
+            {
+                if (isNew) {
+                    if (blog.visibility == "PUBLIC") {
+                        Filters.public = true;
+                    } else {
+                        Filters.mine = true;
+                    }
                 }
-            }
-            $location.path("/list-blogs");
-            if ($scope.currentFolder) {
-                await $scope.currentFolder.sync();
-            }
-            $scope.$apply();
-        } catch (e) {
-            if (e.response && e.response.status == 409) {
-                $scope.display.warningDuplicate = true;
-                $scope.lightbox("warningEditBlog");
+                resolve();
+            }).then(function()
+            {
+                $location.path("/list-blogs");
+                if ($scope.currentFolder)
+                    return $scope.currentFolder.sync();
+                else
+                    return null;
+            }).then(function()
+            {
                 $scope.$apply();
-            } else {
-                console.error(e);
-            }
-        }
+            })
+            .catch(function(e)
+            {
+                if (e.response && e.response.status == 409) {
+                    $scope.display.warningDuplicate = true;
+                    $scope.lightbox("warningEditBlog");
+                    $scope.$apply();
+                    resolve();
+                } else {
+                    console.error(e);
+                    reject();
+                }
+            });
+        });
     };
 
     $scope.removeBlog = async function () {

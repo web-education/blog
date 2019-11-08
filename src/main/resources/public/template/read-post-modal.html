@@ -17,9 +17,9 @@
 	</button>
 </div>
 <div class="row" ng-if="post.showComments">
-	<form ng-submit="postComment(comment, post)">
+	<form guard-root reset-guard="postComment(comment, post)">
 		<div class="row" ng-if="blog.myRights.comment">
-			<textarea ng-model="comment.comment" i18n-placeholder="blog.label.write.your.comment" required></textarea>
+			<textarea ng-model="comment.comment" i18n-placeholder="blog.label.write.your.comment" required input-guard></textarea>
 			<button class="right-magnet">
 				<i18n>save</i18n>
 			</button>
