@@ -91,6 +91,10 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
             this.modified = {
                 $date: new Date().getTime()
             }
+            this.realLastModified = new Date().getTime();
+            this.created = {
+                $date: new Date().getTime()
+            }
             this.author = {
                 userId: model.me.userId,
                 username: model.me.username
