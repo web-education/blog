@@ -30,7 +30,6 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Either.Right;
 import org.entcore.blog.Blog;
 import org.entcore.common.search.SearchingEvents;
-import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.MongoDbSearchService;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
@@ -70,9 +69,6 @@ public class BlogSearchingEvents implements SearchingEvents {
 			}
 
 			final QueryBuilder rightsQuery = new QueryBuilder().or(
-					QueryBuilder.start("visibility").is(VisibilityFilter.PUBLIC.name()).get(),
-                    QueryBuilder.start("visibility").is(VisibilityFilter.PROTECTED.name()).get(),
-                    QueryBuilder.start("visibility").is(VisibilityFilter.PROTECTED.name()).get(),
 					QueryBuilder.start("author.userId").is(userId).get(),
 					QueryBuilder.start("shared").elemMatch(
 							new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
