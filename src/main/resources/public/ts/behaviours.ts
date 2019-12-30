@@ -199,8 +199,9 @@ export let blogModel: any = {
 						.e401(function () { })
 						.e404(function () { });
 				},
-				syncOnePost: function (cb, id) {
-					oldHttp().get('/blog/post/list/all/' + that._id , {postId:id}).done(function(posts) {
+				syncOnePost: function (cb, id,publicPost=false) {
+					const postUrl = publicPost?'/blog/pub/posts/' : '/blog/post/list/all/'
+					oldHttp().get(postUrl + that._id , {postId:id}).done(function(posts) {
 						if(posts.length > 0) {
 							var type = this.model.data['publish-type'];
 							posts.map(function (item) {

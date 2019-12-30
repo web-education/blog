@@ -336,6 +336,17 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
+	public void listOnePublic(String blogId, String postId, Handler<Either<String, JsonArray>> result) {
+		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("state").is(StateType.PUBLISHED.name()).put("_id").is(postId);
+		final JsonObject projection = defaultKeys.copy();
+		//projection.remove("content");
+		final Handler<Message<JsonObject>> finalHandler =event -> {
+			result.handle(Utils.validResults(event));
+		};
+		mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), null, projection, finalHandler);
+	}
+
+	@Override
 	public void list(String blogId, final StateType state, final UserInfos user, final Integer page, final int limit, final String search,
 				final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").is(state.name());

@@ -58,6 +58,8 @@ public interface PostService {
 
 	void listPublic(String blogId, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);
 
+	void listOnePublic(String blogId, String postId, Handler<Either<String, JsonArray>> result);
+
 	void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result);
 
 	void submit(String blogId, String postId, UserInfos user, Handler<Either<String, JsonObject>> result);

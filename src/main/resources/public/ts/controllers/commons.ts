@@ -47,7 +47,7 @@ export type PostsModel = {
 	where(args:{state?:State}):PostModel[]
 	some(cb:(post:PostModel)=>void):boolean;
 	forEach(callback:(post:PostModel)=>void):void
-	syncOnePost(success:()=>void,id:string):void
+	syncOnePost(success:()=>void,id:string, isPublic?:boolean):void
 	syncPosts(success:()=>void, b?:boolean,search?:string,filters?:any, publicPost?:boolean):void;
 	syncAllPosts(success:()=>void, isPublic?:boolean):void
 }

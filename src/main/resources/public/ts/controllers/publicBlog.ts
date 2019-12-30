@@ -20,6 +20,8 @@ interface BlogPublicControllerScope {
     showComments:boolean;
     printed: boolean;
     $apply: any;
+    is2D:boolean
+    is1D:boolean;
     replaceAudioVideo(s:string):string
     preparePrint(blog: BlogModel): void
     print(): void;
@@ -33,6 +35,56 @@ interface BlogPublicControllerScope {
 }
 
 export const blogPublicController = ng.controller('BlogPublicController', ['$scope', '$sce', 'route', 'model', '$location', '$rootScope', ($scope: BlogPublicControllerScope, $sce, route, model, $location, $rootScope) => {
+    let _postid = undefined;
+    let _initPromise = Promise.resolve();
+    const init = async () =>{
+        await skin.listSkins();
+        for(let s of skin.skins){
+            if(s.child == skin.skin){
+                $scope.is1D = s.parent == "panda";
+            }
+        }
+        $scope.is2D = !$scope.is1D;
+    }
+    const tryOpen = async () => {
+        if(!_postid) return;
+        if(!$scope.blog) return;
+        await _initPromise;
+        let _founded = null;
+        const search = ()=>{
+            for(let post of $scope.blog.posts.all){
+                if(post._id == _postid) _founded = post;
+            }
+        }
+        const open = ()=>{
+            $scope.openClosePost($scope.blog, _founded);
+            $scope.$apply();
+        }
+        //
+        search();
+        if(_founded){
+            setTimeout(open, 250)
+        } else {
+            $scope.blog.posts.syncOnePost(function () {
+                search();
+                if(_founded){
+                    setTimeout(open, 250)
+                }
+            }, _postid, true);
+        }
+    }
+    init();
+    route({
+		viewPostInline: (params)=>{
+            _postid = params.postId;
+            tryOpen();
+        },
+		viewPostModal: (params)=>{
+            _postid = params.postId;
+            tryOpen();
+        }
+    });
+
     $scope.display = {
         printPost: false,
         searching: false,
@@ -104,7 +156,8 @@ export const blogPublicController = ng.controller('BlogPublicController', ['$sco
 	}*/
     $scope.setBlog = (blog: BlogModel = (window as any).currentBlog) => {
         $scope.blog = new Behaviours.applicationsBehaviours.blog.model.Blog(blog);
-        pSearchingPost("")
+        _initPromise = pSearchingPost("");
+        tryOpen();
     }
     $scope.viewPostInline = function () {
         $location.path("/")
@@ -115,6 +168,7 @@ export const blogPublicController = ng.controller('BlogPublicController', ['$sco
         if (post.slided) {
             $location.path('/detail/' + post.blogId + '/' + post._id);
         }
+        $scope.$apply();
     }
     $scope.openFirstPost = (blog: BlogModel, post: PostModel) => {
         post.slided = true;
@@ -123,13 +177,20 @@ export const blogPublicController = ng.controller('BlogPublicController', ['$sco
         event.stopPropagation();
         pSearchingPost(search);
     }
-    function pSearchingPost(mysearch: string) {
+    function pSearchingPost(mysearch: string):Promise<any> {
+        let _resolve = null, _reject = null;
+        const promise = new Promise((resolve,reject)=>{
+            _resolve = resolve;
+            _reject = reject;
+        })
         $scope.display.searching = true;
         $scope.blog.posts.syncPosts(function () {
             $scope.display.searching = false;
             let counter = $scope.blog.posts.length();
             if (counter === 0) $scope.$apply();
+            _resolve();
         }, false, mysearch, $scope.display.filters, true);
+        return promise;
     };
     //cancel effect of infrafront
     if (document.addEventListener) {

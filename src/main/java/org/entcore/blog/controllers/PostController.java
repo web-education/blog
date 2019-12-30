@@ -409,9 +409,14 @@ public class PostController extends BaseController {
 	@Get("/pub/posts/:blogId")
 	public void getPublicBlogPosts(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
+		final String postId = request.params().get("postId");
 		blogService.isPublicBlog(blogId, BlogService.IdType.Id, ev->{
 			if(!ev){
 				unauthorized(request);
+				return;
+			}
+			if (!StringUtils.isEmpty(postId)) {
+				post.listOnePublic(blogId, postId, arrayResponseHandler(request));
 				return;
 			}
 			final Integer page;
