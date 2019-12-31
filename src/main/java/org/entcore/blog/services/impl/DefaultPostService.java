@@ -96,9 +96,10 @@ public class DefaultPostService implements PostService {
 					result.handle(event);
 					return;
 				}
-				mongo.findOne(POST_COLLECTION,
-					new JsonObject().put("_id", event.right().getValue().getString("_id")),
-					MongoDbResult.validResultHandler(result));
+				//#29106 avoid fetch after save
+				final String id = event.right().getValue().getString("_id");
+				b.put("_id", id);
+				result.handle(new Either.Right<>(b));
 			}
 		}));
 	}
