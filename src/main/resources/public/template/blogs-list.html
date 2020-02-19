@@ -16,7 +16,7 @@
 <!--TITLE-->
 <div class="row">
 	<a class="button right-magnet" 
-		ng-hide="!currentFolder.ressources.all.length && !currentFolder.children.all.length"
+		ng-hide="!currentFolder.ressources.all.length && !currentFolder.children.all.length && !isTrashFolder()"
 		ng-class="{'zero-mobile': isTrashFolder()}"
 		ng-href="#/edit/new" 
 		workflow="blog.create">
