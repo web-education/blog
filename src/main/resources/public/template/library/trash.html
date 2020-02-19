@@ -22,7 +22,9 @@
         </div>
         <!-- Si les filtres sont tous désactivés -->
         <div class="emptyscreen" ng-if="!(displayLib.searchBlogs && filteredFolders.length == 0 && filteredBlogs.length == 0 )
-            && !hasFiltersActive() && !currentFolder.ressources.filtered.length">
+            && !hasFiltersActive() 
+            && !currentFolder.ressources.filtered.length 
+            && !(!currentFolder.ressources.all.length && !currentFolder.children.all.length)">
             <h2 class="emptyscreen-header">
                 <i18n>empty.filters.title</i18n>
             </h2>
