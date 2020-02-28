@@ -75,7 +75,7 @@
 	</section>
 	<section class="margin-four">
 		<div class="twelve cell chips">
-			<div ng-hide="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length">
+			<div ng-hide="hasFiltersActive() && !currentFolder.ressources.all.length && !currentFolder.children.all.length && !isTrashFolder()">
 				<label class="chip" ng-click="currentFolder.ressources.refreshFilters()"
 					ng-class="{ selected: filters.mine }">
 					<i class="mine" tooltip="filters.mine"></i>
