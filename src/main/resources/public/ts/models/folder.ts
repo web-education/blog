@@ -315,6 +315,8 @@ export class Folder extends HierarchicalFolder implements Shareable {
 }
 
 export class Root extends HierarchicalFolder {
+    syncFolder? = false;
+    syncResource? = false;
     constructor() {
         super();
         this.name = 'root';
@@ -322,7 +324,9 @@ export class Root extends HierarchicalFolder {
 
     async sync(): Promise<void> {
         let ressources = await Folders.ressources();
+        this.syncResource = true;
         let folders = await Folders.folders();
+        this.syncFolder = true;
         this.ressources.all = [];
         ressources.forEach((w) => {
             let inRoot = !w.trashed;

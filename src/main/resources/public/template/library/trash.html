@@ -1,17 +1,19 @@
 ﻿<div class="row">
     <div class="fallen dominos">
+        <div class="emptyscreen" ng-if="showBlogLoader()">
+            <div class="absolute">
+                <img skin-src="/img/illustrations/loading.gif" />
+            </div>
+        </div>
         <!-- Si la corbeille est vide -->
-        <div class="emptyscreen" ng-if="!currentFolder.ressources.all.length && !currentFolder.children.all.length">
+        <div class="emptyscreen" ng-if="showEmptyScreenTrash()">
             <h2 class="emptyscreen-header">
                 <i18n>empty.trash1</i18n>
             </h2>
             <img class="emptyscreen-image" src="/assets/themes/entcore-css-lib/images/empty-trash.svg">
         </div>
         <!-- Si la recherche n'a rien donné -->
-        <div class="emptyscreen" ng-if="displayLib.searchBlogs &&
-                (currentFolder.ressources.all.length || currentFolder.children.all.length) &&
-                (filteredFolders = (currentFolder.children.all | filter:searchFolder)).length == 0 &&
-                (filteredBlogs = (currentFolder.ressources.all | filter:searchBlog)).length == 0">
+        <div class="emptyscreen" ng-if="showEmptyScreenTrashSearch()">
             <h2 class="emptyscreen-header">
                 <i18n>empty.search.title</i18n>
             </h2>
@@ -21,10 +23,7 @@
             </p>
         </div>
         <!-- Si les filtres sont tous désactivés -->
-        <div class="emptyscreen" ng-if="!(displayLib.searchBlogs && filteredFolders.length == 0 && filteredBlogs.length == 0 )
-            && !hasFiltersActive() 
-            && !currentFolder.ressources.filtered.length 
-            && !(!currentFolder.ressources.all.length && !currentFolder.children.all.length)">
+        <div class="emptyscreen" ng-if="showEmptyScreenTrashFilter()">
             <h2 class="emptyscreen-header">
                 <i18n>empty.filters.title</i18n>
             </h2>

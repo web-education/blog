@@ -99,8 +99,14 @@
 		</div>
 	</section>
 </div>
+
+<div class="emptyscreen" ng-if="showBlogLoader()">
+	<div class="absolute">
+		<img skin-src="/img/illustrations/loading.gif" />
+	</div>
+</div>
 <!-- Empty screen Création -->
-<div class="emptyscreen" ng-if="empty" workflow="blog.create">
+<div class="emptyscreen" ng-if="showEmptyScreen()" workflow="blog.create">
 	<h2 class="emptyscreen-header">
 		<i18n>empty.blog.creation.title</i18n>
 	</h2>
@@ -113,7 +119,7 @@
 	</a>
 </div>
 <!-- Empty screen Consultation -->
-<div class="emptyscreen" ng-if="empty" workflow-not="blog.create">
+<div class="emptyscreen" ng-if="showEmptyScreen()" workflow-not="blog.create">
 	<h2 class="emptyscreen-header">
 		<i18n>empty.blog.consultation.title</i18n>
 	</h2>

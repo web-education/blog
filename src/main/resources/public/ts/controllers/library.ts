@@ -8,6 +8,7 @@ export interface LibraryControllerScope {
     folder: Folder
     currentFolder: Folder | Root
     filters: typeof Filters
+	empty: boolean;
     displayLib: {
         data: any
         showShare: boolean
@@ -41,9 +42,9 @@ export interface LibraryControllerScope {
 
     can(right: string): boolean
 
-    searchBlog(blog: Blog): void;
+    searchBlog(blog: Blog): boolean;
 
-    searchFolder(folder: Folder): void;
+    searchFolder(folder: Folder): boolean;
 
     createFolder(): void;
 
@@ -72,6 +73,15 @@ export interface LibraryControllerScope {
     removeBlog(): void;
     isTrashFolder(): boolean;
     hasFiltersActive(): boolean;
+
+    showBlogLoader():boolean
+    showEmptyScreen():boolean
+    showEmptyScreenInFolder():boolean
+    showEmptyScreenSearch():boolean
+    showEmptyScreenFilter():boolean
+    showEmptyScreenTrash():boolean
+    showEmptyScreenTrashSearch ():boolean
+    showEmptyScreenTrashFilter ():boolean
     //
     $apply: any
     display: {
@@ -385,4 +395,66 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             $scope.display.publishType = undefined;
         }
     };
+
+    $scope.showBlogLoader = () => {
+        return !$scope.root.syncFolder || !$scope.root.syncResource;
+    }
+
+    $scope.showEmptyScreen = () => {
+        if($scope.showBlogLoader()) return false;
+        return $scope.empty;
+    }
+
+    $scope.showEmptyScreenInFolder = () => {
+        if($scope.showBlogLoader()) return false;
+        return $scope.hasFiltersActive() 
+                && !$scope.currentFolder.ressources.all.length 
+                && !$scope.currentFolder.children.all.length;
+    }
+
+    $scope.showEmptyScreenSearch = () => {
+        if($scope.showBlogLoader()) return false;
+        return $scope.displayLib.searchBlogs 
+                && ($scope.currentFolder.ressources.all.length || $scope.currentFolder.children.all.length) 
+                && $scope.currentFolder.children.all.filter($scope.searchFolder).length == 0 
+                && $scope.currentFolder.ressources.all.filter($scope.searchBlog).length == 0
+    }
+
+    $scope.showEmptyScreenFilter = () => {
+        if($scope.showBlogLoader()) return false;
+        return !(
+                    $scope.displayLib.searchBlogs 
+                    && $scope.currentFolder.children.all.filter($scope.searchFolder).length == 0 
+                    && $scope.currentFolder.ressources.all.filter($scope.searchBlog).length == 0
+                )
+                && !$scope.hasFiltersActive() 
+                && !$scope.currentFolder.ressources.filtered.length
+                && !$scope.currentFolder.children.all.length ;
+    }
+
+    $scope.showEmptyScreenTrash = () =>{
+        if($scope.showBlogLoader()) return false;
+        return !$scope.currentFolder.ressources.all.length 
+                && !$scope.currentFolder.children.all.length;
+    }
+
+    $scope.showEmptyScreenTrashSearch = () => {
+        if($scope.showBlogLoader()) return false;
+        return $scope.displayLib.searchBlogs 
+                && ($scope.currentFolder.ressources.all.length || $scope.currentFolder.children.all.length) 
+                && $scope.currentFolder.children.all.filter($scope.searchFolder).length == 0 
+                && $scope.currentFolder.ressources.all.filter($scope.searchBlog).length == 0;
+    }
+
+    $scope.showEmptyScreenTrashFilter = () => {
+        if($scope.showBlogLoader()) return false;
+        return !(
+                    $scope.displayLib.searchBlogs 
+                    && $scope.currentFolder.children.all.filter($scope.searchFolder).length == 0 
+                    && $scope.currentFolder.ressources.all.filter($scope.searchBlog).length == 0
+                )
+                && !$scope.hasFiltersActive() 
+                && !$scope.currentFolder.ressources.filtered.length 
+                && !(!$scope.currentFolder.ressources.all.length && !$scope.currentFolder.children.all.length);
+    }
 }
