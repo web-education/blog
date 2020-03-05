@@ -19,61 +19,35 @@ export interface LibraryControllerScope {
             properties: boolean
         }
     }
-
     shareBlog(): void
-
     restore(): void;
-
     move(): void;
-
     open(blog: Blog): void;
-
     openRoot(): void;
-
     openTrash(): void;
-
     editBlogProperties(): void;
-
     lightbox(name: string, data?: any): void;
-
     closeLightbox(name: string, data?: any): void;
-
     saveProperties(): Promise<void>;
-
     can(right: string): boolean
-
     searchBlog(blog: Blog): boolean;
-
     searchFolder(folder: Folder): boolean;
-
     createFolder(): void;
-
     trashSelection(): void;
-
     tryTrashSelection(): void;
-
     isABlog(item: Blog | Folder): boolean;
-
     removeSelection(): void;
-
     duplicateBlogs(): void;
-
     createBlogView(): void;
-
     viewBlog(blog: Blog, ev?: Event): void;
-
     openFolder(folder: Folder): void;
-
     openTrashFolder(folder: Folder): void;
-
     selectionContains(folder: Folder): boolean;
-
     dropTo(targetItem: string | Folder, $originalEvent): void;
-
     removeBlog(): void;
     isTrashFolder(): boolean;
     hasFiltersActive(): boolean;
-
+    printBlog(blog: Blog, printComments: boolean): void;
     showBlogLoader():boolean
     showEmptyScreen():boolean
     showEmptyScreenInFolder():boolean
@@ -140,6 +114,11 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
     const resetSelection = () => {
         $scope.currentFolder.deselectAll();
     };
+    $scope.printBlog = function(blog: Blog, printComments: boolean) {
+        if(blog){
+            window.open(`/blog/print/blog#/print/${blog._id}?comments=${printComments}`, '_blank');
+        }
+    }
 
     $scope.searchBlog = (item: Blog) => {
         return !$scope.displayLib.searchBlogs || idiom.removeAccents(item.title.toLowerCase()).indexOf(
