@@ -12,7 +12,8 @@
             </h2>
             <img class="emptyscreen-image" src="/assets/themes/entcore-css-lib/images/empty-trash.svg">
         </div>
-        <!-- Si la recherche n'a rien donné -->
+    <!--
+        -- Si la recherche n'a rien donné --
         <div class="emptyscreen" ng-if="showEmptyScreenTrashSearch()">
             <h2 class="emptyscreen-header">
                 <i18n>empty.search.title</i18n>
@@ -22,7 +23,7 @@
                 <i18n>empty.search</i18n>
             </p>
         </div>
-        <!-- Si les filtres sont tous désactivés -->
+        -- Si les filtres sont tous désactivés --
         <div class="emptyscreen" ng-if="showEmptyScreenTrashFilter()">
             <h2 class="emptyscreen-header">
                 <i18n>empty.filters.title</i18n>
@@ -32,7 +33,8 @@
                 <i18n>empty.blog.filter</i18n>
             </p>
         </div>
-        <div ng-repeat="folder in currentFolder.children.all | filter:searchFolder">
+    -->
+        <div ng-repeat="folder in currentFolder.children.all"><!-- folder in currentFolder.children.all | filter:searchFolder -->
             <explorer ng-model="folder.selected" class="folder item">
                 <section class="domino" dragstart ng-model="folder._id">
                     <div class="top">
@@ -47,7 +49,7 @@
                 </section>
             </explorer>
         </div>
-        <div ng-repeat="blog in currentFolder.ressources.filtered | filter:searchBlog">
+        <div ng-repeat="blog in currentFolder.ressources.all"><!-- blog in currentFolder.ressources.filtered | filter:searchBlog -->
             <explorer ng-model="blog.selected" class="item">
                 <section class="domino" dragstart ng-model="blog._id">
                     <div class="top">
