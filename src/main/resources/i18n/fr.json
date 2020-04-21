@@ -19,6 +19,7 @@
   "blog.post.content-helper": "Entrez le contenu de votre billet",
   "blog.post.title-helper": "Entrez le titre de votre billet",
   "blog.publish": "Publier",
+  "blog.publish.warning": "Attention, les billets actuellement en brouillon et les billets ajoutés après la publication du Blog dans la Bibliothèque ne seront pas visibles.",
   "blog.read": "Consulter",
   "blog.save": "Enregistrer",
   "blog.submit": "Valider",
