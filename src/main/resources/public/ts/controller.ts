@@ -418,10 +418,11 @@ export const blogController = ng.controller('BlogController', ['$scope', '$sce',
 	}
 	$scope.resetSearching = function () {
 		$scope.display.searching = true;
+		if (!$scope.display.postSearch || $scope.display.postSearch === '') $scope.launchSearchingPost('');
 	};
 
 	$scope.launchSearchingPost = function (mysearch, event) {
-		event.stopPropagation();
+		if (event) event.stopPropagation();
 		pSearchingPost(mysearch);
 	};
 
