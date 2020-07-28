@@ -32,7 +32,7 @@ export type PostModel = {
 		userId:string,username:string
 	}
 	updateComment(comment:CommentModel):void;
-	comment(comment:CommentModel):void;
+	comment(comment:CommentModel):Promise<any>;
 	republish(success:()=>void):void;
 	publish(success:(succeeded:boolean)=>boolean|void,owner?:boolean):void
 	saveModifications(success:(state)=>boolean|void):void;

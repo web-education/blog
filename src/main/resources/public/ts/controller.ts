@@ -341,14 +341,14 @@ export const blogController = ng.controller('BlogController', ['$scope', '$sce',
 		},
 		viewPostInline: viewPostFactory(false),
 		viewPostModal: viewPostFactory(true),
-		newArticle: function (params) {
+		newArticle: async function (params) {
 			$scope.post = new Behaviours.applicationsBehaviours.blog.model.Post();
 
 			$scope.blog = model.blogs.findWhere({ _id: params.blogId });
 			if (!$scope.blog) {
 				template.open('main', 'e404');
 			} else {
-				template.open('main', 'blog');
+				await template.open('main', 'blog');
 				template.open('create-post', 'create-post');
 			}
 		},
@@ -681,8 +681,14 @@ export const blogController = ng.controller('BlogController', ['$scope', '$sce',
 	}
 
 	$scope.postComment = function (comment, post) {
-		post.comment(comment);
+		const promise = post.comment(comment);
+		safeApply($scope);//apply reset form in order to avoid alert on changing page
 		$scope.comment = new Behaviours.applicationsBehaviours.blog.model.Comment();
+		return promise.then(e=>{
+			return new Promise((resolve,reject)=>{
+				setTimeout(resolve, 500)
+			})
+		});
 	}
 
 	$scope.updateComment = function (comment, post) {

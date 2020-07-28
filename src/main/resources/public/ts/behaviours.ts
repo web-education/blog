@@ -480,9 +480,12 @@ export let blogModel: any = {
 			}
 
 			this.Post.prototype.comment = function(comment){
-				oldHttp().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
-					this.comments.sync();
-				}.bind(this));
+				return new Promise((resolve,reject)=>{
+					oldHttp().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
+						this.comments.sync();
+						resolve();
+					}.bind(this));
+				})
 			}
 
 			this.Post.prototype.updateComment = function(comment){
