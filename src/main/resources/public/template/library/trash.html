@@ -50,7 +50,7 @@
         <explorer ng-model="blog.selected" class="item" ng-repeat="blog in currentFolder.ressources.all"><!-- blog in currentFolder.ressources.filtered | filter:searchBlog -->
             <section class="domino" dragstart ng-model="blog._id">
                 <div class="top">
-                    <img skin-src="/img/illustrations/blog.png" ng-if="!blog.icon" class="absolute">
+                    <img skin-src="/img/illustrations/blog.svg" ng-if="!blog.icon" class="absolute">
                     <img image-lazy-load="blog.icon" ng-if="blog.icon" class="absolute" />
                 </div>
                 <div class="bottom">
