@@ -36,3 +36,6 @@ developer.id
 **/view
 node_modules
 package-lock.json
+gradle/
+gradlew*
+rev-manifest.json
