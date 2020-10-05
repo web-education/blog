@@ -50,6 +50,7 @@ import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.filter.ResourceFilter;
@@ -77,16 +78,15 @@ public class BlogController extends BaseController {
 	private PostService postService;
 	private BlogTimelineService timelineService;
 	private ShareService shareService;
-	private EventStore eventStore;
+	private EventHelper eventHelper;
 	private final MongoDb mongo;
+	private static final String PUBLIC_RESOURCE_NAME = "blog_public";
+	private static final String PRIVATE_RESOURCE_NAME = "blog_private";
 
 	public BlogController(MongoDb mongo){
 		this.mongo = mongo;
 	}
 
-	private enum BlogEvent {
-		ACCESS
-	}
 
 	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
 			Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
@@ -99,14 +99,15 @@ public class BlogController extends BaseController {
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		this.shareService = new MongoDbShareService(eb, mongo, "blogs", securedActions, groupedActions);
-		eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
+		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
+		eventHelper = new EventHelper(eventStore);
 	}
 
 	@Get("")
 	@SecuredAction("blog.view")
 	public void blog(HttpServerRequest request) {
 		renderView(request);
-		eventStore.createAndStoreEvent(BlogEvent.ACCESS.name(), request);
+		eventHelper.onAccess(request);
 	}
 
 	@Get("/print/blog")
@@ -125,7 +126,8 @@ public class BlogController extends BaseController {
 					@Override
 					public void handle(final UserInfos user) {
 						if (user != null) {
-							blog.create(data, user, false, defaultResponseHandler(request));
+							final Handler<Either<String,JsonObject>> handler = eventHelper.onCreateResource(request, PRIVATE_RESOURCE_NAME,defaultResponseHandler(request));
+							blog.create(data, user, false, handler);
 						} else {
 							unauthorized(request);
 						}
@@ -601,7 +603,8 @@ public class BlogController extends BaseController {
 				getUserInfos(eb, request, user -> {
 					if (user != null) {
 						changeLogoVisibilityIfNeeded(data, VisibilityFilter.PUBLIC.name()).setHandler(res-> {
-							blog.create(data, user, true, defaultResponseHandler(request));
+							final Handler<Either<String,JsonObject>> handler = eventHelper.onCreateResource(request, PUBLIC_RESOURCE_NAME, defaultResponseHandler(request));
+							blog.create(data, user, true, handler);
 						});
 					} else {
 						unauthorized(request);

@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.entcore.blog.Blog;
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
@@ -37,6 +38,9 @@ import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.common.events.EventHelper;
+import org.entcore.common.events.EventStore;
+import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
@@ -65,6 +69,13 @@ public class PostController extends BaseController {
 	private BlogService blogService;
 	private BlogTimelineService timelineService;
 	private int pagingSize;
+	private final EventHelper eventHelper;
+	private static final String RESOURCE_NAME = "blog_post";
+
+	public PostController(){
+		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
+		this.eventHelper = new EventHelper(eventStore);
+	}
 
 	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
 			Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
@@ -92,7 +103,8 @@ public class PostController extends BaseController {
 					@Override
 					public void handle(final UserInfos user) {
 						if (user != null) {
-							post.create(blogId, data, user, defaultResponseHandler(request));
+							final Handler<Either<String, JsonObject>> handler = eventHelper.onCreateResource(request, RESOURCE_NAME, defaultResponseHandler(request));
+							post.create(blogId, data, user, handler);
 						} else {
 							unauthorized(request);
 						}
