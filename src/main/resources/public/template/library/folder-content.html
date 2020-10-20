@@ -78,14 +78,11 @@
             </div>
             <div class="bottom">
                 <div class="content">
-                    <strong class="block overflow-hd">[[blog.shortenedTitle]]</strong>
-                    <span class="cell-ellipsis block">[[blog.author.username]]</span>
-                    <em class="smaller-text block">
-                        <i18n>real.modified.on</i18n>
-                    </em>
+                    <strong class="ressource-name" tooltip="[[blog.shortenedTitle]]">[[blog.shortenedTitle]]</strong>
+                    <span class="owner">[[blog.author.username]]</span>
+                    <span class="date"><i18n>real.modified.on</i18n></span>
                     <br />
                     <div class="icons">
-                        <!-- Il faut revoir les conditions du ng-if -->
                         <i class="ic-share inline" ng-if="blog.shared.length > 0" tooltip="tooltip.shared"></i>
                         <i class="public" ng-if="blog.visibility === 'PUBLIC'" tooltip="tooltip.public"></i>
                         <i class="manage" ng-if="blog.myRights.removeBlog" tooltip="tooltip.manager"></i>
