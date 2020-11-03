@@ -96,7 +96,7 @@ export let blogModel: any = {
 					this.icon = data.thumbnail + '?thumbnail=290x290';
 				}
 				else{
-					this.icon = '/img/illustrations/blog.png';
+					this.icon = '/img/illustrations/blog.svg';
 				}
 				this.updateData(data);
                 this.fetchPosts = _.map(this.fetchPosts, function(post){
@@ -506,7 +506,7 @@ export let blogModel: any = {
 						if (blog.thumbnail) {
 							this.icon = blog.thumbnail + '?thumbnail=290x290';
 						} else {
-							this.icon = '/img/illustrations/blog.png';
+							this.icon = '/img/illustrations/blog.svg';
 						}
 
 					    this.updateData(blog);
@@ -596,7 +596,7 @@ Behaviours.register('blog', {
 				blog.thumbnail = blog.thumbnail + '?thumbnail=48x48';
 			}
 			else{
-				blog.thumbnail = '/img/illustrations/blog.png';
+				blog.thumbnail = '/img/illustrations/blog.svg';
 			}
 
 			var addedPosts = _.map(blog.fetchPosts, function(post){
